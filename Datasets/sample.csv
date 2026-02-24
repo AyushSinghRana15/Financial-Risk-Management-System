@@ -1,0 +1,31 @@
+Age,Sex,Job,Housing,Saving_Accounts,Checking_Account,Credit_Amount,Duration,Purpose,Risk
+22,male,1,rent,little,little,3500,24,car,1
+35,female,2,own,moderate,moderate,1200,12,education,0
+28,male,1,rent,little,little,5000,36,business,1
+42,male,3,own,rich,rich,2000,18,car,0
+30,female,2,rent,moderate,little,4000,30,furniture,1
+50,male,3,own,quite rich,moderate,1500,12,radio/TV,0
+26,female,1,free,little,little,3200,24,vacation,1
+33,male,2,own,moderate,moderate,2200,18,car,0
+45,female,3,own,rich,rich,1800,12,repairs,0
+29,male,1,rent,little,little,6000,48,business,1
+38,female,2,own,moderate,moderate,2500,24,car,0
+41,male,3,own,rich,rich,1700,12,education,0
+24,female,1,rent,little,little,4500,36,furniture,1
+36,male,2,own,quite rich,moderate,2100,18,radio/TV,0
+31,female,2,rent,moderate,little,3800,30,vacation,1
+55,male,3,own,rich,rich,1400,12,car,0
+27,male,1,rent,little,little,5200,36,business,1
+48,female,3,own,rich,moderate,1600,12,repairs,0
+34,male,2,own,moderate,moderate,2300,18,education,0
+23,female,1,rent,little,little,4700,36,furniture,1
+39,male,3,own,quite rich,rich,1900,12,car,0
+32,female,2,rent,moderate,little,4100,24,radio/TV,1
+44,male,3,own,rich,rich,1500,12,education,0
+25,female,1,rent,little,little,5300,36,business,1
+37,male,2,own,moderate,moderate,2400,18,car,0
+52,female,3,own,rich,rich,1300,12,repairs,0
+29,male,1,rent,little,little,4800,30,vacation,1
+40,female,2,own,quite rich,moderate,2100,18,car,0
+46,male,3,own,rich,rich,1600,12,radio/TV,0
+28,female,1,rent,little,little,5500,36,business,1
