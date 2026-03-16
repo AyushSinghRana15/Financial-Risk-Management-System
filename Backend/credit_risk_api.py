@@ -1,20 +1,18 @@
-from fastapi import FastAPI
+from fastapi import APIRouter
 import pandas as pd
 import numpy as np
 import joblib
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import APIRouter
 
 router = APIRouter()
+
 # -------------------------
 # Load Model
 # -------------------------
 
 model = joblib.load("../Models/balanced_xgboost_model.pkl")
-# Load Market Risk Model
-market_model = joblib.load("../Models/ml_var_model.pkl")
-feature_names = joblib.load("../Models/model_features.pkl")
 
+# Get feature names directly from trained model
+feature_names = model.get_booster().feature_names
 
 # -------------------------
 # Credit Risk Endpoint
@@ -23,33 +21,36 @@ feature_names = joblib.load("../Models/model_features.pkl")
 @router.post("/predict_credit_risk")
 def predict_credit_risk(data: dict):
 
-    # Basic Inputs
-    income = data["income"]
-    credit = data["credit"]
-    annuity = data["annuity"]
-    goods_price = data["goods_price"]
+    # -------------------------
+    # Safe Input Extraction
+    # -------------------------
 
-    children = data["children"]
-    age = data["age"]
-    employment_years = data["employment_years"]
+    income = data.get("income", 0)
+    credit = data.get("credit", 0)
+    annuity = data.get("annuity", 0)
+    goods_price = data.get("goods_price", 0)
 
-    ext1 = data["ext1"]
-    ext2 = data["ext2"]
-    ext3 = data["ext3"]
+    children = data.get("children", 0)
+    age = data.get("age", 0)
+    employment_years = data.get("employment_years", 0)
 
-    family_members = data["family_members"]
+    ext1 = data.get("ext1", 0)
+    ext2 = data.get("ext2", 0)
+    ext3 = data.get("ext3", 0)
 
-    bureau_year = data["bureau_year"]
-    bureau_week = data["bureau_week"]
-    bureau_month = data["bureau_month"]
+    family_members = data.get("family_members", 0)
 
-    def30 = data["def30"]
-    def60 = data["def60"]
+    bureau_year = data.get("bureau_year", 0)
+    bureau_week = data.get("bureau_week", 0)
+    bureau_month = data.get("bureau_month", 0)
 
-    gender = data["gender"]
-    owns_car = data["owns_car"]
-    owns_house = data["owns_house"]
-    education = data["education"]
+    def30 = data.get("def30", 0)
+    def60 = data.get("def60", 0)
+
+    gender = data.get("gender", "Male")
+    owns_car = data.get("owns_car", "No")
+    owns_house = data.get("owns_house", "No")
+    education = data.get("education", "Secondary / secondary special")
 
     # -------------------------
     # Feature Engineering
@@ -72,6 +73,7 @@ def predict_credit_risk(data: dict):
     # -------------------------
 
     features = {
+
         "AMT_INCOME_TOTAL": income,
         "AMT_CREDIT": credit,
         "AMT_ANNUITY": annuity,
@@ -116,13 +118,28 @@ def predict_credit_risk(data: dict):
         "NAME_EDUCATION_TYPE_Secondary / secondary special": 1 if education == "Secondary / secondary special" else 0
     }
 
+    # -------------------------
+    # Create DataFrame
+    # -------------------------
+
     df = pd.DataFrame([features])
 
-    # Align features with training order
+    # Align dataframe with training features
     df = df.reindex(columns=feature_names, fill_value=0)
+
+    # Ensure exact column order
+    df = df[feature_names]
+
+    # -------------------------
+    # Prediction
+    # -------------------------
 
     prob = model.predict_proba(df)[0][1]
     pred = model.predict(df)[0]
+
+    # -------------------------
+    # Response
+    # -------------------------
 
     return {
         "default_probability": float(prob),

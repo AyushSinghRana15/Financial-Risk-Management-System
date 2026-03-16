@@ -14,6 +14,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# register routers
 app.include_router(credit_router)
 app.include_router(market_router)

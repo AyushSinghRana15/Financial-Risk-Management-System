@@ -57,9 +57,11 @@ function MarketRisk() {
     // Handle input change
     const handleChange = (feature, value) => {
 
+        const num = value === "" ? 0 : parseFloat(value);
+
         setInputs({
             ...inputs,
-            [feature]: parseFloat(value)
+            [feature]: num
         });
 
     };
@@ -74,7 +76,7 @@ function MarketRisk() {
                 inputs
             );
 
-            const varValue = res.data.var_prediction;
+            const varValue = res.data.predicted_var;
 
             setPrediction(varValue);
 
