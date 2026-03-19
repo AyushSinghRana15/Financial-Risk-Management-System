@@ -67,27 +67,10 @@ export default function Sidebar() {
                     <FaUniversity />
                     {!collapsed && "Credit Risk"}
                 </Link>
-
-                <Link to="/interest-risk" className={linkClass("/interest-risk")}>
-                    <FaPercentage />
-                    {!collapsed && "Interest Rate Risk"}
-                </Link>
-
-                <Link to="/inflation-risk" className={linkClass("/inflation-risk")}>
-                    <GiMoneyStack />
-                    {!collapsed && "Inflation Risk"}
-                </Link>
-
-                <Link to="/currency-risk" className={linkClass("/currency-risk")}>
+                <Link to="/liquidity-risk" className={linkClass("/liquidity-risk")}>
                     <FaGlobe />
-                    {!collapsed && "Currency Risk"}
+                    {!collapsed && "Liquidity Risk"}
                 </Link>
-
-                <Link to="/political-risk" className={linkClass("/political-risk")}>
-                    <FaBuilding />
-                    {!collapsed && "Political Risk"}
-                </Link>
-
             </div>
 
             <hr className="border-gray-700 mb-6" />
@@ -114,11 +97,6 @@ export default function Sidebar() {
                 <Link to="/operational-risk" className={linkClass("/operational-risk")}>
                     <FaChartLine />
                     {!collapsed && "Operational Risk"}
-                </Link>
-
-                <Link to="/management-risk" className={linkClass("/management-risk")}>
-                    <FaBuilding />
-                    {!collapsed && "Management Risk"}
                 </Link>
 
             </div>

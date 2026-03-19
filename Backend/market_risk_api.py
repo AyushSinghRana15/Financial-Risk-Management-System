@@ -1,6 +1,8 @@
 import pandas as pd
 import joblib
 from fastapi import APIRouter
+import yfinance as yf
+import numpy as np
 
 router = APIRouter()
 
@@ -60,6 +62,53 @@ def get_market_features():
         "features": features,
         "labels": cleaned_labels
     }
+# ----------------------------
+# LIVE MARKET DATA (YAHOO FINANCE)
+# ----------------------------
+
+def fetch_live_market_data():
+    try:
+        data = {}
+
+        for feature in features:
+            try:
+                ticker = yf.download(feature, period="2d", progress=False, timeout=2)
+
+                # If data not available → skip
+                if ticker.empty or len(ticker) < 2:
+                    data[feature] = 0
+                    continue
+
+                # If feature is index/stock → use return
+                if feature.startswith("^") or "=X" in feature or "=F" in feature:
+                    prev_close = ticker["Close"].iloc[-2]
+                    latest_close = ticker["Close"].iloc[-1]
+
+                    value = (latest_close - prev_close) / prev_close
+
+                else:
+                    # fallback → raw close
+                    value = ticker["Close"].iloc[-1]
+
+                data[feature] = float(value) if not np.isnan(value) else 0
+
+            except Exception as inner_error:
+                print(f"Error fetching {feature}:", inner_error)
+                data[feature] = 0
+
+        return data
+
+    except Exception as e:
+        print("Live market data error:", e)
+        return {}
+
+# ----------------------------
+# GET LIVE MARKET DATA
+# ----------------------------
+
+@router.get("/market_live_data")
+def get_live_market_data():
+    return fetch_live_market_data()
 
 
 # ----------------------------

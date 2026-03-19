@@ -2,12 +2,13 @@ import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
 import { BarChart3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import NotificationPanel from "./NotificationPanel";
 
 function Navbar() {
 
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
-
+    const [notifOpen, setNotifOpen] = useState(false);
     const user = JSON.parse(localStorage.getItem("user"));
 
     const logout = () => {
@@ -15,119 +16,101 @@ function Navbar() {
         navigate("/login");
     };
 
-    // Generate initials
     const getInitials = (name) => {
         if (!name) return "";
-        const words = name.split(" ");
-        return words.map(word => word[0]).join("").toUpperCase();
-    };
-
-    const navbarStyle = {
-        height: "60px",
-        background: "white",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "0 30px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-        position: "sticky",
-        top: 0,
-        zIndex: 100
-    };
-
-    const rightSection = {
-        display: "flex",
-        alignItems: "center",
-        gap: "20px"
+        return name.split(" ").map(w => w[0]).join("").toUpperCase();
     };
 
     return (
+        <div className="bg-white/80 backdrop-blur-md border-b 
+                flex items-center justify-between px-6 py-4 
+                sticky top-0 z-50">
 
-        <div style={navbarStyle}>
-
-            {/* Logo */}
-
+            {/* LEFT: Logo */}
             <div className="flex items-center gap-3">
 
-                <div className="bg-blue-600 p-2 rounded-lg text-white">
-                    <BarChart3 size={20} />
+                <div className="bg-blue-600 p-2 rounded-lg text-white shadow">
+                    <BarChart3 size={18} />
                 </div>
 
-                <h1 className="text-xl font-semibold text-gray-800">
+                <h1 className="text-lg font-semibold text-gray-800 tracking-tight">
                     FinRisk Dashboard
                 </h1>
 
             </div>
 
-            {/* Right Section */}
+            {/* RIGHT SECTION */}
+            <div className="flex items-center gap-6">
 
-            <div style={rightSection}>
+                {/* Notification */}
+                <div className="relative">
 
-                <FaBell size={18} style={{ cursor: "pointer" }} />
+                    <div
+                        onClick={() => setNotifOpen(!notifOpen)}
+                        className="relative cursor-pointer"
+                    >
+                        <FaBell className="text-gray-600 hover:text-black transition" size={18} />
+                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </div>
+
+                    {notifOpen && <NotificationPanel onClose={() => setNotifOpen(false)} />}
+
+                </div>
 
                 {!user ? (
-
                     <button
                         onClick={() => navigate("/login")}
-                        className="bg-blue-600 text-white px-4 py-2 rounded"
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm 
+                                   hover:bg-blue-700 transition"
                     >
                         Login
                     </button>
-
                 ) : (
 
-                    <div style={{ position: "relative" }}>
+                    <div className="relative">
 
-                        {/* Initials Avatar */}
-
+                        {/* Avatar */}
                         <div
                             onClick={() => setMenuOpen(!menuOpen)}
-                            className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold cursor-pointer"
+                            className="w-9 h-9 rounded-full bg-blue-600 text-white 
+                                       flex items-center justify-center font-semibold 
+                                       cursor-pointer hover:scale-105 transition"
                         >
                             {getInitials(user.name)}
                         </div>
 
+                        {/* Dropdown */}
                         {menuOpen && (
+                            <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg border overflow-hidden">
 
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    right: 0,
-                                    top: "45px",
-                                    background: "white",
-                                    borderRadius: "8px",
-                                    boxShadow: "0 4px 15px rgba(0,0,0,0.15)",
-                                    width: "200px",
-                                    overflow: "hidden"
-                                }}
-                            >
-
-                                <div className="p-3 border-b text-sm text-gray-600">
-                                    <div className="font-semibold">{user.name}</div>
-                                    <div>{user.email}</div>
+                                <div className="p-4 border-b">
+                                    <p className="font-semibold text-gray-800">{user.name}</p>
+                                    <p className="text-sm text-gray-500">{user.email}</p>
                                 </div>
 
-                                <div className="p-3 hover:bg-gray-100 cursor-pointer">
-                                    Profile
-                                </div>
+                                <div className="py-2">
 
-                                <div className="p-3 hover:bg-gray-100 cursor-pointer">
-                                    Settings
-                                </div>
+                                    <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
+                                        Profile
+                                    </div>
 
-                                <div
-                                    onClick={logout}
-                                    className="p-3 text-red-500 hover:bg-gray-100 cursor-pointer"
-                                >
-                                    Logout
+                                    <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
+                                        Settings
+                                    </div>
+
+                                    <div
+                                        onClick={logout}
+                                        className="px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer text-sm"
+                                    >
+                                        Logout
+                                    </div>
+
                                 </div>
 
                             </div>
-
                         )}
 
                     </div>
-
                 )}
 
             </div>
