@@ -61,8 +61,8 @@ font-size:18px;
 # LOAD MODEL
 # -----------------------------
 
-model = joblib.load("risk_model.pkl")
-features = joblib.load("model_features.pkl")
+model = joblib.load("op-risk_model.pkl")
+features = joblib.load("operational_risk.pkl")
 
 explainer = shap.TreeExplainer(model)
 
