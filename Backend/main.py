@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine, Base
 import models
+from business_risk_api import router as business_router #Adii
+
 
 from credit_risk_api import router as credit_router
 from market_risk_api import router as market_router
@@ -21,6 +23,7 @@ app.add_middleware(
 
 app.include_router(credit_router)
 app.include_router(market_router)
+app.include_router(business_router) #Adii
 
 @app.get("/")
 def root():
