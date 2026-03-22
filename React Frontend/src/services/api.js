@@ -7,3 +7,13 @@ const API = axios.create({
 export const predictCreditRisk = (data) => {
     return API.post("/predict/credit", data);
 };
+
+// ✅ OPERATIONAL
+export const predictOperationalRisk = (data) => {
+    return API.post("/predict_operational_risk", data);
+};
+
+//  E commerce fraud
+export const predictFraudRisk = (data) => {
+  return API.post("/predict_fraud", data);
+};
