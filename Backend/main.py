@@ -36,6 +36,7 @@ Base.metadata.create_all(bind=engine)
 from credit_risk_api import router as credit_router
 from market_risk_api import router as market_router
 from liquidity_risk_api import router as liquidity_router
+from final_financial_api import router as financial_router  
 
 
 # Neon mein tables automatically ban jaayengi
@@ -60,7 +61,7 @@ app.include_router(fraud_router)
 app.include_router(business_router)
 
 app.include_router(liquidity_router,prefix="/liquidity")
-    
+app.include_router(financial_router,prefix="/financial")        
 
 @app.get("/")
 def root():
