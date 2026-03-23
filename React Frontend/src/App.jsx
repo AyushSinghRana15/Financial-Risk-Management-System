@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ECommerceFraudRisk from "./pages/ECommerceFraudRisk";
 
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
@@ -39,6 +40,7 @@ function DashboardLayout() {
             <Route path="/credit-risk" element={<CreditRisk />} />
             <Route path="/market-risk" element={<MarketRisk />} />
             <Route path="/risk-analytics" element={<RiskAnalytics />} />
+            <Route path="/ecommerce-fraud" element={<ECommerceFraudRisk />} />
 
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/portfolio-analytics" element={<PortfolioAnalytics />} />
