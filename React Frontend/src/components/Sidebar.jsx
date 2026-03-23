@@ -98,6 +98,10 @@ export default function Sidebar() {
                     <FaChartLine />
                     {!collapsed && "Operational Risk"}
                 </Link>
+                <Link to="/ecommerce-fraud" className={linkClass("/ecommerce-fraud")}>
+                    <FaPercentage />
+                    {!collapsed && "E-Commerce Fraud"}
+                </Link>
 
             </div>
 
