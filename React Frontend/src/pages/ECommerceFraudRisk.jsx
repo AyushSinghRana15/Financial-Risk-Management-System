@@ -18,31 +18,31 @@ export default function ECommerceFraudRisk() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handlePredict = async () => {
-    const data = {
-      amount,
-      quantity,
-      payment_method: paymentMethod,
-      product_category: productCategory,
-      customer_location: location,
-      device_used: device,
-      customer_age: age,
-      account_age_days: accountAge,
-      transaction_hour: hour,
-      transaction_day: day,
-      transaction_month: month
-    };
-
-    try {
-      setLoading(true);
-      const res = await predictFraudRisk(data);
-      setResult(res.data);
-    } catch (err) {
-      console.error("API Error:", err);
-    } finally {
-      setLoading(false);
-    }
+const handlePredict = async () => {
+  const data = {
+    "Account Age Days": accountAge,
+    "Transaction Hour": hour,
+    "Transaction Amount": amount,
+    "Customer Location": mapLocation(location),
+    "Payment Method": mapPayment(paymentMethod),
+    "Transaction_Month": month,
+    "Customer Age": age,
+    "Transaction_Day": day,
+    "Device Used": mapDevice(device),
+    "Quantity": quantity
   };
+
+  try {
+    setLoading(true);
+    const res = await predictFraudRisk(data);
+    setResult(res.data);
+  } catch (err) {
+    console.error("API Error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+  
 
   return (
     <div style={{ padding: "30px", maxWidth: "500px", margin: "auto" }}>
