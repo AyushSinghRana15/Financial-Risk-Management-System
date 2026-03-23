@@ -3,82 +3,107 @@ import { predictOperationalRisk } from "../services/api";
 
 export default function OperationalRisk() {
 
-    const [reassignment_count, setReassignment] = useState(0);
-    const [reopen_count, setReopen] = useState(0);
-    const [sys_mod_count, setSysMod] = useState(0);
-    const [active, setActive] = useState("No");
-    const [made_sla, setSla] = useState("Yes");
+  const [form, setForm] = useState({
+    reassignment_count: 2,
+    reopen_count: 1,
+    system_modification: "No"
+  });
 
-    const [result, setResult] = useState(null);
+  const [result, setResult] = useState(null);
 
-    const handlePredict = async () => {
-        const data = {
-            reassignment_count,
-            reopen_count,
-            sys_mod_count,
-            active,
-            made_sla
-        };
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-        try {
-            const res = await predictOperationalRisk(data);
-            setResult(res.data);
-        } catch (err) {
-            console.error("API Error:", err);
-        }
+  const handlePredict = async () => {
+    const data = {
+      "Reassignment Count": Number(form.reassignment_count),
+      "Reopen Count": Number(form.reopen_count),
+      "System Modification": form.system_modification === "Yes" ? 1 : 0
     };
 
-    return (
-        <div style={{ padding: "20px" }}>
+    const res = await predictOperationalRisk(data);
+    setResult(res.data);
+  };
 
-            <h2>Operational Risk Prediction</h2>
+  return (
+    <div style={{ maxWidth: "600px", margin: "auto", padding: "20px" }}>
 
-            {/* Inputs */}
-            <div>
+      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
+        ⚙️ Operational Risk Prediction
+      </h2>
 
-                <input
-                    type="number"
-                    placeholder="Reassignment Count"
-                    onChange={(e) => setReassignment(Number(e.target.value))}
-                />
+      {/* Reassignment Count */}
+      <div style={{ marginBottom: "15px" }}>
+        <label><b>Reassignment Count</b></label>
+        <input
+          type="number"
+          name="reassignment_count"
+          value={form.reassignment_count}
+          onChange={handleChange}
+          style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+        />
+      </div>
 
-                <input
-                    type="number"
-                    placeholder="Reopen Count"
-                    onChange={(e) => setReopen(Number(e.target.value))}
-                />
+      {/* Reopen Count */}
+      <div style={{ marginBottom: "15px" }}>
+        <label><b>Reopen Count</b></label>
+        <input
+          type="number"
+          name="reopen_count"
+          value={form.reopen_count}
+          onChange={handleChange}
+          style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+        />
+      </div>
 
-                <input
-                    type="number"
-                    placeholder="System Modification Count"
-                    onChange={(e) => setSysMod(Number(e.target.value))}
-                />
+      {/* System Modification */}
+      <div style={{ marginBottom: "15px" }}>
+        <label><b>System Modification</b></label>
+        <select
+          name="system_modification"
+          value={form.system_modification}
+          onChange={handleChange}
+          style={{ width: "100%", padding: "8px", marginTop: "5px" }}
+        >
+          <option>No</option>
+          <option>Yes</option>
+        </select>
+      </div>
 
-                <select onChange={(e) => setActive(e.target.value)}>
-                    <option>No</option>
-                    <option>Yes</option>
-                </select>
+      {/* Button */}
+      <button
+        onClick={handlePredict}
+        style={{
+          width: "100%",
+          padding: "10px",
+          background: "blue",
+          color: "white",
+          border: "none",
+          borderRadius: "5px"
+        }}
+      >
+        🔍 Predict Risk
+      </button>
 
-                <select onChange={(e) => setSla(e.target.value)}>
-                    <option>Yes</option>
-                    <option>No</option>
-                </select>
-
-                <br /><br />
-
-                <button onClick={handlePredict}>Predict</button>
-            </div>
-
-            {/* Output */}
-            {result && (
-                <div style={{ marginTop: "20px" }}>
-                    <h3>Risk Level: {result.risk_level}</h3>
-                    <p>Low: {result.probabilities.low}</p>
-                    <p>Medium: {result.probabilities.medium}</p>
-                    <p>High: {result.probabilities.high}</p>
-                </div>
-            )}
-
+      {/* Result */}
+      {result && (
+        <div style={{
+          marginTop: "20px",
+          padding: "15px",
+          borderRadius: "8px",
+          backgroundColor: result.prediction === 1 ? "#ffe5e5" : "#e6ffe6"
+        }}>
+          <h3 style={{ color: result.prediction === 1 ? "red" : "green" }}>
+            {result.label}
+          </h3>
+          <p>
+            Risk Probability:{" "}
+            <strong>{(result.risk_probability * 100).toFixed(2)}%</strong>
+          </p>
         </div>
-    );
+      )}
+
+    </div>
+  );
 }
