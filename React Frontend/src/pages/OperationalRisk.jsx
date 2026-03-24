@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { predictOperationalRisk } from "../services/api";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function OperationalRisk() {
 
@@ -28,102 +29,155 @@ export default function OperationalRisk() {
       const res = await predictOperationalRisk(data);
       setResult(res.data);
     } catch (err) {
-      console.error("API Error:", err);
-      alert("Something went wrong!");
+      console.error(err);
+      alert("Error occurred");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div style={{ maxWidth: "600px", margin: "auto", padding: "20px" }}>
+  // Chart Data
+  const chartData = result
+    ? [
+        { name: "High", value: result.probabilities.high },
+        { name: "Medium", value: result.probabilities.medium },
+        { name: "Low", value: result.probabilities.low }
+      ]
+    : [];
 
-      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-        ⚙️ Operational Risk Prediction
+  const COLORS = ["#ef4444", "#f59e0b", "#10b981"];
+
+  return (
+    <div style={{ padding: "30px" }}>
+
+      <h2 style={{ marginBottom: "20px" }}>
+        ⚙️ Operational Risk Analytics
       </h2>
 
-      {/* Reassignment Count */}
-      <div style={{ marginBottom: "15px" }}>
-        <label><b>Reassignment Count</b></label>
-        <input
-          type="number"
-          name="reassignment_count"
-          value={form.reassignment_count}
-          onChange={handleChange}
-          style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-        />
-      </div>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "20px"
+      }}>
 
-      {/* Reopen Count */}
-      <div style={{ marginBottom: "15px" }}>
-        <label><b>Reopen Count</b></label>
-        <input
-          type="number"
-          name="reopen_count"
-          value={form.reopen_count}
-          onChange={handleChange}
-          style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-        />
-      </div>
+        {/* LEFT: FORM */}
+        <div style={cardStyle}>
+          <h3>Input Parameters</h3>
 
-      {/* System Modification */}
-      <div style={{ marginBottom: "15px" }}>
-        <label><b>System Modification</b></label>
-        <select
-          name="system_modification"
-          value={form.system_modification}
-          onChange={handleChange}
-          style={{ width: "100%", padding: "8px", marginTop: "5px" }}
-        >
-          <option>No</option>
-          <option>Yes</option>
-        </select>
-      </div>
+          <input
+            type="number"
+            name="reassignment_count"
+            value={form.reassignment_count}
+            onChange={handleChange}
+            placeholder="Reassignment Count"
+            style={inputStyle}
+          />
 
-      {/* Button */}
-      <button
-        onClick={handlePredict}
-        style={{
-          width: "100%",
-          padding: "10px",
-          background: "#2563eb",
-          color: "white",
-          border: "none",
-          borderRadius: "6px",
-          fontSize: "16px",
-          cursor: "pointer"
-        }}
-      >
-        {loading ? "Predicting..." : "🔍 Predict Risk"}
-      </button>
+          <input
+            type="number"
+            name="reopen_count"
+            value={form.reopen_count}
+            onChange={handleChange}
+            placeholder="Reopen Count"
+            style={inputStyle}
+          />
 
-      {/* Result */}
-      {result && (
-        <div style={{
-          marginTop: "20px",
-          padding: "15px",
-          borderRadius: "10px",
-          backgroundColor:
-            result.prediction === 1 ? "#ffe5e5" : "#e6ffe6"
-        }}>
+          <select
+            name="system_modification"
+            value={form.system_modification}
+            onChange={handleChange}
+            style={inputStyle}
+          >
+            <option>No</option>
+            <option>Yes</option>
+          </select>
 
-          <h3 style={{
-            color: result.prediction === 1 ? "red" : "green",
-            marginBottom: "10px"
-          }}>
-            {result.risk_level}
-          </h3>
-
-          {/* Probabilities */}
-          <div style={{ lineHeight: "1.8" }}>
-            <div>🔴 High: {(result.probabilities.high * 100).toFixed(2)}%</div>
-            <div>🟡 Medium: {(result.probabilities.medium * 100).toFixed(2)}%</div>
-            <div>🟢 Low: {(result.probabilities.low * 100).toFixed(2)}%</div>
-          </div>
-
+          <button onClick={handlePredict} style={buttonStyle}>
+            {loading ? "Predicting..." : "🔍 Predict Risk"}
+          </button>
         </div>
-      )}
 
+        {/* RIGHT: RESULT */}
+        <div style={cardStyle}>
+          <h3>Risk Analysis</h3>
+
+          {!result && <p style={{ color: "#999" }}>No prediction yet</p>}
+
+          {result && (
+            <>
+              {/* Risk Badge */}
+              <div style={{
+                padding: "10px",
+                textAlign: "center",
+                borderRadius: "8px",
+                marginBottom: "15px",
+                fontWeight: "bold",
+                background:
+                  result.prediction === 1 ? "#ffe5e5" : "#e6ffe6",
+                color:
+                  result.prediction === 1 ? "red" : "green"
+              }}>
+                {result.risk_level}
+              </div>
+
+              {/* PIE CHART */}
+              <div style={{ width: "100%", height: 250 }}>
+                <ResponsiveContainer>
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      dataKey="value"
+                      outerRadius={80}
+                      label
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell key={index} fill={COLORS[index]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Values */}
+              <div style={{ marginTop: "15px" }}>
+                <p>🔴 High: {(result.probabilities.high * 100).toFixed(2)}%</p>
+                <p>🟡 Medium: {(result.probabilities.medium * 100).toFixed(2)}%</p>
+                <p>🟢 Low: {(result.probabilities.low * 100).toFixed(2)}%</p>
+              </div>
+            </>
+          )}
+        </div>
+
+      </div>
     </div>
   );
 }
+
+/* Styles */
+
+const cardStyle = {
+  background: "white",
+  padding: "20px",
+  borderRadius: "12px",
+  boxShadow: "0 2px 10px rgba(0,0,0,0.08)"
+};
+
+const inputStyle = {
+  width: "100%",
+  padding: "10px",
+  marginBottom: "12px",
+  borderRadius: "8px",
+  border: "1px solid #ddd"
+};
+
+const buttonStyle = {
+  width: "100%",
+  padding: "12px",
+  background: "#2563eb",
+  color: "white",
+  border: "none",
+  borderRadius: "8px",
+  fontSize: "16px",
+  cursor: "pointer"
+};
