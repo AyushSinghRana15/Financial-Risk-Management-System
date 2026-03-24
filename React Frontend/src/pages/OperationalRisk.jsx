@@ -10,6 +10,7 @@ export default function OperationalRisk() {
   });
 
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -22,8 +23,16 @@ export default function OperationalRisk() {
       "System Modification": form.system_modification === "Yes" ? 1 : 0
     };
 
-    const res = await predictOperationalRisk(data);
-    setResult(res.data);
+    try {
+      setLoading(true);
+      const res = await predictOperationalRisk(data);
+      setResult(res.data);
+    } catch (err) {
+      console.error("API Error:", err);
+      alert("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,13 +86,15 @@ export default function OperationalRisk() {
         style={{
           width: "100%",
           padding: "10px",
-          background: "blue",
+          background: "#2563eb",
           color: "white",
           border: "none",
-          borderRadius: "5px"
+          borderRadius: "6px",
+          fontSize: "16px",
+          cursor: "pointer"
         }}
       >
-        🔍 Predict Risk
+        {loading ? "Predicting..." : "🔍 Predict Risk"}
       </button>
 
       {/* Result */}
@@ -91,16 +102,25 @@ export default function OperationalRisk() {
         <div style={{
           marginTop: "20px",
           padding: "15px",
-          borderRadius: "8px",
-          backgroundColor: result.prediction === 1 ? "#ffe5e5" : "#e6ffe6"
+          borderRadius: "10px",
+          backgroundColor:
+            result.prediction === 1 ? "#ffe5e5" : "#e6ffe6"
         }}>
-          <h3 style={{ color: result.prediction === 1 ? "red" : "green" }}>
-            {result.label}
+
+          <h3 style={{
+            color: result.prediction === 1 ? "red" : "green",
+            marginBottom: "10px"
+          }}>
+            {result.risk_level}
           </h3>
-          <p>
-            Risk Probability:{" "}
-            <strong>{(result.risk_probability * 100).toFixed(2)}%</strong>
-          </p>
+
+          {/* Probabilities */}
+          <div style={{ lineHeight: "1.8" }}>
+            <div>🔴 High: {(result.probabilities.high * 100).toFixed(2)}%</div>
+            <div>🟡 Medium: {(result.probabilities.medium * 100).toFixed(2)}%</div>
+            <div>🟢 Low: {(result.probabilities.low * 100).toFixed(2)}%</div>
+          </div>
+
         </div>
       )}
 
