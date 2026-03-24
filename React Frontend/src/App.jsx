@@ -18,6 +18,7 @@ import BusinessRisk from "./pages/BusinessRisk";
 import FinancialRisk from "./pages/FinancialRisk";
 import OperationalRisk from "./pages/OperationalRisk";
 
+import ProfileSection from "./components/ProfileSection";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -51,6 +52,7 @@ function DashboardLayout() {
             <Route path="/financial-risk" element={<FinancialRisk />} />
             <Route path="/operational-risk" element={<OperationalRisk />} />
 
+            <Route path="/profile" element={<ProfileSection />} />
 
           </Routes>
         </div>
