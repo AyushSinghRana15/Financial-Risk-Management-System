@@ -12,14 +12,36 @@ export default function OperationalRisk() {
   });
 
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handlePredict = async () => {
-    const res = await predictOperationalRisk(form);
-    setResult(res.data);
+    try {
+      setLoading(true);
+      setError("");
+      setResult(null);
+
+      const res = await predictOperationalRisk(form);
+
+      console.log("API Response:", res.data);
+
+      // safety check
+      if (!res.data || res.data.error) {
+        throw new Error(res.data?.error || "Invalid response from server");
+      }
+
+      setResult(res.data);
+
+    } catch (err) {
+      console.error("Prediction Error:", err);
+      setError("⚠️ Failed to fetch prediction. Check backend.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,48 +69,37 @@ export default function OperationalRisk() {
             Input Parameters
           </h3>
 
-          {/* Input Field */}
+          {/* Inputs */}
           <div style={{ marginBottom: "12px" }}>
             <label>Reassignment Count</label>
-            <input
-              type="number"
-              name="reassignment_count"
+            <input type="number" name="reassignment_count"
               value={form.reassignment_count}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px" }}
-            />
+              style={{ width: "100%", padding: "8px" }} />
           </div>
 
           <div style={{ marginBottom: "12px" }}>
             <label>Reopen Count</label>
-            <input
-              type="number"
-              name="reopen_count"
+            <input type="number" name="reopen_count"
               value={form.reopen_count}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px" }}
-            />
+              style={{ width: "100%", padding: "8px" }} />
           </div>
 
           <div style={{ marginBottom: "12px" }}>
             <label>System Modification Count</label>
-            <input
-              type="number"
-              name="sys_mod_count"
+            <input type="number" name="sys_mod_count"
               value={form.sys_mod_count}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px" }}
-            />
+              style={{ width: "100%", padding: "8px" }} />
           </div>
 
           <div style={{ marginBottom: "12px" }}>
             <label>Active</label>
-            <select
-              name="active"
+            <select name="active"
               value={form.active}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px" }}
-            >
+              style={{ width: "100%", padding: "8px" }}>
               <option>No</option>
               <option>Yes</option>
             </select>
@@ -96,12 +107,10 @@ export default function OperationalRisk() {
 
           <div style={{ marginBottom: "12px" }}>
             <label>Made SLA</label>
-            <select
-              name="made_sla"
+            <select name="made_sla"
               value={form.made_sla}
               onChange={handleChange}
-              style={{ width: "100%", padding: "8px" }}
-            >
+              style={{ width: "100%", padding: "8px" }}>
               <option>No</option>
               <option>Yes</option>
             </select>
@@ -109,10 +118,13 @@ export default function OperationalRisk() {
 
           <button
             onClick={handlePredict}
+            disabled={loading}
             style={{
               width: "100%",
               padding: "12px",
-              background: "linear-gradient(to right, #2563eb, #1d4ed8)",
+              background: loading
+                ? "#9ca3af"
+                : "linear-gradient(to right, #2563eb, #1d4ed8)",
               color: "white",
               border: "none",
               borderRadius: "8px",
@@ -120,8 +132,15 @@ export default function OperationalRisk() {
               cursor: "pointer"
             }}
           >
-            🔍 Predict Risk
+            {loading ? "⏳ Predicting..." : "🔍 Predict Risk"}
           </button>
+
+          {/* Error */}
+          {error && (
+            <p style={{ color: "red", marginTop: "10px" }}>
+              {error}
+            </p>
+          )}
 
         </div>
 
@@ -135,7 +154,7 @@ export default function OperationalRisk() {
 
           <h3>Risk Analysis</h3>
 
-          {!result && (
+          {!result && !loading && (
             <p style={{ color: "#888" }}>
               Run prediction to see results
             </p>
@@ -146,12 +165,23 @@ export default function OperationalRisk() {
               <h2 style={{
                 color: result.prediction === 1 ? "red" : "green"
               }}>
-                {result.risk_level}
+                {result.risk_level || "Unknown"}
               </h2>
 
-              <p><b>Low:</b> {(result.probabilities.low * 100).toFixed(2)}%</p>
-              <p><b>Medium:</b> {(result.probabilities.medium * 100).toFixed(2)}%</p>
-              <p><b>High:</b> {(result.probabilities.high * 100).toFixed(2)}%</p>
+              <p>
+                <b>Low:</b>{" "}
+                {((result?.probabilities?.low ?? 0) * 100).toFixed(2)}%
+              </p>
+
+              <p>
+                <b>Medium:</b>{" "}
+                {((result?.probabilities?.medium ?? 0) * 100).toFixed(2)}%
+              </p>
+
+              <p>
+                <b>High:</b>{" "}
+                {((result?.probabilities?.high ?? 0) * 100).toFixed(2)}%
+              </p>
             </>
           )}
 
