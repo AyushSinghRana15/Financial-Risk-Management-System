@@ -12,100 +12,146 @@ export default function OperationalRisk() {
   });
 
   const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handlePredict = async () => {
-    const data = {
-      reassignment_count: Number(form.reassignment_count),
-      reopen_count: Number(form.reopen_count),
-      sys_mod_count: Number(form.sys_mod_count),
-      active: form.active,
-      made_sla: form.made_sla
-    };
-
-    try {
-      setLoading(true);
-      const res = await predictOperationalRisk(data);
-      setResult(res.data);
-    } catch (err) {
-      console.error("API Error:", err);
-      alert("Error fetching prediction");
-    } finally {
-      setLoading(false);
-    }
+    const res = await predictOperationalRisk(form);
+    setResult(res.data);
   };
 
   return (
     <div style={{ padding: "30px" }}>
 
-      <h2>⚙️ Operational Risk Analytics</h2>
+      <h2 style={{ marginBottom: "20px" }}>
+        ⚙️ Operational Risk Analytics
+      </h2>
 
-      <div style={{ display: "flex", gap: "30px", flexWrap: "wrap" }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "20px"
+      }}>
 
-        {/* LEFT */}
+        {/* LEFT: FORM */}
         <div style={{
-          flex: 1,
           background: "#fff",
           padding: "20px",
-          borderRadius: "10px",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.1)"
+          borderRadius: "12px",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.1)"
         }}>
 
-          <h3>Input Parameters</h3>
+          <h3 style={{ marginBottom: "15px" }}>
+            Input Parameters
+          </h3>
 
-          <label>🔁 Reassignment Count</label>
-          <input type="number" name="reassignment_count" value={form.reassignment_count} onChange={handleChange} />
+          {/* Input Field */}
+          <div style={{ marginBottom: "12px" }}>
+            <label>Reassignment Count</label>
+            <input
+              type="number"
+              name="reassignment_count"
+              value={form.reassignment_count}
+              onChange={handleChange}
+              style={{ width: "100%", padding: "8px" }}
+            />
+          </div>
 
-          <label>🔄 Reopen Count</label>
-          <input type="number" name="reopen_count" value={form.reopen_count} onChange={handleChange} />
+          <div style={{ marginBottom: "12px" }}>
+            <label>Reopen Count</label>
+            <input
+              type="number"
+              name="reopen_count"
+              value={form.reopen_count}
+              onChange={handleChange}
+              style={{ width: "100%", padding: "8px" }}
+            />
+          </div>
 
-          <label>🛠️ System Modification Count</label>
-          <input type="number" name="sys_mod_count" value={form.sys_mod_count} onChange={handleChange} />
+          <div style={{ marginBottom: "12px" }}>
+            <label>System Modification Count</label>
+            <input
+              type="number"
+              name="sys_mod_count"
+              value={form.sys_mod_count}
+              onChange={handleChange}
+              style={{ width: "100%", padding: "8px" }}
+            />
+          </div>
 
-          <label>🟢 Active</label>
-          <select name="active" value={form.active} onChange={handleChange}>
-            <option>No</option>
-            <option>Yes</option>
-          </select>
+          <div style={{ marginBottom: "12px" }}>
+            <label>Active</label>
+            <select
+              name="active"
+              value={form.active}
+              onChange={handleChange}
+              style={{ width: "100%", padding: "8px" }}
+            >
+              <option>No</option>
+              <option>Yes</option>
+            </select>
+          </div>
 
-          <label>⏱️ Made SLA</label>
-          <select name="made_sla" value={form.made_sla} onChange={handleChange}>
-            <option>No</option>
-            <option>Yes</option>
-          </select>
+          <div style={{ marginBottom: "12px" }}>
+            <label>Made SLA</label>
+            <select
+              name="made_sla"
+              value={form.made_sla}
+              onChange={handleChange}
+              style={{ width: "100%", padding: "8px" }}
+            >
+              <option>No</option>
+              <option>Yes</option>
+            </select>
+          </div>
 
-          <button onClick={handlePredict}>
-            {loading ? "Predicting..." : "🔍 Predict Risk"}
+          <button
+            onClick={handlePredict}
+            style={{
+              width: "100%",
+              padding: "12px",
+              background: "linear-gradient(to right, #2563eb, #1d4ed8)",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              cursor: "pointer"
+            }}
+          >
+            🔍 Predict Risk
           </button>
 
         </div>
 
-        {/* RIGHT */}
+        {/* RIGHT: RESULT */}
         <div style={{
-          flex: 1,
           background: "#fff",
           padding: "20px",
-          borderRadius: "10px"
+          borderRadius: "12px",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.1)"
         }}>
 
           <h3>Risk Analysis</h3>
 
-          {!result ? (
-            <p>Run prediction to see results</p>
-          ) : (
+          {!result && (
+            <p style={{ color: "#888" }}>
+              Run prediction to see results
+            </p>
+          )}
+
+          {result && (
             <>
-              <h3 style={{
+              <h2 style={{
                 color: result.prediction === 1 ? "red" : "green"
               }}>
                 {result.risk_level}
-              </h3>
+              </h2>
 
-              <p>Low: {(result.probabilities.low * 100).toFixed(2)}%</p>
-              <p>High: {(result.probabilities.high * 100).toFixed(2)}%</p>
+              <p><b>Low:</b> {(result.probabilities.low * 100).toFixed(2)}%</p>
+              <p><b>Medium:</b> {(result.probabilities.medium * 100).toFixed(2)}%</p>
+              <p><b>High:</b> {(result.probabilities.high * 100).toFixed(2)}%</p>
             </>
           )}
 
