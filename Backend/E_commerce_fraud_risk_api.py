@@ -9,11 +9,18 @@ router = APIRouter()
 # Load Model & Features
 # -------------------------------
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+import os
+import joblib
 
-model = joblib.load(os.path.join(BASE_DIR, "Models", "E_commerce_fraud_xgboost_model.pkl"))
-features = joblib.load(os.path.join(BASE_DIR, "Models", "E_commerce_features.pkl"))
+# ✅ go to project root
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# ✅ correct Models path
+MODELS_PATH = os.path.join(PROJECT_ROOT, "Models")
+
+# ✅ load files
+model = joblib.load(os.path.join(MODELS_PATH, "E_commerce_fraud_xgboost_model.pkl"))
+features = joblib.load(os.path.join(MODELS_PATH, "E_commerce_features.pkl"))
 
 # -------------------------------
 # Mappings (same as Streamlit)
