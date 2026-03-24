@@ -10,6 +10,8 @@ class User(Base):
     password   = Column(String(200), nullable=False)
     role       = Column(String(20), default="analyst")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    age = Column(Integer, nullable=True)
+    risk_profile = Column(String(20), nullable=True)
 
 class Portfolio(Base):
     __tablename__ = "portfolios"
