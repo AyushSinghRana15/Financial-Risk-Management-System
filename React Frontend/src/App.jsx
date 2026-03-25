@@ -22,7 +22,7 @@ import ProfileSection from "./components/ProfileSection";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
-
+import Verify from "./pages/Verify";
 /* Dashboard Layout */
 function DashboardLayout() {
   return (
@@ -53,7 +53,6 @@ function DashboardLayout() {
             <Route path="/operational-risk" element={<OperationalRisk />} />
 
             <Route path="/profile" element={<ProfileSection />} />
-
           </Routes>
         </div>
 
@@ -73,6 +72,7 @@ function App() {
         {/* Auth Pages (NO Sidebar/Navbar) */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/verify/:token" element={<Verify />} />
 
         <Route
           path="/*"

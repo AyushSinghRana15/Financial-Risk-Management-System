@@ -172,76 +172,157 @@ export default function Dashboard() {
 
             </div>
             {/* 🔥 INSIGHTS & ANALYTICS */}
+            {/* 🔥 INSIGHTS & ANALYTICS */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
 
                 {/* 📊 Portfolio Allocation */}
                 <div className="bg-white p-6 rounded-xl shadow">
                     <h2 className="text-lg font-semibold mb-4">Portfolio Allocation</h2>
 
-                    <ResponsiveContainer width="100%" height={250}>
-                        <PieChart>
-                            <Pie
-                                data={[
-                                    { name: "Stocks", value: 50 },
-                                    { name: "Bonds", value: 20 },
-                                    { name: "Crypto", value: 15 },
-                                    { name: "Commodities", value: 15 }
-                                ]}
-                                dataKey="value"
-                                outerRadius={80}
-                            >
-                                <Cell fill="#3b82f6" />
-                                <Cell fill="#22c55e" />
-                                <Cell fill="#ef4444" />
-                                <Cell fill="#f59e0b" />
-                            </Pie>
-                            <Tooltip />
-                        </PieChart>
-                    </ResponsiveContainer>
+                    {(() => {
+                        const portfolio = {
+                            Stocks: 40,
+                            Bonds: 20,
+                            Crypto: 20,
+                            Gold: 10,
+                            Oil: 10
+                        };
+
+                        const pieData = Object.keys(portfolio).map((key) => ({
+                            name: key,
+                            value: portfolio[key]
+                        }));
+
+                        const colors = ["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6"];
+
+                        return (
+                            <ResponsiveContainer width="100%" height={250}>
+                                <PieChart>
+                                    <Pie
+                                        data={pieData}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        outerRadius={80}
+                                        label
+                                    >
+                                        {pieData.map((entry, index) => (
+                                            <Cell key={index} fill={colors[index % colors.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        );
+                    })()}
                 </div>
 
                 {/* 📈 Risk Trend */}
                 <div className="bg-white p-6 rounded-xl shadow">
                     <h2 className="text-lg font-semibold mb-4">Risk Trend</h2>
 
-                    <ResponsiveContainer width="100%" height={250}>
-                        <LineChart
-                            data={[
-                                { day: "Mon", risk: 60 },
-                                { day: "Tue", risk: 65 },
-                                { day: "Wed", risk: 70 },
-                                { day: "Thu", risk: 68 },
-                                { day: "Fri", risk: 75 }
-                            ]}
-                        >
-                            <XAxis dataKey="day" />
-                            <YAxis />
-                            <Tooltip />
-                            <Line type="monotone" dataKey="risk" />
-                        </LineChart>
-                    </ResponsiveContainer>
+                    {(() => {
+                        const baseRisk = 0.04; // replace later with API VaR
+
+                        const riskData = Array.from({ length: 7 }, (_, i) => ({
+                            day: `Day ${i + 1}`,
+                            risk: (baseRisk + (Math.random() * 0.01 - 0.005)) * 100
+                        }));
+
+                        return (
+                            <ResponsiveContainer width="100%" height={250}>
+                                <LineChart data={riskData}>
+                                    <XAxis dataKey="day" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Line
+                                        type="monotone"
+                                        dataKey="risk"
+                                        stroke="#3b82f6"
+                                        strokeWidth={3}
+                                        dot={false}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        );
+                    })()}
                 </div>
 
                 {/* ⚠️ Risk Alerts */}
                 <div className="bg-white p-6 rounded-xl shadow">
                     <h2 className="text-lg font-semibold mb-4">Risk Alerts</h2>
 
-                    <ul className="space-y-3 text-gray-600">
-                        <li className="text-red-500">⚠️ High crypto exposure</li>
-                        <li className="text-yellow-500">⚠️ Market volatility rising</li>
-                        <li className="text-green-500">✅ Portfolio diversified</li>
-                    </ul>
+                    {(() => {
+                        const portfolio = {
+                            Stocks: 40,
+                            Bonds: 20,
+                            Crypto: 20,
+                            Gold: 10,
+                            Oil: 10
+                        };
+
+                        const alerts = [];
+
+                        if (portfolio.Crypto > 15) {
+                            alerts.push({ text: "High crypto exposure", color: "text-red-500" });
+                        }
+
+                        if (portfolio.Stocks > 50) {
+                            alerts.push({ text: "High stock concentration", color: "text-yellow-500" });
+                        }
+
+                        if (portfolio.Bonds >= 20) {
+                            alerts.push({ text: "Portfolio has stability buffer", color: "text-green-500" });
+                        }
+
+                        if (alerts.length === 0) {
+                            alerts.push({ text: "Portfolio looks balanced", color: "text-green-500" });
+                        }
+
+                        return (
+                            <ul className="space-y-3 text-gray-600">
+                                {alerts.map((alert, index) => (
+                                    <li key={index} className={alert.color}>
+                                        ⚠️ {alert.text}
+                                    </li>
+                                ))}
+                            </ul>
+                        );
+                    })()}
                 </div>
 
                 {/* 🧠 AI Insights */}
                 <div className="bg-white p-6 rounded-xl shadow">
                     <h2 className="text-lg font-semibold mb-4">AI Insights</h2>
 
-                    <p className="text-gray-600">
-                        Your portfolio shows moderate risk. High correlation between
-                        stocks and crypto increases volatility. Consider adding bonds
-                        to stabilize returns.
-                    </p>
+                    {(() => {
+                        const portfolio = {
+                            Stocks: 40,
+                            Bonds: 20,
+                            Crypto: 20,
+                            Gold: 10,
+                            Oil: 10
+                        };
+
+                        let insight = "Your portfolio is moderately balanced. ";
+
+                        if (portfolio.Crypto > 15) {
+                            insight += "High crypto exposure may increase volatility. ";
+                        }
+
+                        if (portfolio.Stocks > 40) {
+                            insight += "Stock-heavy allocation increases market sensitivity. ";
+                        }
+
+                        if (portfolio.Bonds >= 20) {
+                            insight += "Bonds provide stability and reduce downside risk. ";
+                        }
+
+                        insight += "Consider diversification across uncorrelated assets.";
+
+                        return (
+                            <p className="text-gray-600">{insight}</p>
+                        );
+                    })()}
                 </div>
 
             </div>

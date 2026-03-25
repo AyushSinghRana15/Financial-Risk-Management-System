@@ -22,8 +22,10 @@ export default function Sidebar() {
         >
 
             {/* Toggle Button */}
-            <div className="flex items-center justify-between mb-8">
-
+            <div
+                className={`flex items-center mb-8 ${collapsed ? "justify-center" : "justify-between"
+                    }`}
+            >
                 {!collapsed && (
                     <h1 className="text-xl font-bold">
                         Risk System
@@ -123,6 +125,6 @@ export default function Sidebar() {
 
             </div>
 
-        </div>
+        </div >
     );
 }

@@ -12,6 +12,9 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     age = Column(Integer, nullable=True)
     risk_profile = Column(String(20), nullable=True)
+    is_verified = Column(Integer, default=0)   # 0 = false, 1 = true
+    verification_token = Column(String(200), nullable=True)
+
 
 class Portfolio(Base):
     __tablename__ = "portfolios"

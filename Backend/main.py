@@ -5,11 +5,22 @@ from database import SessionLocal
 from models import User
 from database import engine, Base
 import models
-
+import uuid
+from passlib.context import CryptContext
 from business_risk_api import router as business_router
 from credit_risk_api import router as credit_router
 from market_risk_api import router as market_router
 from E_commerce_fraud_risk_api import router as fraud_router
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password):
+    return pwd_context.hash(password)
+
+def verify_password(plain, hashed):
+    return pwd_context.verify(plain, hashed)
+
 
 # Create tables (optional)
 Base.metadata.create_all(bind=engine)
@@ -78,3 +89,68 @@ def update_profile(data: dict):
         db.refresh(user)
 
     return {"message": "Profile updated"}
+# ================= AUTH APIs =================
+
+@app.post("/signup")
+def signup(data: dict):
+    db: Session = SessionLocal()
+
+    existing = db.query(User).filter(User.email == data.get("email")).first()
+    if existing:
+        return {"error": "Email already registered"}
+
+    token = str(uuid.uuid4())
+
+    new_user = User(
+        username=data.get("name"),
+        email=data.get("email"),
+        password=data.get("password"),
+        verification_token=token,
+        is_verified=0
+    )
+
+    db.add(new_user)
+    db.commit()
+
+    # 🔥 TEMP: print instead of email
+    print(f"Verify link: http://localhost:5173/verify/{token}")
+
+    return {"message": "Verification link generated (check terminal)"}
+
+
+@app.get("/verify/{token}")
+def verify_email(token: str):
+    db: Session = SessionLocal()
+
+    user = db.query(User).filter(User.verification_token == token).first()
+
+    if not user:
+        return {"error": "Invalid token"}
+
+    user.is_verified = 1
+    user.verification_token = None
+    db.commit()
+
+    return {"message": "Email verified successfully"}
+
+
+@app.post("/login")
+def login(data: dict):
+    db: Session = SessionLocal()
+
+    user = db.query(User).filter(User.email == data.get("email")).first()
+
+    if not user:
+        return {"error": "User not found"}
+
+    if user.is_verified == 0:
+        return {"error": "Please verify your email first"}
+
+    if user.password != data.get("password"):
+        return {"error": "Invalid credentials"}
+
+    return {
+        "name": user.username,
+        "email": user.email,
+        "role": user.role
+    }
