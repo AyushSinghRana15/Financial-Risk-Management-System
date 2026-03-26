@@ -7,6 +7,7 @@ export default function ECommerceFraudRisk() {
     amount: 100,
     quantity: 1,
     paymentMethod: "Credit Card",
+    productCategory: "Electronics",
     location: "USA",
     device: "Mobile",
     age: 30,
@@ -23,21 +24,27 @@ export default function ECommerceFraudRisk() {
   };
 
   const handlePredict = async () => {
+    // ✅ FIX: backend ke according keys bhejo
     const data = {
-      "Account Age Days": Number(form.accountAge),
-      "Transaction Hour": Number(form.hour),
-      "Transaction Amount": Number(form.amount),
-      "Customer Location": 1,
-      "Payment Method": 2,
-      "Transaction_Month": Number(form.month),
-      "Customer Age": Number(form.age),
-      "Transaction_Day": Number(form.day),
-      "Device Used": 1,
-      "Quantity": Number(form.quantity)
+      amount: Number(form.amount),
+      quantity: Number(form.quantity),
+      payment_method: form.paymentMethod,
+      product_category: form.productCategory,
+      customer_location: form.location,
+      device_used: form.device,
+      customer_age: Number(form.age),
+      account_age_days: Number(form.accountAge),
+      transaction_hour: Number(form.hour),
+      transaction_day: Number(form.day),
+      transaction_month: Number(form.month)
     };
 
-    const res = await predictFraudRisk(data);
-    setResult(res.data);
+    try {
+      const res = await predictFraudRisk(data);
+      setResult(res.data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (
@@ -91,8 +98,12 @@ export default function ECommerceFraudRisk() {
 
       {/* RESULT */}
       {result && (
-        <div style={{ marginTop: "20px", padding: "15px", borderRadius: "8px",
-          backgroundColor: result.prediction === 1 ? "#ffe5e5" : "#e6ffe6" }}>
+        <div style={{
+          marginTop: "20px",
+          padding: "15px",
+          borderRadius: "8px",
+          backgroundColor: result.prediction === 1 ? "#ffe5e5" : "#e6ffe6"
+        }}>
 
           <h3 style={{ color: result.prediction === 1 ? "red" : "green" }}>
             {result.label}
@@ -100,7 +111,11 @@ export default function ECommerceFraudRisk() {
 
           <p>
             Fraud Probability:{" "}
-            <strong>{(result.fraud_probability * 100).toFixed(2)}%</strong>
+            <strong>
+              {result.fraud_probability
+                ? (result.fraud_probability * 100).toFixed(2)
+                : 0}%
+            </strong>
           </p>
         </div>
       )}
