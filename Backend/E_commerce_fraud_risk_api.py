@@ -9,23 +9,18 @@ router = APIRouter()
 # Load Model & Features
 # -------------------------------
 
-import os
-import joblib
-
-# ✅ go to project root
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# ✅ correct Models path
 MODELS_PATH = os.path.join(PROJECT_ROOT, "Models")
 
-# ✅ load files
 model = joblib.load(os.path.join(MODELS_PATH, "E_commerce_fraud_xgboost_model.pkl"))
-# -------------------------------
-# Mappings (same as Streamlit)
-# -------------------------------
+
+# ✅ load feature order
+features = joblib.load(os.path.join(MODELS_PATH, "E_commerce_model_features.pkl"))
+
 # -------------------------------
 # Mappings
 # -------------------------------
+
 payment_map = {
     "Credit Card": 0,
     "Debit Card": 1,
@@ -52,17 +47,18 @@ device_map = {
     "Desktop": 1,
     "Tablet": 2
 }
+
 # -------------------------------
 # API Endpoint
 # -------------------------------
+
 @router.post("/predict_fraud")
 def predict_fraud(data: dict):
     try:
-        # Create empty dataframe with correct feature order
+        # ✅ correct feature order dataframe
         df = pd.DataFrame(columns=features)
         df.loc[0] = 0
 
-        # Fill values
         df["Transaction Amount"] = data.get("amount", 100)
         df["Quantity"] = data.get("quantity", 1)
 
@@ -82,6 +78,9 @@ def predict_fraud(data: dict):
         df["Transaction_Day"] = data.get("transaction_day", 15)
         df["Transaction_Month"] = data.get("transaction_month", 6)
 
+        # 🔥 enforce correct order
+        df = df[features]
+
         # Prediction
         prediction = model.predict(df)[0]
         probability = model.predict_proba(df)[0][1]
@@ -93,6 +92,4 @@ def predict_fraud(data: dict):
         }
 
     except Exception as e:
-        return {
-            "error": str(e)
-        }
+        return {"error": str(e)}
