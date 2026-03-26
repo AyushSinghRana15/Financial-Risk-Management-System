@@ -21,6 +21,7 @@ import OperationalRisk from "./pages/OperationalRisk";
 import ProfileSection from "./components/ProfileSection";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Verify from "./pages/Verify";
 
@@ -60,6 +61,7 @@ function DashboardLayout() {
             <Route path="/operational-risk" element={<OperationalRisk />} />
 
             <Route path="/profile" element={<ProfileSection />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </div>
 

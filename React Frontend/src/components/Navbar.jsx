@@ -130,7 +130,13 @@ function Navbar() {
                                         Profile
                                     </div>
 
-                                    <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm">
+                                    <div
+                                        onClick={() => {
+                                            navigate("/settings");
+                                            setMenuOpen(false);
+                                        }}
+                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                    >
                                         Settings
                                     </div>
 
