@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import User
@@ -29,6 +30,16 @@ def verify_password(plain, hashed):
 
 # Create tables (optional)
 Base.metadata.create_all(bind=engine)
+#from database import engine, Base
+#import models
+
+from credit_risk_api import router as credit_router
+from market_risk_api import router as market_router
+from liquidity_risk_api import router as liquidity_router
+
+
+# Neon mein tables automatically ban jaayengi
+#Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -44,8 +55,12 @@ app.add_middleware(
 
 app.include_router(credit_router)
 app.include_router(market_router)
+
 app.include_router(fraud_router)
 app.include_router(business_router)
+
+app.include_router(liquidity_router,prefix="/liquidity")
+    
 
 @app.get("/")
 def root():
