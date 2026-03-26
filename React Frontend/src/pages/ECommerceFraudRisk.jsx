@@ -20,11 +20,11 @@ export default function ECommerceFraudRisk() {
   const [result, setResult] = useState(null);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
   };
 
   const handlePredict = async () => {
-    // ✅ FIX: backend ke according keys bhejo
     const data = {
       amount: Number(form.amount),
       quantity: Number(form.quantity),
@@ -39,8 +39,11 @@ export default function ECommerceFraudRisk() {
       transaction_month: Number(form.month)
     };
 
+    console.log("Sending data:", data); // 🔥 debug
+
     try {
       const res = await predictFraudRisk(data);
+      console.log("Response:", res.data); // 🔥 debug
       setResult(res.data);
     } catch (error) {
       console.error("Error:", error);
@@ -112,11 +115,12 @@ export default function ECommerceFraudRisk() {
           <p>
             Fraud Probability:{" "}
             <strong>
-              {result.fraud_probability
+              {result.fraud_probability !== undefined
                 ? (result.fraud_probability * 100).toFixed(2)
                 : 0}%
             </strong>
           </p>
+
         </div>
       )}
     </div>
