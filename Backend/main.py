@@ -11,6 +11,11 @@ from business_risk_api import router as business_router
 from credit_risk_api import router as credit_router
 from market_risk_api import router as market_router
 from E_commerce_fraud_risk_api import router as fraud_router
+from dotenv import load_dotenv
+load_dotenv()
+
+from ai_service import get_ai_insights
+
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -154,3 +159,20 @@ def login(data: dict):
         "email": user.email,
         "role": user.role
     }
+
+@app.get("/ai-insights")
+def ai_insights():
+    db: Session = SessionLocal()
+
+    # TEMP: use first user (you can fix later with auth)
+    user = db.query(User).first()
+
+    # ⚠️ Replace this later with real portfolio table
+    portfolio = [
+        {"asset": "AAPL", "type": "stock", "qty": 10, "price": 150},
+        {"asset": "BTC", "type": "crypto", "qty": 0.5, "price": 30000}
+    ]
+
+    result = get_ai_insights(portfolio)
+
+    return result

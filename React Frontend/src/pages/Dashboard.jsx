@@ -172,7 +172,6 @@ export default function Dashboard() {
 
             </div>
             {/* 🔥 INSIGHTS & ANALYTICS */}
-            {/* 🔥 INSIGHTS & ANALYTICS */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
 
                 {/* 📊 Portfolio Allocation */}
@@ -291,39 +290,45 @@ export default function Dashboard() {
                 </div>
 
                 {/* 🧠 AI Insights */}
+                {/* 🧠 AI Insights */}
                 <div className="bg-white p-6 rounded-xl shadow">
                     <h2 className="text-lg font-semibold mb-4">AI Insights</h2>
 
                     {(() => {
-                        const portfolio = {
-                            Stocks: 40,
-                            Bonds: 20,
-                            Crypto: 20,
-                            Gold: 10,
-                            Oil: 10
+                        const aiData = {
+                            risk: "High",
+                            insights: [
+                                "Portfolio is concentrated in crypto and equities",
+                                "High volatility due to BTC exposure",
+                                "Low diversification increases risk"
+                            ],
+                            suggestions: [
+                                "Diversify into bonds and gold",
+                                "Reduce crypto allocation"
+                            ]
                         };
 
-                        let insight = "Your portfolio is moderately balanced. ";
-
-                        if (portfolio.Crypto > 15) {
-                            insight += "High crypto exposure may increase volatility. ";
-                        }
-
-                        if (portfolio.Stocks > 40) {
-                            insight += "Stock-heavy allocation increases market sensitivity. ";
-                        }
-
-                        if (portfolio.Bonds >= 20) {
-                            insight += "Bonds provide stability and reduce downside risk. ";
-                        }
-
-                        insight += "Consider diversification across uncorrelated assets.";
-
                         return (
-                            <p className="text-gray-600">{insight}</p>
+                            <>
+                                <p><strong>Risk:</strong> {aiData.risk}</p>
+
+                                <ul className="list-disc ml-5 mt-2 text-gray-600">
+                                    {aiData.insights.slice(0, 3).map((i, idx) => (
+                                        <li key={idx}>{i}</li>
+                                    ))}
+                                </ul>
+
+                                <p className="mt-3 font-medium">Suggestions:</p>
+                                <ul className="list-disc ml-5 text-gray-600">
+                                    {aiData.suggestions.slice(0, 2).map((s, idx) => (
+                                        <li key={idx}>{s}</li>
+                                    ))}
+                                </ul>
+                            </>
                         );
                     })()}
                 </div>
+
 
             </div>
 
