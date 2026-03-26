@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import { FaBell } from "react-icons/fa";
 import { BarChart3 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPanel from "./NotificationPanel";
 
 function Navbar() {
 
     const navigate = useNavigate();
+    const location = useLocation();
+
     const [menuOpen, setMenuOpen] = useState(false);
     const [notifOpen, setNotifOpen] = useState(false);
+
     const user = JSON.parse(localStorage.getItem("user"));
 
     const logout = () => {
@@ -21,30 +24,59 @@ function Navbar() {
         return name.split(" ").map(w => w[0]).join("").toUpperCase();
     };
 
+    const linkClass = (path) =>
+        `cursor-pointer text-sm font-medium transition ${location.pathname === path
+            ? "text-blue-600"
+            : "text-gray-600 hover:text-black"
+        }`;
+
     return (
         <div className="bg-white/80 backdrop-blur-md border-b 
-                flex items-center justify-between px-6 py-4 
-                sticky top-0 z-50">
+            flex items-center px-6 py-4 sticky top-0 z-50">
 
             {/* LEFT: Logo */}
-            <div className="flex items-center gap-3">
-
+            <div
+                onClick={() => navigate("/dashboard")}
+                className="flex items-center gap-3 cursor-pointer"
+            >
                 <div className="bg-blue-600 p-2 rounded-lg text-white shadow">
                     <BarChart3 size={18} />
                 </div>
 
                 <h1 className="text-lg font-semibold text-gray-800 tracking-tight">
-                    FinRisk Dashboard
+                    FinRisk
                 </h1>
-
             </div>
+
+            {/* SPACER */}
+            <div className="flex-1"></div>
 
             {/* RIGHT SECTION */}
             <div className="flex items-center gap-6">
 
+                {/* Nav Links */}
+                <div className="flex items-center gap-6">
+
+                    <span onClick={() => navigate("/dashboard")} className={linkClass("/dashboard")}>
+                        Home
+                    </span>
+
+                    <span onClick={() => navigate("/portfolio")} className={linkClass("/portfolio")}>
+                        Portfolio
+                    </span>
+
+                    <span onClick={() => navigate("/market")} className={linkClass("/market")}>
+                        Market
+                    </span>
+
+                    <span onClick={() => navigate("/about")} className={linkClass("/about")}>
+                        About
+                    </span>
+
+                </div>
+
                 {/* Notification */}
                 <div className="relative">
-
                     <div
                         onClick={() => setNotifOpen(!notifOpen)}
                         className="relative cursor-pointer"
@@ -54,27 +86,25 @@ function Navbar() {
                     </div>
 
                     {notifOpen && <NotificationPanel onClose={() => setNotifOpen(false)} />}
-
                 </div>
 
+                {/* Auth Section */}
                 {!user ? (
                     <button
                         onClick={() => navigate("/login")}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm 
-                                   hover:bg-blue-700 transition"
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
                     >
                         Login
                     </button>
                 ) : (
-
                     <div className="relative">
 
                         {/* Avatar */}
                         <div
                             onClick={() => setMenuOpen(!menuOpen)}
                             className="w-9 h-9 rounded-full bg-blue-600 text-white 
-                                       flex items-center justify-center font-semibold 
-                                       cursor-pointer hover:scale-105 transition"
+                            flex items-center justify-center font-semibold 
+                            cursor-pointer hover:scale-105 transition"
                         >
                             {getInitials(user.name)}
                         </div>

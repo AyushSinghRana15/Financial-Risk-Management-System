@@ -10,8 +10,10 @@ import uuid
 from passlib.context import CryptContext
 from business_risk_api import router as business_router
 from credit_risk_api import router as credit_router
-from market_risk_api import router as market_router
 from E_commerce_fraud_risk_api import router as fraud_router
+from market_risk_api import router as market_risk_router
+from routes.market import router as market_data_router
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -55,7 +57,8 @@ app.add_middleware(
 )
 
 app.include_router(credit_router)
-app.include_router(market_router)
+app.include_router(market_risk_router)
+app.include_router(market_data_router)
 
 app.include_router(fraud_router)
 app.include_router(business_router)

@@ -23,6 +23,9 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Verify from "./pages/Verify";
+
+import Market from "./pages/Market";
+import About from "./pages/About";
 /* Dashboard Layout */
 function DashboardLayout() {
   return (
@@ -37,7 +40,11 @@ function DashboardLayout() {
         <div style={{ padding: "30px", overflowY: "auto" }}>
           <Routes>
 
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/" element={<Dashboard />} />  // optional fallback
+            <Route path="/market" element={<Market />} />
+            <Route path="/about" element={<About />} />
+
             <Route path="/credit-risk" element={<CreditRisk />} />
             <Route path="/market-risk" element={<MarketRisk />} />
             <Route path="/risk-analytics" element={<RiskAnalytics />} />
