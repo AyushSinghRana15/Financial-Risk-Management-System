@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends
+from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -19,9 +20,20 @@ from portfolio import router as portfolio_router
 # Env
 from dotenv import load_dotenv
 load_dotenv()
+import os
+
+# Google OAuth
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 # AI Service
 from ai_service import get_ai_insights
+
+# Google Auth
+from google.oauth2 import id_token
+from google.auth.transport import requests
+
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 # ================= DB =================
 Base.metadata.create_all(bind=engine)
@@ -67,22 +79,47 @@ def root():
 # ================= GOOGLE AUTH =================
 @app.post("/auth/google")
 def google_auth(data: dict, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == data.get("email")).first()
+    credential = data.get("credential")
+    
+    if not credential:
+        return {"error": "No credential provided"}, 400
+    
+    try:
+        CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+        idinfo = id_token.verify_oauth2_token(credential, requests.Request(), CLIENT_ID)
+        
+        email = idinfo.get("email")
+        name = idinfo.get("name")
+        picture = idinfo.get("picture")
+        
+        print(f"Verified User: {email}")
+        
+    except ValueError:
+        return {"error": "Invalid token"}, 401
+    
+    user = db.query(User).filter(User.email == email).first()
 
     if not user:
         user = User(
-            name=data.get("name"),
-            email=data.get("email"),
+            name=name or email.split("@")[0],
+            email=email,
             password_hash="google_oauth",
             is_verified=True
         )
         db.add(user)
         db.commit()
         db.refresh(user)
+    else:
+        user.name = name or user.name
+        user.picture = picture
+        user.is_verified = True
+        db.commit()
+        db.refresh(user)
 
     return {
         "name": user.name,
-        "email": user.email
+        "email": user.email,
+        "picture": picture
     }
 
 # ================= PROFILE APIs =================
@@ -201,3 +238,111 @@ def ai_risk_alerts(data: dict):
         }
 
     return {"response": str(result)}
+
+
+# ================= NOTIFICATIONS =================
+@app.get("/notifications")
+def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    
+    notifications = []
+    notification_id = 1
+    
+    if not user:
+        return [
+            {
+                "id": 1,
+                "text": "Welcome to FinRisk! Start by adding assets to your portfolio.",
+                "type": "info",
+                "timestamp": datetime.now().isoformat(),
+                "read": False
+            }
+        ]
+    
+    # Fetch latest risk predictions
+    latest_credit = db.query(CreditPrediction).filter(
+        CreditPrediction.user_id == user.id
+    ).order_by(desc(CreditPrediction.id)).first()
+    
+    latest_market = db.query(MarketRiskData).filter(
+        MarketRiskData.user_id == user.id
+    ).order_by(desc(MarketRiskData.id)).first()
+    
+    # Generate risk alerts
+    if latest_credit and latest_credit.risk_score:
+        risk_score = latest_credit.risk_score * 100
+        if risk_score > 70:
+            notifications.append({
+                "id": notification_id,
+                "text": f"High Credit Risk Alert: Your risk score is {risk_score:.1f}%",
+                "type": "warning",
+                "timestamp": latest_credit.created_at.isoformat() if latest_credit.created_at else datetime.now().isoformat(),
+                "read": False
+            })
+            notification_id += 1
+        elif risk_score > 40:
+            notifications.append({
+                "id": notification_id,
+                "text": f"Moderate Credit Risk: Your risk score is {risk_score:.1f}%",
+                "type": "info",
+                "timestamp": latest_credit.created_at.isoformat() if latest_credit.created_at else datetime.now().isoformat(),
+                "read": False
+            })
+            notification_id += 1
+    
+    if latest_market and latest_market.risk_score:
+        risk_score = latest_market.risk_score * 100
+        if risk_score > 5:
+            notifications.append({
+                "id": notification_id,
+                "text": f"Market VaR Alert: Value at Risk exceeds {risk_score:.1f}%",
+                "type": "warning",
+                "timestamp": latest_market.created_at.isoformat() if latest_market.created_at else datetime.now().isoformat(),
+                "read": False
+            })
+            notification_id += 1
+        elif risk_score > 2:
+            notifications.append({
+                "id": notification_id,
+                "text": f"Elevated Market Risk: VaR at {risk_score:.1f}%",
+                "type": "info",
+                "timestamp": latest_market.created_at.isoformat() if latest_market.created_at else datetime.now().isoformat(),
+                "read": False
+            })
+            notification_id += 1
+    
+    # Get AI-powered advice notifications
+    portfolio_assets = db.query(Portfolio).filter(Portfolio.user_id == user.id).all()
+    if portfolio_assets:
+        portfolio_data = [
+            {"asset": a.asset_name, "type": a.asset_type, "qty": a.quantity, "price": a.current_price}
+            for a in portfolio_assets
+        ]
+        
+        try:
+            ai_result = get_ai_insights(portfolio_data)
+            if isinstance(ai_result, dict):
+                insights = ai_result.get("insights", [])[:2]
+                for insight in insights:
+                    notifications.append({
+                        "id": notification_id,
+                        "text": insight,
+                        "type": "success",
+                        "timestamp": datetime.now().isoformat(),
+                        "read": False
+                    })
+                    notification_id += 1
+        except Exception as e:
+            print(f"AI insights error: {e}")
+    
+    # If no notifications, add a default message
+    if len(notifications) == 0:
+        notifications.append({
+            "id": 1,
+            "text": "No risk alerts detected. Your portfolio looks stable!",
+            "type": "success",
+            "timestamp": datetime.now().isoformat(),
+            "read": False
+        })
+    
+    return notifications

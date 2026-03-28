@@ -11,7 +11,9 @@ import {
     XAxis,
     YAxis,
     Tooltip,
-    ResponsiveContainer
+    ResponsiveContainer,
+    AreaChart,
+    Area
 } from "recharts";
 
 export default function Dashboard() {
@@ -146,8 +148,8 @@ export default function Dashboard() {
                     <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused] will-change-transform min-w-max">
                         {[...kpiCards, ...kpiCards].map((card, index) => (
                             <Link to={card.link} key={index}>
-                                <div className={`w-[260px] flex-shrink-0 bg-white dark:bg-slate-800 p-5 rounded-xl shadow border-l-4 ${colorMap[card.color]} cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 hover:rotate-1`}>
-                                    <p className="text-gray-500 dark:text-gray-400 text-sm">{card.title}</p>
+                                <div className={`kpi-card kpi-card-glow-${card.color} w-[260px] flex-shrink-0 bg-white dark:bg-slate-800 p-5 rounded-xl shadow-md border-l-4 ${colorMap[card.color]} cursor-pointer transition-all duration-300 hover:shadow-2xl hover:scale-105`}>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">{card.title}</p>
                                     <h2 className="text-2xl font-bold mt-2 text-gray-800 dark:text-white">{card.value}</h2>
                                     <p className="text-sm mt-1 text-gray-600 dark:text-gray-400">{card.change}</p>
                                 </div>
@@ -190,11 +192,17 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
 
                 {/* Portfolio Allocation */}
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
                     <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Portfolio Allocation</h2>
 
                     <ResponsiveContainer width="100%" height={250}>
                         <PieChart>
+                            <defs>
+                                <linearGradient id="pieGradient" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stopColor="#3b82f6" />
+                                    <stop offset="100%" stopColor="#8b5cf6" />
+                                </linearGradient>
+                            </defs>
                             <Pie 
                                 data={portfolio.length > 0 
                                     ? portfolio.map(a => ({ name: a.asset_name, value: a.total_value }))
@@ -202,37 +210,67 @@ export default function Dashboard() {
                                 } 
                                 dataKey="value" 
                                 nameKey="name" 
-                                outerRadius={80} 
-                                label
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={90} 
+                                paddingAngle={3}
                             >
-                                {["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6"].map((c, i) => (
+                                {["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6", "#ec4899"].map((c, i) => (
                                     <Cell key={i} fill={c} />
                                 ))}
                             </Pie>
                             <Tooltip />
                         </PieChart>
                     </ResponsiveContainer>
+                    {portfolio.length > 0 && (
+                        <div className="text-center -mt-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Total Value</p>
+                            <p className="text-lg font-bold text-gray-800 dark:text-white">
+                                ₹ {portfolio.reduce((sum, a) => sum + (a.total_value || 0), 0).toLocaleString()}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Risk Trend */}
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
                     <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Risk Trend</h2>
 
                     <ResponsiveContainer width="100%" height={250}>
-                        <LineChart data={Array.from({ length: 7 }, (_, i) => ({
+                        <AreaChart data={Array.from({ length: 7 }, (_, i) => ({
                             day: `Day ${i + 1}`,
                             risk: (0.04 + (Math.random() * 0.01 - 0.005)) * 100
                         }))}>
-                            <XAxis dataKey="day" />
-                            <YAxis />
-                            <Tooltip />
-                            <Line type="monotone" dataKey="risk" stroke="#3b82f6" strokeWidth={3} dot={false} />
-                        </LineChart>
+                            <defs>
+                                <linearGradient id="riskGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                </linearGradient>
+                            </defs>
+                            <XAxis dataKey="day" stroke="#94a3b8" fontSize={12} />
+                            <YAxis stroke="#94a3b8" fontSize={12} />
+                            <Tooltip 
+                                contentStyle={{ 
+                                    backgroundColor: '#1e293b', 
+                                    border: 'none', 
+                                    borderRadius: '8px',
+                                    color: '#fff'
+                                }}
+                            />
+                            <Area 
+                                type="monotone" 
+                                dataKey="risk" 
+                                stroke="#3b82f6" 
+                                strokeWidth={2}
+                                fill="url(#riskGradient)" 
+                            />
+                        </AreaChart>
                     </ResponsiveContainer>
                 </div>
 
                 {/* AI Risk Alerts */}
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow hover:shadow-md transition">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md hover:shadow-lg transition">
                     <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Risk Alerts</h2>
 
                     {loading ? (
@@ -264,7 +302,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* AI Insights */}
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md">
                     <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">AI Insights</h2>
 
                     <p className="text-gray-700 dark:text-gray-300"><strong>Risk:</strong> High</p>

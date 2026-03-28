@@ -1,3 +1,88 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --bg-gradient-start: #f8fafc;
+  --bg-gradient-end: #e2e8f0;
+}
+
+.dark {
+  --bg-gradient-start: #0f172a;
+  --bg-gradient-end: #1e293b;
+}
+
+body {
+  background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  min-height: 100vh;
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-white/20 dark:border-slate-700/50;
+  }
+
+  .glass-border {
+    @apply border border-white/10 dark:border-slate-700/30;
+  }
+
+  .logo-theme {
+    @apply dark:brightness-0 dark:invert;
+    object-fit: contain;
+    height: 2rem;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .logo-theme-sm {
+    @apply dark:brightness-0 dark:invert;
+    object-fit: contain;
+    height: 1.75rem;
+    width: auto;
+    max-width: 100%;
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+.kpi-card {
+  @apply relative overflow-hidden;
+}
+
+.kpi-card::before {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+  background: radial-gradient(circle at 50% 0%, currentColor 0%, transparent 70%);
+}
+
+.kpi-card:hover::before {
+  @apply opacity-10;
+}
+
+.kpi-card-glow-blue::before {
+  @apply bg-blue-500;
+}
+
+.kpi-card-glow-purple::before {
+  @apply bg-purple-500;
+}
+
+.kpi-card-glow-red::before {
+  @apply bg-red-500;
+}
+
+.kpi-card-glow-green::before {
+  @apply bg-green-500;
+}

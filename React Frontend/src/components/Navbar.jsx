@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { FaBell } from "react-icons/fa";
-import { BarChart3 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { FaBell, FaChartLine } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPanel from "./NotificationPanel";
+
+const BASE_URL = "http://127.0.0.1:8000";
 
 function Navbar() {
 
@@ -11,8 +12,29 @@ function Navbar() {
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [notifOpen, setNotifOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const userEmail = user?.email || "";
+
+    useEffect(() => {
+        const fetchUnreadCount = async () => {
+            if (!userEmail) {
+                setUnreadCount(0);
+                return;
+            }
+            try {
+                const res = await fetch(`${BASE_URL}/notifications?email=${userEmail}`);
+                const data = await res.json();
+                const unread = data.filter(n => !n.read).length;
+                setUnreadCount(unread);
+            } catch (err) {
+                console.error("Error fetching unread count:", err);
+            }
+        };
+
+        fetchUnreadCount();
+    }, [userEmail, notifOpen]);
 
     const logout = () => {
         localStorage.removeItem("user");
@@ -26,8 +48,8 @@ function Navbar() {
 
     const linkClass = (path) =>
         `cursor-pointer text-sm font-medium transition ${location.pathname === path
-            ? "text-blue-400"
-            : "text-gray-400 hover:text-white dark:text-gray-400 dark:hover:text-white"
+            ? "text-blue-600 dark:text-blue-400"
+            : "text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
         }`;
 
     return (
@@ -36,15 +58,14 @@ function Navbar() {
             {/* LEFT: Logo */}
             <div
                 onClick={() => navigate("/dashboard")}
-                className="flex items-center gap-3 cursor-pointer"
+                className="flex items-center gap-3 cursor-pointer group"
             >
-                <div className="bg-blue-600 p-2 rounded-lg text-white shadow">
-                    <BarChart3 size={18} />
+                <div className="p-2 bg-blue-600 rounded-lg group-hover:bg-blue-700 transition">
+                    <FaChartLine className="text-white" size={20} />
                 </div>
-
-                <h1 className="text-lg font-semibold text-gray-800 dark:text-white tracking-tight">
+                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-blue-600 dark:from-white dark:to-blue-400">
                     FinRisk
-                </h1>
+                </span>
             </div>
 
             {/* SPACER */}
@@ -80,8 +101,10 @@ function Navbar() {
                         onClick={() => setNotifOpen(!notifOpen)}
                         className="relative cursor-pointer"
                     >
-                        <FaBell className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition" size={18} />
-                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        <FaBell className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition" size={18} />
+                        {unreadCount > 0 && (
+                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                        )}
                     </div>
 
                     {notifOpen && <NotificationPanel onClose={() => setNotifOpen(false)} />}
@@ -96,16 +119,29 @@ function Navbar() {
                         Login
                     </button>
                 ) : (
-                    <div className="relative">
+                    <div className="relative flex items-center gap-3">
+
+                        {/* First Name Label */}
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
+                            {user.name?.split(" ")[0]}
+                        </span>
 
                         {/* Avatar */}
                         <div
                             onClick={() => setMenuOpen(!menuOpen)}
                             className="w-9 h-9 rounded-full bg-blue-600 text-white 
                             flex items-center justify-center font-semibold 
-                            cursor-pointer hover:scale-105 transition"
+                            cursor-pointer hover:scale-105 transition overflow-hidden"
                         >
-                            {getInitials(user.name)}
+                            {user.picture ? (
+                                <img 
+                                    src={user.picture} 
+                                    alt={user.name} 
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                getInitials(user.name)
+                            )}
                         </div>
 
                         {/* Dropdown */}

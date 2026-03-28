@@ -84,15 +84,36 @@ function About() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
 
-            {/* Hero Section - Edge to Edge */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white rounded-b-2xl shadow-xl -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 -mt-4 sm:-mt-6 md:-mt-8 lg:-mt-10">
-                <div className="relative max-w-5xl mx-auto px-6 py-10 text-center">
-                    <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
+            {/* Hero Section - True Edge to Edge with Shine Animation */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white rounded-b-[3rem] shadow-2xl -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 -mt-4 sm:-mt-6 md:-mt-8 lg:-mt-10">
+                
+                {/* Shine Effect */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <div className="absolute top-0 left-0 w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine opacity-60"></div>
+                </div>
+
+                {/* Floating decorative orbs */}
+                <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-float"></div>
+                <div className="absolute bottom-10 right-20 w-40 h-40 bg-purple-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "1s" }}></div>
+
+                <div className="relative max-w-5xl mx-auto px-6 py-16 text-center">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-white mb-4">
                         FinRisk
                     </h1>
-                    <p className="text-sm text-blue-100 mt-2">
+                    <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto">
                         AI-Powered Financial Risk Management
                     </p>
+                    <div className="flex justify-center gap-4 mt-8">
+                        <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm">
+                            ML-Powered
+                        </div>
+                        <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm">
+                            Real-time Data
+                        </div>
+                        <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm">
+                            Risk Analytics
+                        </div>
+                    </div>
                 </div>
             </div>
 

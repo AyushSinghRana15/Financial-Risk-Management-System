@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -10,14 +9,10 @@ export default function Login() {
 
   const handleGoogleSuccess = async (res) => {
     try {
-      const user = jwtDecode(res.credential);
-
       const response = await axios.post(
         "http://127.0.0.1:8000/auth/google",
         {
-          name: user.name,
-          email: user.email,
-          picture: user.picture,
+          credential: res.credential,
         }
       );
 
@@ -55,7 +50,7 @@ export default function Login() {
         
         {/* Logo & Branding */}
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg shadow-blue-500/30">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg">
             <span className="text-4xl">🏦</span>
           </div>
           
@@ -63,9 +58,6 @@ export default function Login() {
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
               FinRisk
             </h1>
-            <p className="text-blue-200/80 text-sm mt-1">
-              AI-Powered Financial Risk Management
-            </p>
           </div>
         </div>
 
