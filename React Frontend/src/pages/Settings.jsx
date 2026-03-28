@@ -91,59 +91,34 @@ function Settings() {
                     <div className="text-center py-10">Loading...</div>
                 ) : (
                 <>
-                {/* Google Profile Card */}
-                {(userPicture || form.name || form.email) && (
+                {/* Google Profile Card - Read Only */}
+                {(userPicture || userName || userEmail) && (
                     <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-2xl shadow-lg text-white">
                         <div className="flex items-center gap-4">
                             {userPicture ? (
                                 <img 
                                     src={userPicture} 
                                     alt="Profile" 
-                                    className="w-16 h-16 rounded-full border-2 border-white shadow-md"
+                                    className="w-20 h-20 rounded-full border-4 border-white/30 shadow-xl"
                                 />
                             ) : (
-                                <div className="w-16 h-16 rounded-full bg-white/30 flex items-center justify-center text-2xl font-bold">
-                                    {form.name ? form.name.charAt(0).toUpperCase() : "?"}
+                                <div className="w-20 h-20 rounded-full bg-white/30 flex items-center justify-center text-3xl font-bold">
+                                    {userName ? userName.charAt(0).toUpperCase() : "?"}
                                 </div>
                             )}
                             <div>
-                                <h2 className="text-xl font-bold">{form.name || "User"}</h2>
-                                <p className="text-blue-100 text-sm">{form.email}</p>
-                                <span className="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-white/20 rounded-full text-xs">
-                                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                                <h2 className="text-2xl font-bold">{userName || "User"}</h2>
+                                <p className="text-blue-100">{userEmail}</p>
+                                <span className="inline-flex items-center gap-2 mt-3 px-3 py-1.5 bg-white/20 rounded-full text-sm">
+                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
                                     </svg>
-                                    Signed in with Google
+                                    Google Account
                                 </span>
                             </div>
                         </div>
                     </div>
                 )}
-
-                {/* Profile Info */}
-                <div className="bg-white p-6 rounded-2xl shadow border space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-700">
-                        Profile Info
-                    </h2>
-
-                    <input
-                        type="text"
-                        name="name"
-                        placeholder="Full Name"
-                        value={form.name}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        value={form.email}
-                        disabled
-                        className="w-full px-3 py-2 border rounded-lg bg-gray-50"
-                    />
-                </div>
 
                 {/* Risk Preference */}
                 <div className="bg-white p-6 rounded-2xl shadow border space-y-4">
