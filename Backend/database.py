@@ -1,9 +1,15 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
+from dotenv import load_dotenv #Adii DB
+
+
+load_dotenv() #Adii db
 
 # ✅ fallback to SQLite if env not set
 DATABASE_URL = os.environ.get("DATABASE_URL") or "sqlite:///./test.db"
+
+print("DB:", DATABASE_URL) #Adii db
 
 # ✅ handle sqlite separately
 if "sqlite" in DATABASE_URL:
