@@ -13,6 +13,7 @@ from liquidity_risk_api import router as liquidity_router
 from final_financial_api import router as financial_router
 from routes.market import router as market_data_router
 from E_commerce_fraud_risk_api import router as fraud_router
+from portfolio import router as portfolio_router
 
 # Env
 from dotenv import load_dotenv
@@ -26,6 +27,10 @@ Base.metadata.create_all(bind=engine)
 
 # ================= APP =================
 app = FastAPI()
+
+#portfolio_router = APIRouter(prefix="/portfolio", tags=["Portfolio"])
+
+app.include_router(portfolio_router)
 
 # ================= CORS =================
 app.add_middleware(

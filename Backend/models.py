@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, BigInteger, Boolean
+from sqlalchemy import Column, Integer, String, Float, DateTime, Text, BigInteger, Boolean,ForeignKey
 from sqlalchemy.sql import func
 from database import Base
 
@@ -22,13 +22,19 @@ class User(Base):
 
 # ================= PORTFOLIO =================
 class Portfolio(Base):
-    __tablename__ = "portfolios"
+    __tablename__ = "portfolio"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, nullable=True)
-    name = Column(String(100), nullable=False)
-    total_value = Column(Float, default=0.0)
-    currency = Column(String(10), default="INR")
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    asset_name = Column(String)
+    asset_type = Column(String)
+
+    quantity = Column(Float)
+    buy_price = Column(Float)
+    current_price = Column(Float)
+    total_value = Column(Float)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
