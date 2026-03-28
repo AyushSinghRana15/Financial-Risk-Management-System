@@ -39,24 +39,54 @@ export default function ECommerceFraudRisk() {
       transaction_month: Number(form.month)
     };
 
-    console.log("Sending data:", data); // 🔥 debug
+    console.log("Sending data:", data);
 
     try {
       const res = await predictFraudRisk(data);
-      console.log("Response:", res.data); // 🔥 debug
       setResult(res.data);
     } catch (error) {
-      console.error("Error:", error);
+      console.error(error);
     }
   };
 
+  // 🎨 Styles (Streamlit-like clean UI)
+  const inputStyle = {
+    width: "100%",
+    padding: "10px",
+    marginTop: "5px",
+    borderRadius: "6px",
+    border: "1px solid #ccc"
+  };
+
+  const containerStyle = {
+    maxWidth: "500px",
+    margin: "auto",
+    padding: "20px",
+    background: "#ffffff",
+    borderRadius: "10px",
+    boxShadow: "0 0 10px rgba(0,0,0,0.1)"
+  };
+
+  const buttonStyle = {
+    width: "100%",
+    padding: "12px",
+    marginTop: "10px",
+    background: "#2563eb",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: "bold"
+  };
+
   return (
-    <div style={{ maxWidth: "600px", margin: "auto", padding: "20px" }}>
+    <div style={containerStyle}>
+
       <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
         🛒 E-Commerce Fraud Detection
       </h2>
 
-      {/* FORM */}
+      {/* NUMBER INPUTS */}
       {[
         ["Transaction Amount", "amount"],
         ["Quantity", "quantity"],
@@ -67,35 +97,60 @@ export default function ECommerceFraudRisk() {
         ["Transaction Month", "month"]
       ].map(([label, name]) => (
         <div key={name} style={{ marginBottom: "15px" }}>
-          <label style={{ fontWeight: "bold" }}>{label}</label>
+          <label><b>{label}</b></label>
           <input
             type="number"
             name={name}
             value={form[name]}
             onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "8px",
-              borderRadius: "5px",
-              border: "1px solid #ccc"
-            }}
+            style={inputStyle}
           />
         </div>
       ))}
 
+      {/* DROPDOWNS */}
+
+      <div style={{ marginBottom: "15px" }}>
+        <label><b>Payment Method</b></label>
+        <select name="paymentMethod" value={form.paymentMethod} onChange={handleChange} style={inputStyle}>
+          <option>Credit Card</option>
+          <option>Debit Card</option>
+          <option>PayPal</option>
+          <option>Bank Transfer</option>
+        </select>
+      </div>
+
+      <div style={{ marginBottom: "15px" }}>
+        <label><b>Product Category</b></label>
+        <select name="productCategory" value={form.productCategory} onChange={handleChange} style={inputStyle}>
+          <option>Electronics</option>
+          <option>Clothing</option>
+          <option>Home</option>
+          <option>Beauty</option>
+        </select>
+      </div>
+
+      <div style={{ marginBottom: "15px" }}>
+        <label><b>Customer Location</b></label>
+        <select name="location" value={form.location} onChange={handleChange} style={inputStyle}>
+          <option>USA</option>
+          <option>UK</option>
+          <option>India</option>
+          <option>Germany</option>
+        </select>
+      </div>
+
+      <div style={{ marginBottom: "15px" }}>
+        <label><b>Device Used</b></label>
+        <select name="device" value={form.device} onChange={handleChange} style={inputStyle}>
+          <option>Mobile</option>
+          <option>Desktop</option>
+          <option>Tablet</option>
+        </select>
+      </div>
+
       {/* BUTTON */}
-      <button
-        onClick={handlePredict}
-        style={{
-          width: "100%",
-          padding: "10px",
-          background: "blue",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer"
-        }}
-      >
+      <button onClick={handlePredict} style={buttonStyle}>
         🔍 Predict Fraud
       </button>
 
@@ -107,22 +162,18 @@ export default function ECommerceFraudRisk() {
           borderRadius: "8px",
           backgroundColor: result.prediction === 1 ? "#ffe5e5" : "#e6ffe6"
         }}>
-
           <h3 style={{ color: result.prediction === 1 ? "red" : "green" }}>
             {result.label}
           </h3>
-
           <p>
             Fraud Probability:{" "}
             <strong>
-              {result.fraud_probability !== undefined
-                ? (result.fraud_probability * 100).toFixed(2)
-                : 0}%
+              {(result.fraud_probability * 100).toFixed(2)}%
             </strong>
           </p>
-
         </div>
       )}
+
     </div>
   );
 }

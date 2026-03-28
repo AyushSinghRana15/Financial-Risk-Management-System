@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 import {
     PieChart,
     Pie,
@@ -10,7 +13,58 @@ import {
     Tooltip,
     ResponsiveContainer
 } from "recharts";
+
 export default function Dashboard() {
+
+    // 🔥 AI Risk Alerts State
+    const [alerts, setAlerts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    // 🔥 Fetch AI Risk Alerts
+    useEffect(() => {
+        const fetchRiskAlerts = async () => {
+            try {
+                const portfolio = {
+                    Stocks: 40,
+                    Bonds: 20,
+                    Crypto: 20,
+                    Gold: 10,
+                    Oil: 10
+                };
+
+                const prompt = `
+                Analyze this portfolio and return ONLY short risk alerts:
+                ${JSON.stringify(portfolio)}
+
+                Rules:
+                - Max 3 alerts
+                - Very short (1 line each)
+                - No explanation
+                `;
+
+                const res = await axios.post("http://localhost:8000/ai-risk-alerts", {
+                    prompt
+                });
+
+                const text = res.data.response || "";
+
+                const parsedAlerts = text
+                    .split("\n")
+                    .map(a => a.trim())
+                    .filter(a => a.length > 0);
+
+                setAlerts(parsedAlerts);
+
+            } catch (err) {
+                console.error(err);
+                setAlerts(["Failed to load AI risk alerts"]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRiskAlerts();
+    }, []);
 
     const kpiCards = [
         {
@@ -43,7 +97,6 @@ export default function Dashboard() {
         }
     ];
 
-    // ✅ FIX: Tailwind dynamic color mapping
     const colorMap = {
         blue: "border-blue-500",
         purple: "border-purple-500",
@@ -59,276 +112,144 @@ export default function Dashboard() {
                 Financial Risk Management Dashboard
             </h1>
 
-            {/* 🔥 KPI SCROLL SECTION (FIXED) */}
+            {/* KPI SCROLL */}
             <div className="relative mb-10 overflow-hidden">
-
-                {/* ✅ FIX: give proper height */}
                 <div className="w-full h-[140px] overflow-hidden relative">
-
                     <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused]">
-
                         {[...kpiCards, ...kpiCards].map((card, index) => (
                             <Link to={card.link} key={index}>
-                                <div
-                                    className={`w-[260px] flex-shrink-0 bg-white p-5 rounded-xl shadow 
-                        border-l-4 ${colorMap[card.color]} cursor-pointer
-                        transition-all duration-300
-                        hover:shadow-xl hover:scale-105 hover:rotate-1`}
-                                >
+                                <div className={`w-[260px] flex-shrink-0 bg-white p-5 rounded-xl shadow border-l-4 ${colorMap[card.color]} cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 hover:rotate-1`}>
                                     <p className="text-gray-500 text-sm">{card.title}</p>
                                     <h2 className="text-2xl font-bold mt-2">{card.value}</h2>
                                     <p className="text-sm mt-1 text-gray-600">{card.change}</p>
                                 </div>
                             </Link>
                         ))}
-
                     </div>
-
                 </div>
-
             </div>
-            {/* 🔥 MODULE CARDS */}
+
+            {/* MODULE CARDS */}
             <div className="relative mt-10 overflow-hidden">
-
                 <div className="w-full h-[220px] overflow-hidden relative">
-
                     <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused]">
-
                         {[1, 2].map((_, i) => (
                             <div key={i} className="flex gap-6">
 
-                                {/* Credit Risk */}
-                                <Link to="/credit-risk">
-                                    <div className="w-[320px] flex-shrink-0 bg-white p-6 rounded-xl shadow-md 
-                                        transition-all duration-300 
-                                        hover:shadow-2xl hover:-translate-y-2 hover:rotate-1 
-                                        border-l-4 border-blue-500 cursor-pointer">
-                                        <h2 className="text-lg font-semibold mb-2">Credit Risk</h2>
-                                        <p className="text-gray-600">Default probability analysis</p>
-                                    </div>
-                                </Link>
-
-                                {/* Market Risk */}
-                                <Link to="/market-risk">
-                                    <div className="w-[320px] flex-shrink-0 bg-white p-6 rounded-xl shadow-md 
-                                        transition-all duration-300 
-                                        hover:shadow-2xl hover:-translate-y-2 hover:-rotate-1 
-                                        border-l-4 border-purple-500 cursor-pointer">
-                                        <h2 className="text-lg font-semibold mb-2">Market Risk</h2>
-                                        <p className="text-gray-600">Value at Risk estimation</p>
-                                    </div>
-                                </Link>
-
-                                {/* Business Risk */}
-                                <Link to="/business-risk">
-                                    <div className="w-[320px] flex-shrink-0 bg-white p-6 rounded-xl shadow-md 
-                                        transition-all duration-300 
-                                        hover:shadow-2xl hover:-translate-y-2 hover:rotate-1 
-                                        border-l-4 border-yellow-500 cursor-pointer">
-                                        <h2 className="text-lg font-semibold mb-2">Business Risk</h2>
-                                        <p className="text-gray-600">Strategic & revenue risks</p>
-                                    </div>
-                                </Link>
-
-                                {/* Operational Risk */}
-                                <Link to="/operational-risk">
-                                    <div className="w-[320px] flex-shrink-0 bg-white p-6 rounded-xl shadow-md 
-                                        transition-all duration-300 
-                                        hover:shadow-2xl hover:-translate-y-2 hover:-rotate-1 
-                                        border-l-4 border-indigo-500 cursor-pointer">
-                                        <h2 className="text-lg font-semibold mb-2">Operational Risk</h2>
-                                        <p className="text-gray-600">Process & system failures</p>
-                                    </div>
-                                </Link>
-
-                                {/* Financial Risk */}
-                                <Link to="/financial-risk">
-                                    <div className="w-[320px] flex-shrink-0 bg-white p-6 rounded-xl shadow-md 
-                                        transition-all duration-300 
-                                        hover:shadow-2xl hover:-translate-y-2 hover:rotate-1 
-                                        border-l-4 border-red-500 cursor-pointer">
-                                        <h2 className="text-lg font-semibold mb-2">Financial Risk</h2>
-                                        <p className="text-gray-600">Capital & leverage risks</p>
-                                    </div>
-                                </Link>
-
-                                {/* Liquidity Risk */}
-                                <Link to="/liquidity-risk">
-                                    <div className="w-[320px] flex-shrink-0 bg-white p-6 rounded-xl shadow-md 
-                                        transition-all duration-300 
-                                        hover:shadow-2xl hover:-translate-y-2 hover:-rotate-1 
-                                        border-l-4 border-teal-500 cursor-pointer">
-                                        <h2 className="text-lg font-semibold mb-2">Liquidity Risk</h2>
-                                        <p className="text-gray-600">Cash flow & funding risks</p>
-                                    </div>
-                                </Link>
+                                {[
+                                    { name: "Credit Risk", link: "/credit-risk", color: "blue", desc: "Default probability analysis" },
+                                    { name: "Market Risk", link: "/market-risk", color: "purple", desc: "Value at Risk estimation" },
+                                    { name: "Business Risk", link: "/business-risk", color: "yellow", desc: "Strategic & revenue risks" },
+                                    { name: "Operational Risk", link: "/operational-risk", color: "indigo", desc: "Process & system failures" },
+                                    { name: "Financial Risk", link: "/financial-risk", color: "red", desc: "Capital & leverage risks" },
+                                    { name: "Liquidity Risk", link: "/liquidity-risk", color: "teal", desc: "Cash flow & funding risks" }
+                                ].map((mod, idx) => (
+                                    <Link to={mod.link} key={idx}>
+                                        <div className={`w-[320px] flex-shrink-0 bg-white p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border-l-4 border-${mod.color}-500 cursor-pointer`}>
+                                            <h2 className="text-lg font-semibold mb-2">{mod.name}</h2>
+                                            <p className="text-gray-600">{mod.desc}</p>
+                                        </div>
+                                    </Link>
+                                ))}
 
                             </div>
                         ))}
-
                     </div>
-
                 </div>
-
             </div>
-            {/* 🔥 INSIGHTS & ANALYTICS */}
+
+            {/* INSIGHTS */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
 
-                {/* 📊 Portfolio Allocation */}
+                {/* Portfolio Allocation */}
                 <div className="bg-white p-6 rounded-xl shadow">
                     <h2 className="text-lg font-semibold mb-4">Portfolio Allocation</h2>
 
-                    {(() => {
-                        const portfolio = {
-                            Stocks: 40,
-                            Bonds: 20,
-                            Crypto: 20,
-                            Gold: 10,
-                            Oil: 10
-                        };
-
-                        const pieData = Object.keys(portfolio).map((key) => ({
-                            name: key,
-                            value: portfolio[key]
-                        }));
-
-                        const colors = ["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6"];
-
-                        return (
-                            <ResponsiveContainer width="100%" height={250}>
-                                <PieChart>
-                                    <Pie
-                                        data={pieData}
-                                        dataKey="value"
-                                        nameKey="name"
-                                        outerRadius={80}
-                                        label
-                                    >
-                                        {pieData.map((entry, index) => (
-                                            <Cell key={index} fill={colors[index % colors.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        );
-                    })()}
+                    <ResponsiveContainer width="100%" height={250}>
+                        <PieChart>
+                            <Pie data={[
+                                { name: "Stocks", value: 40 },
+                                { name: "Bonds", value: 20 },
+                                { name: "Crypto", value: 20 },
+                                { name: "Gold", value: 10 },
+                                { name: "Oil", value: 10 }
+                            ]} dataKey="value" nameKey="name" outerRadius={80} label>
+                                {["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6"].map((c, i) => (
+                                    <Cell key={i} fill={c} />
+                                ))}
+                            </Pie>
+                            <Tooltip />
+                        </PieChart>
+                    </ResponsiveContainer>
                 </div>
 
-                {/* 📈 Risk Trend */}
+                {/* Risk Trend */}
                 <div className="bg-white p-6 rounded-xl shadow">
                     <h2 className="text-lg font-semibold mb-4">Risk Trend</h2>
 
-                    {(() => {
-                        const baseRisk = 0.04; // replace later with API VaR
-
-                        const riskData = Array.from({ length: 7 }, (_, i) => ({
+                    <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={Array.from({ length: 7 }, (_, i) => ({
                             day: `Day ${i + 1}`,
-                            risk: (baseRisk + (Math.random() * 0.01 - 0.005)) * 100
-                        }));
-
-                        return (
-                            <ResponsiveContainer width="100%" height={250}>
-                                <LineChart data={riskData}>
-                                    <XAxis dataKey="day" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Line
-                                        type="monotone"
-                                        dataKey="risk"
-                                        stroke="#3b82f6"
-                                        strokeWidth={3}
-                                        dot={false}
-                                    />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        );
-                    })()}
+                            risk: (0.04 + (Math.random() * 0.01 - 0.005)) * 100
+                        }))}>
+                            <XAxis dataKey="day" />
+                            <YAxis />
+                            <Tooltip />
+                            <Line type="monotone" dataKey="risk" stroke="#3b82f6" strokeWidth={3} dot={false} />
+                        </LineChart>
+                    </ResponsiveContainer>
                 </div>
 
-                {/* ⚠️ Risk Alerts */}
-                <div className="bg-white p-6 rounded-xl shadow">
+                {/* AI Risk Alerts */}
+                <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition">
                     <h2 className="text-lg font-semibold mb-4">Risk Alerts</h2>
 
-                    {(() => {
-                        const portfolio = {
-                            Stocks: 40,
-                            Bonds: 20,
-                            Crypto: 20,
-                            Gold: 10,
-                            Oil: 10
-                        };
-
-                        const alerts = [];
-
-                        if (portfolio.Crypto > 15) {
-                            alerts.push({ text: "High crypto exposure", color: "text-red-500" });
-                        }
-
-                        if (portfolio.Stocks > 50) {
-                            alerts.push({ text: "High stock concentration", color: "text-yellow-500" });
-                        }
-
-                        if (portfolio.Bonds >= 20) {
-                            alerts.push({ text: "Portfolio has stability buffer", color: "text-green-500" });
-                        }
-
-                        if (alerts.length === 0) {
-                            alerts.push({ text: "Portfolio looks balanced", color: "text-green-500" });
-                        }
-
-                        return (
-                            <ul className="space-y-3 text-gray-600">
-                                {alerts.map((alert, index) => (
-                                    <li key={index} className={alert.color}>
-                                        ⚠️ {alert.text}
+                    {loading ? (
+                        <p className="text-gray-500 text-sm">Analyzing portfolio risk...</p>
+                    ) : (
+                        <ul className="space-y-3 text-sm">
+                            {alerts.length > 0 ? (
+                                alerts.map((alert, index) => (
+                                    <li
+                                        key={index}
+                                        className={
+                                            alert.toLowerCase().includes("high")
+                                                ? "text-red-500"
+                                                : alert.toLowerCase().includes("consider")
+                                                    ? "text-yellow-500"
+                                                    : "text-green-500"
+                                        }
+                                    >
+                                        ⚠️ {alert}
                                     </li>
-                                ))}
-                            </ul>
-                        );
-                    })()}
+                                ))
+                            ) : (
+                                <li className="text-green-500">
+                                    ✅ No major risks detected
+                                </li>
+                            )}
+                        </ul>
+                    )}
                 </div>
 
-                {/* 🧠 AI Insights */}
-                {/* 🧠 AI Insights */}
+                {/* AI Insights */}
                 <div className="bg-white p-6 rounded-xl shadow">
                     <h2 className="text-lg font-semibold mb-4">AI Insights</h2>
 
-                    {(() => {
-                        const aiData = {
-                            risk: "High",
-                            insights: [
-                                "Portfolio is concentrated in crypto and equities",
-                                "High volatility due to BTC exposure",
-                                "Low diversification increases risk"
-                            ],
-                            suggestions: [
-                                "Diversify into bonds and gold",
-                                "Reduce crypto allocation"
-                            ]
-                        };
+                    <p><strong>Risk:</strong> High</p>
 
-                        return (
-                            <>
-                                <p><strong>Risk:</strong> {aiData.risk}</p>
+                    <ul className="list-disc ml-5 mt-2 text-gray-600">
+                        <li>Portfolio is concentrated in crypto and equities</li>
+                        <li>High volatility due to BTC exposure</li>
+                        <li>Low diversification increases risk</li>
+                    </ul>
 
-                                <ul className="list-disc ml-5 mt-2 text-gray-600">
-                                    {aiData.insights.slice(0, 3).map((i, idx) => (
-                                        <li key={idx}>{i}</li>
-                                    ))}
-                                </ul>
-
-                                <p className="mt-3 font-medium">Suggestions:</p>
-                                <ul className="list-disc ml-5 text-gray-600">
-                                    {aiData.suggestions.slice(0, 2).map((s, idx) => (
-                                        <li key={idx}>{s}</li>
-                                    ))}
-                                </ul>
-                            </>
-                        );
-                    })()}
+                    <p className="mt-3 font-medium">Suggestions:</p>
+                    <ul className="list-disc ml-5 text-gray-600">
+                        <li>Diversify into bonds and gold</li>
+                        <li>Reduce crypto allocation</li>
+                    </ul>
                 </div>
-
 
             </div>
 
