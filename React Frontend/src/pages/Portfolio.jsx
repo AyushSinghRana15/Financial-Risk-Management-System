@@ -251,79 +251,86 @@ function Portfolio() {
             )}
 
             {/* Premium Add Asset Form */}
-            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <div className="flex items-center gap-2 mb-4">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <span className="text-blue-600 text-xl font-bold">+</span>
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
                     </div>
-                    <h2 className="text-lg font-semibold text-gray-800">Add New Asset</h2>
+                    <h2 className="text-xl font-bold text-gray-800">Add New Asset</h2>
                 </div>
                 
                 <form onSubmit={addAsset} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Asset Name</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div className="lg:col-span-1">
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Asset Name</label>
                             <input 
                                 name="asset_name" 
-                                placeholder="e.g. AAPL, BTC" 
+                                placeholder="e.g. AAPL" 
                                 value={form.asset_name} 
                                 onChange={handleChange} 
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                                 required
                             />
                         </div>
                         
-                        <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Asset Type</label>
-                            <select 
-                                name="asset_type" 
-                                value={form.asset_type} 
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white"
-                            >
-                                <option value="Stock">Stock</option>
-                                <option value="Crypto">Crypto</option>
-                                <option value="ETF">ETF</option>
-                                <option value="Commodity">Commodity</option>
-                                <option value="Bond">Bond</option>
-                            </select>
+                        <div className="lg:col-span-1">
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Asset Type</label>
+                            <div className="relative">
+                                <select 
+                                    name="asset_type" 
+                                    value={form.asset_type} 
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm appearance-none cursor-pointer pr-10"
+                                >
+                                    <option value="Stock">Stock</option>
+                                    <option value="Crypto">Crypto</option>
+                                    <option value="ETF">ETF</option>
+                                    <option value="Commodity">Commodity</option>
+                                    <option value="Bond">Bond</option>
+                                </select>
+                                <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
                         </div>
                         
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Quantity</label>
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Quantity</label>
                             <input 
                                 type="number" 
                                 name="quantity" 
                                 placeholder="0" 
                                 value={form.quantity} 
                                 onChange={handleChange} 
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                                 required
                             />
                         </div>
                         
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Buy Price</label>
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Buy Price</label>
                             <input 
                                 type="number" 
                                 name="buy_price" 
                                 placeholder="0.00" 
                                 value={form.buy_price} 
                                 onChange={handleChange} 
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                                 required
                             />
                         </div>
                         
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1">Current Price</label>
+                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Current Price</label>
                             <input 
                                 type="number" 
                                 name="current_price" 
                                 placeholder="0.00" 
                                 value={form.current_price} 
                                 onChange={handleChange} 
-                                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
                                 required
                             />
                         </div>
@@ -331,7 +338,7 @@ function Portfolio() {
 
                     <button 
                         type="submit"
-                        className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transform hover:scale-[1.02] transition-all shadow-md"
+                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transform hover:scale-[1.01] transition-all shadow-lg shadow-blue-500/25"
                     >
                         Add Asset to Portfolio
                     </button>
