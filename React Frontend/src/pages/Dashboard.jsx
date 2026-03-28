@@ -143,7 +143,7 @@ export default function Dashboard() {
             {/* KPI SCROLL */}
             <div className="relative mb-10 overflow-hidden">
                 <div className="w-full h-[140px] overflow-hidden relative">
-                    <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused] will-change-transform">
+                    <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused] will-change-transform min-w-max">
                         {[...kpiCards, ...kpiCards].map((card, index) => (
                             <Link to={card.link} key={index}>
                                 <div className={`w-[260px] flex-shrink-0 bg-white p-5 rounded-xl shadow border-l-4 ${colorMap[card.color]} cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 hover:rotate-1`}>
@@ -160,7 +160,7 @@ export default function Dashboard() {
             {/* MODULE CARDS */}
             <div className="relative mt-10 overflow-hidden">
                 <div className="w-full h-[220px] overflow-hidden relative">
-                    <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused]">
+                    <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused] min-w-max">
                         {[1, 2].map((_, i) => (
                             <div key={i} className="flex gap-6">
 

@@ -24,7 +24,6 @@ function MarketRisk() {
     const [riskLevel, setRiskLevel] = useState("");
     const [confidence, setConfidence] = useState("95%");
     const [rollingData, setRollingData] = useState([]);
-    const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
     const [fetchingLive, setFetchingLive] = useState(false);
     const [openSection, setOpenSection] = useState("equities");
@@ -69,13 +68,7 @@ function MarketRisk() {
                 res.data.features.forEach(f => init[f] = 0);
                 setInputs(init);
             });
-        
-        if (userEmail) {
-            axios.get(`http://localhost:8000/market_risk_history?email=${encodeURIComponent(userEmail)}`)
-                .then(res => setHistory(res.data.history || []))
-                .catch(console.error);
-        }
-    }, [userEmail]);
+    }, []);
 
     // 🔥 FIXED CLEAN NAME FUNCTION
     const cleanFeatureName = (feature) => {
@@ -183,12 +176,6 @@ function MarketRisk() {
 
             setRollingData(series);
             window.dispatchEvent(new Event("refreshDashboard"));
-
-            if (userEmail) {
-                axios.get(`http://localhost:8000/market_risk_history?email=${encodeURIComponent(userEmail)}`)
-                    .then(res => setHistory(res.data.history || []))
-                    .catch(console.error);
-            }
 
         } catch (err) {
             console.error(err);

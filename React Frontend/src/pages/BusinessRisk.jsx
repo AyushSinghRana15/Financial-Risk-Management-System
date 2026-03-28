@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState } from "react";
 
 const API = "http://localhost:8000";
 
@@ -20,16 +19,7 @@ export default function BusinessRisk() {
   const userEmail = localStorage.getItem('user') || "";
   const [values, setValues] = useState({});
   const [result, setResult] = useState(null);
-  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (userEmail) {
-      axios.get(`${API}/business_risk_history?email=${encodeURIComponent(userEmail)}`)
-        .then(res => setHistory(res.data.history || []))
-        .catch(console.error);
-    }
-  }, [userEmail, result]);
 
   const handleChange = (key, value) => {
     setValues((prev) => ({ ...prev, [key]: value }));

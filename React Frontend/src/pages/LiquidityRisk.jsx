@@ -20,7 +20,6 @@ export default function LiquidityRisk() {
     useEffect(() => {
         axios.get(`${API_URL}/features`)
             .then(res => {
-                console.log("API RESPONSE:", res.data);
                 setFeatures(res.data.features);
                 setLabels(res.data.labels);
 
@@ -28,10 +27,8 @@ export default function LiquidityRisk() {
                 res.data.features.forEach(f => init[f] = 0);
                 setFormData(init);
             })
-            .catch(err => {
-            console.error("Feature API Error:", err);
-            alert("Backend not connected");
-              
+            .catch(() => {
+                alert("Backend not connected");
           });
         
         if (userEmail) {
@@ -63,8 +60,6 @@ export default function LiquidityRisk() {
             `${API_URL}/predict`,
             { ...formData, email: userEmail }
         );
-
-        console.log("Prediction Response:", res.data);
 
         setResult(res.data);
         window.dispatchEvent(new Event("refreshDashboard"));

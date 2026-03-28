@@ -51,8 +51,6 @@ export default function ECommerceFraudRisk() {
       transaction_month: Number(form.month)
     };
 
-    console.log("Sending data:", data);
-
     try {
       const res = await axios.post("http://localhost:8000/predict_fraud", data);
       setResult(res.data);
