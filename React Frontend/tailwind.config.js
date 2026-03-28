@@ -1,6 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
 
+  darkMode: "class", // ✅ ADD THIS LINE
+
   content: [
     "./index.html",
     "./src/**/*.{js,jsx,ts,tsx}",
@@ -14,7 +16,7 @@ export default {
       keyframes: {
         scroll: {
           "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-100%)" }, // ✅ FIXED
+          "100%": { transform: "translateX(-100%)" },
         },
       },
     },
