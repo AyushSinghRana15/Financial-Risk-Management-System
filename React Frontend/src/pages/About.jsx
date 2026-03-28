@@ -89,33 +89,33 @@ function About() {
                 {/* Dot pattern overlay */}
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
                 
-                {/* Glow orbs */}
-                <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-                <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
+                {/* Floating Glow orbs */}
+                <div className="absolute -top-16 -right-16 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-float"></div>
+                <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "-3s" }}></div>
                 
                 {/* Shining diagonal animation */}
                 <div className="absolute inset-0 overflow-hidden">
                     <div className="absolute top-0 left-0 w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine pointer-events-none"></div>
                 </div>
                 
-                <div className="relative max-w-5xl mx-auto px-6 py-24 text-center">
-                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
+                <div className="relative max-w-5xl mx-auto px-6 py-16 text-center">
+                    <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                         <span className="text-sm font-medium">Powered by AI & Machine Learning</span>
                     </div>
                     
-                    <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
+                    <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
                         FinRisk
                     </h1>
                     
-                    <p className="text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-base md:text-lg text-blue-100 max-w-2xl mx-auto leading-relaxed">
                         AI-Powered Financial Risk Management System that transforms complex analytics 
                         into actionable insights for smarter investment decisions.
                     </p>
                 </div>
             </div>
 
-            <div className="max-w-5xl mx-auto px-6 -mt-16 pb-12 space-y-16">
+            <div className="max-w-5xl mx-auto px-6 -mt-8 pb-12 space-y-16">
 
                 {/* Mission */}
                 <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
