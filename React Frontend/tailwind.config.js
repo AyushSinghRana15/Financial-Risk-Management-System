@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
 
-  darkMode: "class", // ✅ ADD THIS LINE
+  darkMode: "class",
 
   content: [
     "./index.html",
@@ -12,21 +12,11 @@ export default {
     extend: {
       animation: {
         scroll: "scroll 25s linear infinite",
-        shine: "shine 8s infinite linear",
-        float: "float 6s ease-in-out infinite",
       },
       keyframes: {
         scroll: {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
-        },
-        shine: {
-          "0%": { transform: "translateX(-200%) rotate(45deg)" },
-          "100%": { transform: "translateX(200%) rotate(45deg)" },
-        },
-        float: {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-15px)" },
         },
       },
     },
