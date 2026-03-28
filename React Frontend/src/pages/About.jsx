@@ -85,12 +85,12 @@ function About() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
 
             {/* Hero Section */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white">
+            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white rounded-b-[3rem] shadow-xl">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-30"></div>
                 <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
                 <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"></div>
                 
-                <div className="relative max-w-5xl mx-auto px-6 py-20 text-center">
+                <div className="relative max-w-5xl mx-auto px-6 py-24 text-center">
                     <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
                         <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                         <span className="text-sm font-medium">Powered by AI & Machine Learning</span>
@@ -107,7 +107,7 @@ function About() {
                 </div>
             </div>
 
-            <div className="max-w-5xl mx-auto px-6 py-12 space-y-16">
+            <div className="max-w-5xl mx-auto px-6 -mt-16 pb-12 space-y-16">
 
                 {/* Mission */}
                 <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
