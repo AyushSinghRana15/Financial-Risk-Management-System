@@ -12,7 +12,7 @@ function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [notifOpen, setNotifOpen] = useState(false);
 
-    const user = JSON.parse(localStorage.getItem("user"));
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
 
     const logout = () => {
         localStorage.removeItem("user");
@@ -26,13 +26,12 @@ function Navbar() {
 
     const linkClass = (path) =>
         `cursor-pointer text-sm font-medium transition ${location.pathname === path
-            ? "text-blue-600"
-            : "text-gray-600 hover:text-black"
+            ? "text-blue-400"
+            : "text-gray-400 hover:text-white dark:text-gray-400 dark:hover:text-white"
         }`;
 
     return (
-        <div className="bg-white/80 backdrop-blur-md border-b 
-            flex items-center px-6 py-4 sticky top-0 z-50">
+        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b dark:border-slate-700 flex items-center px-6 py-4 sticky top-0 z-50">
 
             {/* LEFT: Logo */}
             <div
@@ -43,7 +42,7 @@ function Navbar() {
                     <BarChart3 size={18} />
                 </div>
 
-                <h1 className="text-lg font-semibold text-gray-800 tracking-tight">
+                <h1 className="text-lg font-semibold text-gray-800 dark:text-white tracking-tight">
                     FinRisk
                 </h1>
             </div>
@@ -81,7 +80,7 @@ function Navbar() {
                         onClick={() => setNotifOpen(!notifOpen)}
                         className="relative cursor-pointer"
                     >
-                        <FaBell className="text-gray-600 hover:text-black transition" size={18} />
+                        <FaBell className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition" size={18} />
                         <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     </div>
 
@@ -89,7 +88,7 @@ function Navbar() {
                 </div>
 
                 {/* Auth Section */}
-                {!user ? (
+                {!user || !user.name ? (
                     <button
                         onClick={() => navigate("/login")}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
@@ -111,11 +110,11 @@ function Navbar() {
 
                         {/* Dropdown */}
                         {menuOpen && (
-                            <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-lg border overflow-hidden">
+                            <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-lg border dark:border-slate-700 overflow-hidden">
 
-                                <div className="p-4 border-b">
-                                    <p className="font-semibold text-gray-800">{user.name}</p>
-                                    <p className="text-sm text-gray-500">{user.email}</p>
+                                <div className="p-4 border-b dark:border-slate-700">
+                                    <p className="font-semibold text-gray-800 dark:text-white">{user.name}</p>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
                                 </div>
 
                                 <div className="py-2">
@@ -125,7 +124,7 @@ function Navbar() {
                                             navigate("/profile");
                                             setMenuOpen(false);
                                         }}
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                        className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200"
                                     >
                                         Profile
                                     </div>
@@ -135,14 +134,14 @@ function Navbar() {
                                             navigate("/settings");
                                             setMenuOpen(false);
                                         }}
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                        className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200"
                                     >
                                         Settings
                                     </div>
 
                                     <div
                                         onClick={logout}
-                                        className="px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer text-sm"
+                                        className="px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer text-sm"
                                     >
                                         Logout
                                     </div>

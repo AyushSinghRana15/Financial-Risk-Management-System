@@ -33,15 +33,19 @@ function Market() {
         return "Indices";
     };
 
-    if (loading) return <div className="p-6">Loading market data...</div>;
+    if (loading) return (
+        <div className="p-6 text-gray-500 dark:text-gray-400">
+            Loading market data...
+        </div>
+    );
 
     return (
-        <div className="p-6 space-y-8">
+        <div className="p-6 space-y-8 bg-gray-50 dark:bg-slate-900 min-h-screen">
 
             {/* Header */}
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold">Market Overview</h1>
-                <p className="text-sm text-gray-500">
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Market Overview</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                     Last updated: {new Date().toLocaleTimeString()}
                 </p>
             </div>
@@ -50,7 +54,7 @@ function Market() {
             {["Indices", "Crypto", "Commodities"].map(category => (
 
                 <div key={category}>
-                    <h2 className="text-lg font-semibold mb-3 text-gray-700">
+                    <h2 className="text-lg font-semibold mb-3 text-gray-700 dark:text-gray-300">
                         {category}
                     </h2>
 
@@ -65,21 +69,21 @@ function Market() {
                                 return (
                                     <div
                                         key={name}
-                                        className="bg-white p-5 rounded-xl shadow hover:shadow-md transition"
+                                        className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow hover:shadow-md transition"
                                     >
 
-                                        <h3 className="text-gray-500 text-sm">{name}</h3>
+                                        <h3 className="text-gray-500 dark:text-gray-400 text-sm">{name}</h3>
 
-                                        <p className="text-2xl font-bold mt-1">
+                                        <p className="text-2xl font-bold mt-1 text-gray-800 dark:text-white">
                                             {formatPrice(name, item.price)}
                                         </p>
 
-                                        <p className={`mt-1 text-sm font-medium flex items-center gap-1 ${isUp ? "text-green-600" : "text-red-600"
+                                        <p className={`mt-1 text-sm font-medium flex items-center gap-1 ${isUp ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                                             }`}>
                                             {isUp ? "▲" : "▼"} {item.change}%
                                         </p>
 
-                                        <p className="text-xs text-gray-400 mt-1">
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                                             {isUp ? "Market up" : "Market down"}
                                         </p>
 

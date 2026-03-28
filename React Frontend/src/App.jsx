@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
 import ECommerceFraudRisk from "./pages/ECommerceFraudRisk";
 
 import Navbar from "./components/Navbar";
@@ -28,7 +29,7 @@ import About from "./pages/About";
 /* Dashboard Layout */
 function DashboardLayout() {
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 dark:bg-slate-900 transition-colors duration-300">
 
       <Sidebar />
 
@@ -69,6 +70,15 @@ function DashboardLayout() {
 }
 
 function App() {
+  useEffect(() => {
+    const theme = localStorage.getItem("theme");
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

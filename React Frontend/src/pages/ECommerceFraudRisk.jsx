@@ -60,152 +60,148 @@ export default function ECommerceFraudRisk() {
     }
   };
 
-  // 🎨 Styles (Streamlit-like clean UI)
-  const inputStyle = {
-    width: "100%",
-    padding: "10px",
-    marginTop: "5px",
-    borderRadius: "6px",
-    border: "1px solid #ccc"
-  };
-
-  const containerStyle = {
-    maxWidth: "500px",
-    margin: "auto",
-    padding: "20px",
-    background: "#ffffff",
-    borderRadius: "10px",
-    boxShadow: "0 0 10px rgba(0,0,0,0.1)"
-  };
-
-  const buttonStyle = {
-    width: "100%",
-    padding: "12px",
-    marginTop: "10px",
-    background: "#2563eb",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontWeight: "bold"
-  };
-
   return (
-    <div style={containerStyle}>
+    <div className="p-6 bg-gray-100 dark:bg-slate-900 min-h-screen">
+      <div className="max-w-xl mx-auto">
+        
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow p-6">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white text-center mb-6">
+            E-Commerce Fraud Detection
+          </h2>
 
-      <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-        🛒 E-Commerce Fraud Detection
-      </h2>
+          {/* NUMBER INPUTS */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            {[
+              ["Transaction Amount", "amount"],
+              ["Quantity", "quantity"],
+              ["Customer Age", "age"],
+              ["Account Age (days)", "accountAge"],
+              ["Transaction Hour", "hour"],
+              ["Transaction Day", "day"],
+              ["Transaction Month", "month"]
+            ].map(([label, name]) => (
+              <div key={name}>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1"><b>{label}</b></label>
+                <input
+                  type="number"
+                  name={name}
+                  value={form[name]}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            ))}
+          </div>
 
-      {/* NUMBER INPUTS */}
-      {[
-        ["Transaction Amount", "amount"],
-        ["Quantity", "quantity"],
-        ["Customer Age", "age"],
-        ["Account Age (days)", "accountAge"],
-        ["Transaction Hour", "hour"],
-        ["Transaction Day", "day"],
-        ["Transaction Month", "month"]
-      ].map(([label, name]) => (
-        <div key={name} style={{ marginBottom: "15px" }}>
-          <label><b>{label}</b></label>
-          <input
-            type="number"
-            name={name}
-            value={form[name]}
-            onChange={handleChange}
-            style={inputStyle}
-          />
-        </div>
-      ))}
-
-      {/* DROPDOWNS */}
-
-      <div style={{ marginBottom: "15px" }}>
-        <label><b>Payment Method</b></label>
-        <select name="paymentMethod" value={form.paymentMethod} onChange={handleChange} style={inputStyle}>
-          <option>Credit Card</option>
-          <option>Debit Card</option>
-          <option>PayPal</option>
-          <option>Bank Transfer</option>
-        </select>
-      </div>
-
-      <div style={{ marginBottom: "15px" }}>
-        <label><b>Product Category</b></label>
-        <select name="productCategory" value={form.productCategory} onChange={handleChange} style={inputStyle}>
-          <option>Electronics</option>
-          <option>Clothing</option>
-          <option>Home</option>
-          <option>Beauty</option>
-        </select>
-      </div>
-
-      <div style={{ marginBottom: "15px" }}>
-        <label><b>Customer Location</b></label>
-        <select name="location" value={form.location} onChange={handleChange} style={inputStyle}>
-          <option>USA</option>
-          <option>UK</option>
-          <option>India</option>
-          <option>Germany</option>
-        </select>
-      </div>
-
-      <div style={{ marginBottom: "15px" }}>
-        <label><b>Device Used</b></label>
-        <select name="device" value={form.device} onChange={handleChange} style={inputStyle}>
-          <option>Mobile</option>
-          <option>Desktop</option>
-          <option>Tablet</option>
-        </select>
-      </div>
-
-      {/* BUTTON */}
-      <button onClick={handlePredict} style={buttonStyle}>
-        🔍 Predict Fraud
-      </button>
-
-      {/* RESULT */}
-      {result && (
-        <div style={{
-          marginTop: "20px",
-          padding: "15px",
-          borderRadius: "8px",
-          backgroundColor: result.prediction === 1 ? "#ffe5e5" : "#e6ffe6"
-        }}>
-          <h3 style={{ color: result.prediction === 1 ? "red" : "green" }}>
-            {result.label}
-          </h3>
-          <p>
-            Fraud Probability:{" "}
-            <strong>
-              {(result.fraud_probability * 100).toFixed(2)}%
-            </strong>
-          </p>
-        </div>
-      )}
-
-      {/* Recent Predictions */}
-      {history.length > 0 && (
-        <div style={{ marginTop: "20px" }}>
-          <h3 style={{ fontWeight: "bold", marginBottom: "10px" }}>Recent Predictions</h3>
-          {history.map(h => (
-            <div key={h.id} style={{ 
-              display: "flex", 
-              justifyContent: "space-between", 
-              padding: "10px", 
-              marginBottom: "5px", 
-              background: "#f8f9fa",
-              borderRadius: "5px"
-            }}>
-              <span style={{ fontSize: 12 }}>{new Date(h.predicted_at).toLocaleDateString()}</span>
-              <span>${h.amount}</span>
-              <span>{h.label}</span>
+          {/* DROPDOWNS */}
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1"><b>Payment Method</b></label>
+              <select 
+                name="paymentMethod" 
+                value={form.paymentMethod} 
+                onChange={handleChange} 
+                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>Credit Card</option>
+                <option>Debit Card</option>
+                <option>PayPal</option>
+                <option>Bank Transfer</option>
+              </select>
             </div>
-          ))}
-        </div>
-      )}
 
+            <div>
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1"><b>Product Category</b></label>
+              <select 
+                name="productCategory" 
+                value={form.productCategory} 
+                onChange={handleChange} 
+                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>Electronics</option>
+                <option>Clothing</option>
+                <option>Home</option>
+                <option>Beauty</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1"><b>Customer Location</b></label>
+              <select 
+                name="location" 
+                value={form.location} 
+                onChange={handleChange} 
+                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>USA</option>
+                <option>UK</option>
+                <option>India</option>
+                <option>Germany</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1"><b>Device Used</b></label>
+              <select 
+                name="device" 
+                value={form.device} 
+                onChange={handleChange} 
+                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>Mobile</option>
+                <option>Desktop</option>
+                <option>Tablet</option>
+              </select>
+            </div>
+          </div>
+
+          {/* BUTTON */}
+          <button 
+            onClick={handlePredict} 
+            className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors mt-6"
+          >
+            Predict Fraud
+          </button>
+
+          {/* RESULT */}
+          {result && (
+            <div className={`mt-6 p-5 rounded-xl ${
+              result.prediction === 1 
+                ? "bg-red-100 dark:bg-red-900/30" 
+                : "bg-green-100 dark:bg-green-900/30"
+            }`}>
+              <h3 className={`text-lg font-bold ${
+                result.prediction === 1 
+                  ? "text-red-600 dark:text-red-400" 
+                  : "text-green-600 dark:text-green-400"
+              }`}>
+                {result.label}
+              </h3>
+              <p className="text-gray-700 dark:text-gray-200 mt-2">
+                Fraud Probability: <strong>{(result.fraud_probability * 100).toFixed(2)}%</strong>
+              </p>
+            </div>
+          )}
+
+          {/* Recent Predictions */}
+          {history.length > 0 && (
+            <div className="mt-6">
+              <h3 className="font-bold text-gray-800 dark:text-white mb-3">Recent Predictions</h3>
+              <div className="space-y-2">
+                {history.map(h => (
+                  <div key={h.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(h.predicted_at).toLocaleDateString()}</span>
+                    <span className="text-gray-800 dark:text-gray-200">${h.amount}</span>
+                    <span className={`text-sm ${h.label?.includes('Fraud') ? 'text-red-500 dark:text-red-400' : 'text-green-500 dark:text-green-400'}`}>
+                      {h.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

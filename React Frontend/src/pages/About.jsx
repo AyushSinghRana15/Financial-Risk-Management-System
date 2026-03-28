@@ -41,14 +41,14 @@ const techStack = [
 ];
 
 const flowSteps = [
-    { icon: "👤", label: "User", color: "bg-blue-100 border-blue-300" },
-    { icon: "⚛️", label: "React UI", color: "bg-cyan-100 border-cyan-300" },
-    { icon: "🔌", label: "API Layer", color: "bg-green-100 border-green-300" },
-    { icon: "⚡", label: "FastAPI", color: "bg-emerald-100 border-emerald-300" },
-    { icon: "🧠", label: "AI Engine", color: "bg-purple-100 border-purple-300" },
-    { icon: "📊", label: "Market Data", color: "bg-yellow-100 border-yellow-300" },
-    { icon: "🗄️", label: "Database", color: "bg-indigo-100 border-indigo-300" },
-    { icon: "📈", label: "Dashboard", color: "bg-pink-100 border-pink-300" }
+    { icon: "👤", label: "User", color: "bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-600" },
+    { icon: "⚛️", label: "React UI", color: "bg-cyan-100 dark:bg-cyan-900/50 border-cyan-300 dark:border-cyan-600" },
+    { icon: "🔌", label: "API Layer", color: "bg-green-100 dark:bg-green-900/50 border-green-300 dark:border-green-600" },
+    { icon: "⚡", label: "FastAPI", color: "bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-600" },
+    { icon: "🧠", label: "AI Engine", color: "bg-purple-100 dark:bg-purple-900/50 border-purple-300 dark:border-purple-600" },
+    { icon: "📊", label: "Market Data", color: "bg-yellow-100 dark:bg-yellow-900/50 border-yellow-300 dark:border-yellow-600" },
+    { icon: "🗄️", label: "Database", color: "bg-indigo-100 dark:bg-indigo-900/50 border-indigo-300 dark:border-indigo-600" },
+    { icon: "📈", label: "Dashboard", color: "bg-pink-100 dark:bg-pink-900/50 border-pink-300 dark:border-pink-600" }
 ];
 
 function About() {
@@ -82,7 +82,7 @@ function About() {
     }, [flowStep, isPlaying]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
 
             {/* Hero Section - Edge to Edge */}
             <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white rounded-b-2xl shadow-xl -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 -mt-4 sm:-mt-6 md:-mt-8 lg:-mt-10">
@@ -99,12 +99,12 @@ function About() {
             <div className="max-w-5xl mx-auto px-6 mt-8 pb-12 space-y-16">
 
                 {/* Mission */}
-                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-3">
-                        <span className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-xl">🎯</span>
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-slate-700">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-3">
+                        <span className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center text-xl">🎯</span>
                         Our Mission
                     </h2>
-                    <p className="text-gray-600 leading-relaxed text-lg">
+                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg">
                         Making financial risk analysis accessible, intelligent, and actionable through 
                         machine learning, real-time market data, and intuitive visualizations.
                     </p>
@@ -112,8 +112,8 @@ function About() {
 
                 {/* Key Features - Interactive Grid */}
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-                        <span className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center text-xl">✨</span>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-3">
+                        <span className="w-10 h-10 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center text-xl">✨</span>
                         Key Features
                     </h2>
                     
@@ -125,17 +125,17 @@ function About() {
                                 onMouseEnter={() => setActiveFeature(idx)}
                                 onMouseLeave={() => setActiveFeature(null)}
                                 className={`
-                                    relative bg-white rounded-2xl p-6 shadow-lg border-2 transition-all duration-300 cursor-pointer
+                                    relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border-2 transition-all duration-300 cursor-pointer
                                     ${activeFeature === idx 
-                                        ? 'border-blue-500 shadow-xl scale-[1.02]' 
-                                        : 'border-transparent opacity-80 hover:opacity-100'}
+                                        ? 'border-blue-500 dark:border-blue-400 shadow-xl scale-[1.02]' 
+                                        : 'border-transparent opacity-80 hover:opacity-100 dark:opacity-90 dark:hover:opacity-100'}
                                 `}
                             >
                                 <div className={`text-4xl mb-4 transition-transform duration-300 ${activeFeature === idx ? 'scale-110' : ''}`}>
                                     {feature.icon}
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-800 mb-2">{feature.title}</h3>
-                                <p className={`text-gray-600 leading-relaxed transition-all duration-300 ${activeFeature === idx ? '' : 'line-clamp-2'}`}>
+                                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{feature.title}</h3>
+                                <p className={`text-gray-600 dark:text-gray-300 leading-relaxed transition-all duration-300 ${activeFeature === idx ? '' : 'line-clamp-2'}`}>
                                     {feature.desc}
                                 </p>
                                 <div className={`absolute top-4 right-4 w-3 h-3 rounded-full bg-${feature.color}-500 transition-opacity ${activeFeature === idx ? 'opacity-100' : 'opacity-0'}`}></div>
@@ -178,10 +178,10 @@ function About() {
                 </div>
 
                 {/* Animated Architecture Flow */}
-                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-slate-700">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-3">
-                            <span className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-xl">🔄</span>
+                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+                            <span className="w-10 h-10 bg-green-100 dark:bg-green-900/50 rounded-xl flex items-center justify-center text-xl">🔄</span>
                             Architecture Flow
                         </h2>
                         <button
@@ -189,7 +189,7 @@ function About() {
                             disabled={isPlaying}
                             className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all
                                 ${isPlaying 
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                    ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed' 
                                     : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg hover:scale-105'}`}
                         >
                             {isPlaying ? 'Playing...' : '▶ Play Flow'}
@@ -203,15 +203,15 @@ function About() {
                                     className={`
                                         px-4 py-3 rounded-xl border-2 font-medium text-sm transition-all duration-500
                                         ${flowStep >= idx 
-                                            ? `${step.color} border-current shadow-lg scale-110` 
-                                            : 'bg-gray-100 border-gray-200 text-gray-400'}
+                                            ? `${step.color} border-current shadow-lg scale-110 text-gray-800 dark:text-white` 
+                                            : 'bg-gray-100 dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-400 dark:text-gray-500'}
                                     `}
                                 >
                                     <span className="mr-2">{step.icon}</span>
                                     {step.label}
                                 </div>
                                 {idx < flowSteps.length - 1 && (
-                                    <span className={`text-gray-400 transition-all ${flowStep > idx ? 'opacity-100 scale-110' : 'opacity-30'}`}>→</span>
+                                    <span className={`text-gray-400 dark:text-gray-600 transition-all ${flowStep > idx ? 'opacity-100 scale-110' : 'opacity-30'}`}>→</span>
                                 )}
                             </div>
                         ))}

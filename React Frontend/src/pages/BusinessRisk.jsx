@@ -55,35 +55,27 @@ export default function BusinessRisk() {
   };
 
   return (
-    <div>
+    <div className="p-6 bg-gray-100 dark:bg-slate-900 min-h-screen">
       {/* Header */}
-      <div style={{
-        background: "white", borderRadius: "12px", padding: "24px",
-        marginBottom: "24px", display: "flex", justifyContent: "space-between",
-        alignItems: "center", boxShadow: "0 1px 4px rgba(0,0,0,0.06)"
-      }}>
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow p-6 mb-6 flex justify-between items-center">
         <div>
-          <h2 style={{ margin: 0, fontSize: "22px", fontWeight: 700 }}>Business Risk Dashboard</h2>
-          <p style={{ margin: "4px 0 0", color: "#666", fontSize: "14px" }}>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white m-0">Business Risk Dashboard</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm m-0 mt-1">
             ML-based Business Risk Prediction
           </p>
         </div>
-        <span style={{ fontSize: "13px", color: "#666", fontWeight: 500 }}>Threshold: 25%</span>
+        <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">Threshold: 25%</span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "24px" }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left - Inputs */}
-        <div style={{
-          background: "white", borderRadius: "12px", padding: "24px",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.06)"
-        }}>
-          <h3 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 600 }}>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow p-6">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white m-0 mb-5">
             Business Indicators
           </h3>
           {FEATURES.map((feature) => (
-            <div key={feature.key} style={{ marginBottom: "16px" }}>
-              <label style={{ display: "block", fontSize: "13px", fontWeight: 500,
-                color: "#374151", marginBottom: "4px" }}>
+            <div key={feature.key} className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {feature.label}
               </label>
               <input
@@ -91,68 +83,50 @@ export default function BusinessRisk() {
                 placeholder={feature.placeholder}
                 value={values[feature.key] || ""}
                 onChange={(e) => handleChange(feature.key, e.target.value)}
-                style={{
-                  width: "100%", padding: "10px 12px", border: "1px solid #e2e8f0",
-                  borderRadius: "8px", fontSize: "14px", outline: "none",
-                  boxSizing: "border-box"
-                }}
+                className="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <span style={{ fontSize: "11px", color: "#9ca3af" }}>{feature.hint}</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{feature.hint}</span>
             </div>
           ))}
           <button
             onClick={handlePredict}
             disabled={loading}
-            style={{
-              width: "100%", marginTop: "12px", padding: "12px",
-              background: loading ? "#a0aec0" : "#3b82f6",
-              color: "white", border: "none", borderRadius: "8px",
-              fontSize: "15px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer"
-            }}
+            className="w-full mt-3 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400"
           >
             {loading ? "Predicting..." : "Run Prediction"}
           </button>
         </div>
 
         {/* Right - Result */}
-        <div style={{
-          background: "white", borderRadius: "12px", padding: "24px",
-          boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
-          display: "flex", flexDirection: "column", justifyContent: "flex-start",
-          alignItems: "center", minHeight: "300px"
-        }}>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow p-6 flex flex-col items-center justify-start min-h-[300px]">
           {!result ? (
-            <p style={{ color: "#9ca3af", fontSize: "15px" }}>Run prediction to see results</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm">Run prediction to see results</p>
           ) : (
-            <div style={{ width: "100%", textAlign: "center" }}>
-              <div style={{
-                display: "inline-block", padding: "10px 28px",
+            <div className="w-full text-center">
+              <div className="inline-block px-6 py-3 rounded-lg mb-8 border-l-4" style={{
                 background: getRiskColor(result.risk_level) + "18",
-                borderLeft: `4px solid ${getRiskColor(result.risk_level)}`,
-                borderRadius: "8px", marginBottom: "32px"
+                borderColor: getRiskColor(result.risk_level)
               }}>
-                <div style={{ fontSize: "20px", fontWeight: 700,
-                  color: getRiskColor(result.risk_level) }}>
+                <div className="text-xl font-bold" style={{ color: getRiskColor(result.risk_level) }}>
                   {result.risk_level}
                 </div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                <div style={{ background: "#f8fafc", borderRadius: "10px", padding: "18px" }}>
-                  <div style={{ fontSize: "12px", color: "#666", marginBottom: "6px" }}>Risk Probability</div>
-                  <div style={{ fontSize: "26px", fontWeight: 700, color: getRiskColor(result.risk_level) }}>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 dark:bg-slate-700 rounded-xl p-4">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Risk Probability</div>
+                  <div className="text-2xl font-bold" style={{ color: getRiskColor(result.risk_level) }}>
                     {(result.risk_probability * 100).toFixed(1)}%
                   </div>
                 </div>
-                <div style={{ background: "#f8fafc", borderRadius: "10px", padding: "18px" }}>
-                  <div style={{ fontSize: "12px", color: "#666", marginBottom: "6px" }}>Prediction</div>
-                  <div style={{ fontSize: "26px", fontWeight: 700,
-                    color: result.risk_prediction === 1 ? "#e53e3e" : "#38a169" }}>
+                <div className="bg-gray-50 dark:bg-slate-700 rounded-xl p-4">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Prediction</div>
+                  <div className="text-2xl font-bold" style={{ color: result.risk_prediction === 1 ? "#e53e3e" : "#38a169" }}>
                     {result.risk_prediction === 1 ? "At Risk" : "Safe"}
                   </div>
                 </div>
-                <div style={{ background: "#f8fafc", borderRadius: "10px", padding: "18px", gridColumn: "span 2" }}>
-                  <div style={{ fontSize: "12px", color: "#666", marginBottom: "6px" }}>Decision Threshold</div>
-                  <div style={{ fontSize: "22px", fontWeight: 700, color: "#3b82f6" }}>
+                <div className="bg-gray-50 dark:bg-slate-700 rounded-xl p-4 col-span-2">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Decision Threshold</div>
+                  <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
                     {(result.threshold * 100).toFixed(0)}%
                   </div>
                 </div>

@@ -180,12 +180,12 @@ function Portfolio() {
             : 0;
 
     return (
-        <div className="p-10 bg-gray-100 min-h-screen space-y-8">
+        <div className="p-10 bg-gray-100 dark:bg-slate-900 min-h-screen space-y-8">
 
-            <h1 className="text-3xl font-bold">Portfolio Risk</h1>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Portfolio Risk</h1>
 
             {!USER_EMAIL && (
-                <div className="bg-yellow-100 p-4 rounded">
+                <div className="bg-yellow-100 dark:bg-yellow-900/30 p-4 rounded text-yellow-800 dark:text-yellow-200">
                     Please login with Google to view your portfolio
                 </div>
             )}
@@ -209,23 +209,23 @@ function Portfolio() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-gray-500">Portfolio Value</h2>
-                    <p className="text-2xl font-bold">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                    <h2 className="text-gray-500 dark:text-gray-400">Portfolio Value</h2>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-white">
                         ₹ {totalValue.toLocaleString()}
                     </p>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-gray-500">Daily VaR</h2>
-                    <p className="text-2xl font-bold text-red-600">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                    <h2 className="text-gray-500 dark:text-gray-400">Daily VaR</h2>
+                    <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                         ₹ {(totalValue * 0.025).toFixed(0)}
                     </p>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-gray-500">Volatility</h2>
-                    <p className="text-2xl font-bold">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                    <h2 className="text-gray-500 dark:text-gray-400">Volatility</h2>
+                    <p className="text-2xl font-bold text-gray-800 dark:text-white">
                         {(volatility * 100).toFixed(2)}%
                     </p>
                 </div>
@@ -233,17 +233,17 @@ function Portfolio() {
             </div>
 
             {risk && (
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-xl font-semibold mb-2">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                    <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">
                         AI Risk Insights
                     </h2>
 
-                    <p className="font-bold text-lg">
+                    <p className="font-bold text-lg text-gray-800 dark:text-white">
                         Risk Level: {risk.risk}
                     </p>
 
                     {risk.insights?.map((insight, i) => (
-                        <p key={i} className="text-red-500">
+                        <p key={i} className="text-red-500 dark:text-red-400">
                             ⚠️ {insight}
                         </p>
                     ))}
@@ -251,38 +251,38 @@ function Portfolio() {
             )}
 
             {/* Premium Add Asset Form */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-lg">
+            <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-lg">
                 <div className="flex items-center gap-3 mb-5">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
                         <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
                     </div>
-                    <h2 className="text-xl font-bold text-gray-800">Add New Asset</h2>
+                    <h2 className="text-xl font-bold text-gray-800 dark:text-white">Add New Asset</h2>
                 </div>
                 
                 <form onSubmit={addAsset} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                         <div className="lg:col-span-1">
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Asset Name</label>
+                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Asset Name</label>
                             <input 
                                 name="asset_name" 
                                 placeholder="e.g. AAPL" 
                                 value={form.asset_name} 
                                 onChange={handleChange} 
-                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm text-gray-800 dark:text-white"
                                 required
                             />
                         </div>
                         
                         <div className="lg:col-span-1">
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Asset Type</label>
+                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Asset Type</label>
                             <div className="relative">
                                 <select 
                                     name="asset_type" 
                                     value={form.asset_type} 
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm appearance-none cursor-pointer pr-10"
+                                    className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm appearance-none cursor-pointer pr-10 text-gray-800 dark:text-white"
                                 >
                                     <option value="Stock">Stock</option>
                                     <option value="Crypto">Crypto</option>
@@ -297,40 +297,40 @@ function Portfolio() {
                         </div>
                         
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Quantity</label>
+                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Quantity</label>
                             <input 
                                 type="number" 
                                 name="quantity" 
                                 placeholder="0" 
                                 value={form.quantity} 
                                 onChange={handleChange} 
-                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm text-gray-800 dark:text-white"
                                 required
                             />
                         </div>
                         
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Buy Price</label>
+                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Buy Price</label>
                             <input 
                                 type="number" 
                                 name="buy_price" 
                                 placeholder="0.00" 
                                 value={form.buy_price} 
                                 onChange={handleChange} 
-                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm text-gray-800 dark:text-white"
                                 required
                             />
                         </div>
                         
                         <div>
-                            <label className="block text-sm font-medium text-gray-600 mb-1.5">Current Price</label>
+                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1.5">Current Price</label>
                             <input 
                                 type="number" 
                                 name="current_price" 
                                 placeholder="0.00" 
                                 value={form.current_price} 
                                 onChange={handleChange} 
-                                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm"
+                                className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm text-gray-800 dark:text-white"
                                 required
                             />
                         </div>
@@ -355,28 +355,28 @@ function Portfolio() {
                 </div>
             )}
 
-            <div className="bg-white p-4 rounded-xl shadow overflow-x-auto">
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow overflow-x-auto">
                 <table className="w-full">
                     <thead>
-                        <tr className="border-b">
-                            <th className="p-2 text-left">Asset</th>
-                            <th className="p-2 text-left">Type</th>
-                            <th className="p-2 text-left">Qty</th>
-                            <th className="p-2 text-left">Value</th>
-                            <th className="p-2 text-left">Action</th>
+                        <tr className="border-b dark:border-slate-700">
+                            <th className="p-2 text-left text-gray-600 dark:text-gray-400">Asset</th>
+                            <th className="p-2 text-left text-gray-600 dark:text-gray-400">Type</th>
+                            <th className="p-2 text-left text-gray-600 dark:text-gray-400">Qty</th>
+                            <th className="p-2 text-left text-gray-600 dark:text-gray-400">Value</th>
+                            <th className="p-2 text-left text-gray-600 dark:text-gray-400">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {assets.map(a => (
-                            <tr key={a.id} className="border-b">
-                                <td className="p-2">{a.asset_name}</td>
-                                <td className="p-2">{a.asset_type}</td>
-                                <td className="p-2">{a.quantity}</td>
-                                <td className="p-2">
+                            <tr key={a.id} className="border-b dark:border-slate-700">
+                                <td className="p-2 text-gray-800 dark:text-gray-200">{a.asset_name}</td>
+                                <td className="p-2 text-gray-800 dark:text-gray-200">{a.asset_type}</td>
+                                <td className="p-2 text-gray-800 dark:text-gray-200">{a.quantity}</td>
+                                <td className="p-2 text-gray-800 dark:text-gray-200">
                                     ₹ {(a.quantity * a.current_price).toLocaleString()}
                                 </td>
                                 <td className="p-2">
-                                    <button onClick={() => deleteAsset(a.id)} className="text-red-500">
+                                    <button onClick={() => deleteAsset(a.id)} className="text-red-500 hover:text-red-600 dark:hover:text-red-400">
                                         Delete
                                     </button>
                                 </td>
@@ -386,8 +386,8 @@ function Portfolio() {
                 </table>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow">
-                <h2 className="text-xl font-semibold mb-4">Asset Allocation</h2>
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Asset Allocation</h2>
 
                 <ResponsiveContainer width="100%" height={300}>
                     <PieChart>

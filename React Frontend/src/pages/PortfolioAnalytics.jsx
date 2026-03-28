@@ -33,15 +33,15 @@ export default function PortfolioAnalytics() {
     ];
 
     return (
-        <div className="p-6 bg-gray-100 min-h-screen">
+        <div className="p-6 bg-gray-100 dark:bg-slate-900 min-h-screen">
 
-            <h1 className="text-3xl font-bold mb-6">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
                 Portfolio Risk Dashboard
             </h1>
 
-            <div className="bg-white shadow-md rounded-xl p-6">
+            <div className="bg-white dark:bg-slate-800 shadow-md rounded-xl p-6">
 
-                <h2 className="text-xl font-semibold mb-4">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
                     Asset Correlation Matrix
                 </h2>
 
@@ -49,8 +49,8 @@ export default function PortfolioAnalytics() {
 
                     <ScatterChart>
 
-                        <XAxis dataKey="x" type="category" name="Asset X" />
-                        <YAxis dataKey="y" type="category" name="Asset Y" />
+                        <XAxis dataKey="x" type="category" name="Asset X" stroke="#6b7280" />
+                        <YAxis dataKey="y" type="category" name="Asset Y" stroke="#6b7280" />
                         <ZAxis dataKey="value" range={[100, 400]} />
 
                         <Tooltip />

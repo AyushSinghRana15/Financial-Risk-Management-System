@@ -26,38 +26,6 @@ function MarketRisk() {
     const [rollingData, setRollingData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [fetchingLive, setFetchingLive] = useState(false);
-    const [openSection, setOpenSection] = useState("equities");
-
-    const featureCategories = {
-        equities: {
-            title: "Major Indices",
-            icon: "📈",
-            color: "blue",
-            pattern: /^(?:\^NSEI|\^DJI|\^GSPC|\^IXIC|\^FTSE|\^N225|\^BSESN)/
-        },
-        commodities: {
-            title: "Commodities & Forex",
-            icon: "🪙",
-            color: "yellow",
-            pattern: /(?:GC=F|CL=F|SI=F|DX-Y\.NYB|INR=X|EURUSD=X)/
-        },
-        statistical: {
-            title: "Statistical Data",
-            icon: "📊",
-            color: "purple",
-            pattern: /^(?:\^INDIAVIX)/
-        }
-    };
-
-    const getCategory = (feature) => {
-        for (const [key, cat] of Object.entries(featureCategories)) {
-            if (cat.pattern.test(feature)) return key;
-        }
-        if (feature.includes("return")) return "equities";
-        if (feature.includes("vol")) return "statistical";
-        if (feature.includes("skew") || feature.includes("kurt")) return "statistical";
-        return "equities";
-    };
 
     useEffect(() => {
         axios.get("http://127.0.0.1:8000/market_features")
@@ -70,7 +38,6 @@ function MarketRisk() {
             });
     }, []);
 
-    // 🔥 FIXED CLEAN NAME FUNCTION
     const cleanFeatureName = (feature) => {
 
         const nameMap = {
@@ -99,7 +66,6 @@ function MarketRisk() {
             }
         });
 
-        // 🔥 differentiate types
         if (feature.includes("lag")) {
             const lag = feature.match(/lag(\d+)/);
             if (lag) return `${base} (${lag[1]} Days Ago)`;
@@ -113,12 +79,10 @@ function MarketRisk() {
         if (feature.includes("skew")) return `${base} (Market Skewness)`;
         if (feature.includes("kurt")) return `${base} (Market Extremes)`;
 
-        // 🔥 key fix → distinguish return explicitly
         if (feature.toLowerCase().includes("return")) {
             return `${base} (Today Return)`;
         }
 
-        // fallback → raw value
         return `${base} (Current Value)`;
     };
 
@@ -197,13 +161,13 @@ function MarketRisk() {
     };
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen space-y-6">
+        <div className="p-6 bg-gray-50 dark:bg-slate-900 min-h-screen space-y-6">
 
             {/* HEADER */}
-            <div className="bg-white p-6 rounded-2xl shadow flex justify-between items-center">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold">Market Risk Dashboard</h1>
-                    <p className="text-gray-500 text-sm">
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Market Risk Dashboard</h1>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
                         ML-based Value at Risk Prediction
                     </p>
                 </div>
@@ -211,17 +175,17 @@ function MarketRisk() {
                 <select
                     value={confidence}
                     onChange={(e) => setConfidence(e.target.value)}
-                    className="border px-3 py-2 rounded-lg"
+                    className="border dark:border-slate-600 bg-white dark:bg-slate-700 text-gray-800 dark:text-white px-3 py-2 rounded-lg"
                 >
                     <option>95%</option>
                     <option>99%</option>
                 </select>
             </div>
 
-            {/* Market Indicators - Categorized Accordions */}
-            <div className="bg-white p-6 rounded-xl shadow">
+            {/* Market Indicators */}
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-semibold text-lg">Market Indicators</h2>
+                    <h2 className="font-semibold text-lg text-gray-800 dark:text-white">Market Indicators</h2>
                     <button
                         onClick={fetchLiveData}
                         disabled={fetchingLive}
@@ -232,62 +196,29 @@ function MarketRisk() {
                     </button>
                 </div>
                 
-                <div className="space-y-3">
-                    {Object.entries(featureCategories).map(([key, category]) => {
-                        const categoryFeatures = features.filter(f => getCategory(f) === key);
-                        if (categoryFeatures.length === 0) return null;
-                        
-                        return (
-                            <div key={key} className="border border-gray-200 rounded-xl overflow-hidden">
-                                <button
-                                    onClick={() => setOpenSection(openSection === key ? null : key)}
-                                    className={`w-full flex items-center justify-between p-4 bg-${category.color}-50 hover:bg-${category.color}-100 transition-colors`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xl">{category.icon}</span>
-                                        <span className="font-semibold text-gray-800">{category.title}</span>
-                                        <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
-                                            {categoryFeatures.length} indicators
-                                        </span>
-                                    </div>
-                                    {openSection === key ? (
-                                        <FaChevronUp className="text-gray-500" />
-                                    ) : (
-                                        <FaChevronDown className="text-gray-500" />
-                                    )}
-                                </button>
-                                
-                                {openSection === key && (
-                                    <div className="p-4 bg-white">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                            {categoryFeatures.map((feature) => (
-                                                <div key={feature} className="bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">
-                                                    <label className="text-xs font-medium text-gray-600 block mb-1">
-                                                        {cleanFeatureName(feature)}
-                                                    </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {features.map((feature) => (
+                        <div key={feature} className="bg-gray-50 dark:bg-slate-700 p-3 rounded-lg border border-gray-100 dark:border-slate-600 hover:border-blue-200 dark:hover:border-blue-600 transition-colors">
+                            <label className="text-xs font-medium text-gray-600 dark:text-gray-300 block mb-1">
+                                {cleanFeatureName(feature)}
+                            </label>
 
-                                                    <input
-                                                        type="number"
-                                                        step="0.01"
-                                                        value={inputs[feature] || ""}
-                                                        placeholder="0.00"
-                                                        onChange={(e) =>
-                                                            handleChange(feature, e.target.value)
-                                                        }
-                                                        className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                    />
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={inputs[feature] || ""}
+                                placeholder="0.00"
+                                onChange={(e) =>
+                                    handleChange(feature, e.target.value)
+                                }
+                                className="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-800 dark:text-white"
+                            />
 
-                                                    <p className="text-xs text-gray-400 mt-1">
-                                                        ±1% = 0.01
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        );
-                    })}
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                ±1% = 0.01
+                            </p>
+                        </div>
+                    ))}
                 </div>
 
                 <button
@@ -301,59 +232,59 @@ function MarketRisk() {
 
             {/* Results Section */}
             {prediction === null ? (
-                <div className="bg-white p-12 rounded-xl shadow text-center text-gray-400">
+                <div className="bg-white dark:bg-slate-800 p-12 rounded-xl shadow text-center text-gray-400 dark:text-gray-500">
                     Run prediction to see results
                 </div>
             ) : (
                 <>
                     {/* KPI Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white p-5 rounded-xl shadow flex justify-between">
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow flex justify-between">
                             <div>
-                                <p className="text-gray-500 text-sm">VaR</p>
-                                <h2 className="text-2xl font-bold text-blue-600">
+                                <p className="text-gray-500 dark:text-gray-400 text-sm">VaR</p>
+                                <h2 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                     {(absVar * 100).toFixed(2)}%
                                 </h2>
                             </div>
-                            <FaChartLine className="text-blue-500 text-xl" />
+                            <FaChartLine className="text-blue-500 dark:text-blue-400 text-xl" />
                         </div>
 
-                        <div className="bg-white p-5 rounded-xl shadow">
-                            <p className="text-gray-500 text-sm">Risk</p>
-                            <p className="font-semibold">{riskLevel}</p>
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow">
+                            <p className="text-gray-500 dark:text-gray-400 text-sm">Risk</p>
+                            <p className="font-semibold text-gray-800 dark:text-white">{riskLevel}</p>
                         </div>
 
-                        <div className="bg-white p-5 rounded-xl shadow">
-                            <p className="text-gray-500 text-sm">Confidence</p>
-                            <p className="font-semibold">{confidence}</p>
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow">
+                            <p className="text-gray-500 dark:text-gray-400 text-sm">Confidence</p>
+                            <p className="font-semibold text-gray-800 dark:text-white">{confidence}</p>
                         </div>
                     </div>
 
                     {/* HYBRID GAUGE */}
-                    <div className="bg-white p-5 rounded-xl shadow">
-                        <h3 className="font-semibold mb-4">Risk Visualization</h3>
+                    <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow">
+                        <h3 className="font-semibold mb-4 text-gray-800 dark:text-white">Risk Visualization</h3>
 
-                        <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="relative h-6 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
                             <div
                                 className={`h-full ${getColor()} transition-all`}
                                 style={{ width: `${Math.min(absVar * 200, 100)}%` }}
                             />
 
                             <div
-                                className="absolute top-[-8px] text-xs"
+                                className="absolute top-[-8px] text-xs text-gray-600 dark:text-gray-300"
                                 style={{ left: `${Math.min(absVar * 200, 100)}%` }}
                             >
                                 ▲
                             </div>
                         </div>
 
-                        <div className="flex justify-between text-xs text-gray-500 mt-2">
+                        <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
                             <span>Low</span>
                             <span>Moderate</span>
                             <span>High</span>
                         </div>
 
-                        <p className="mt-2 text-sm">
+                        <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                             VaR: <b>{(absVar * 100).toFixed(2)}%</b>
                         </p>
                     </div>
@@ -361,11 +292,11 @@ function MarketRisk() {
                     {/* Charts - 2 Column Layout */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* BAR */}
-                        <div className="bg-white p-5 rounded-xl shadow">
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow">
                             <ResponsiveContainer width="100%" height={250}>
                                 <BarChart data={chartData}>
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
+                                    <XAxis dataKey="name" stroke="#6b7280" />
+                                    <YAxis stroke="#6b7280" />
                                     <Tooltip />
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <Bar dataKey="value" fill="#3b82f6" />
@@ -374,16 +305,16 @@ function MarketRisk() {
                         </div>
 
                         {/* LINE */}
-                        <div className="bg-white p-5 rounded-xl shadow">
-                            <h3 className="font-semibold mb-4">Rolling VaR</h3>
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow">
+                            <h3 className="font-semibold mb-4 text-gray-800 dark:text-white">Rolling VaR</h3>
 
                             <ResponsiveContainer width="100%" height={250}>
                                 <LineChart data={rollingData}>
-                                    <XAxis dataKey="day" />
-                                    <YAxis />
+                                    <XAxis dataKey="day" stroke="#6b7280" />
+                                    <YAxis stroke="#6b7280" />
                                     <Tooltip />
                                     <CartesianGrid strokeDasharray="3 3" />
-                                    <Line dataKey="value" stroke="#ef4444" />
+                                    <Line type="monotone" dataKey="value" stroke="#ef4444" />
                                 </LineChart>
                             </ResponsiveContainer>
                         </div>

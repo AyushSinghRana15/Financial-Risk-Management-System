@@ -29,6 +29,18 @@ function Settings() {
 
     const [loading, setLoading] = useState(true);
     const [saveSuccess, setSaveSuccess] = useState(false);
+    const [darkMode, setDarkMode] = useState(localStorage.getItem("theme") === "dark");
+
+    const toggleDarkMode = () => {
+        const newMode = !darkMode;
+        setDarkMode(newMode);
+        localStorage.setItem("theme", newMode ? "dark" : "light");
+        if (newMode) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    };
 
     useEffect(() => {
         if (userEmail) {
@@ -79,10 +91,10 @@ function Settings() {
 
                 {/* Header */}
                 <div>
-                    <h1 className="text-2xl font-semibold text-gray-800">
+                    <h1 className="text-2xl font-semibold text-gray-800 dark:text-white">
                         Settings
                     </h1>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                         Manage your preferences and system behavior
                     </p>
                 </div>
@@ -120,9 +132,38 @@ function Settings() {
                     </div>
                 )}
 
+                {/* Appearance */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow border space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                        Appearance
+                    </h2>
+
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <span className="text-2xl">{darkMode ? "🌙" : "☀️"}</span>
+                            <div>
+                                <p className="font-medium text-gray-800 dark:text-gray-200">Dark Mode</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Switch between light and dark theme</p>
+                            </div>
+                        </div>
+                        <button
+                            onClick={toggleDarkMode}
+                            className={`relative w-14 h-8 rounded-full p-1 transition-colors duration-300 ${
+                                darkMode ? "bg-blue-600" : "bg-gray-300"
+                            }`}
+                        >
+                            <div
+                                className={`w-6 h-6 rounded-full bg-white shadow-md transform transition-transform duration-300 ${
+                                    darkMode ? "translate-x-6" : "translate-x-0"
+                                }`}
+                            />
+                        </button>
+                    </div>
+                </div>
+
                 {/* Risk Preference */}
-                <div className="bg-white p-6 rounded-2xl shadow border space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-700">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow border space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                         Risk Preference
                     </h2>
 
@@ -130,21 +171,21 @@ function Settings() {
                         name="risk"
                         value={form.risk}
                         onChange={handleChange}
-                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600"
                     >
                         <option>Low</option>
                         <option>Medium</option>
                         <option>High</option>
                     </select>
 
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                         This influences AI risk analysis and alerts.
                     </p>
                 </div>
 
                 {/* System Controls */}
-                <div className="bg-white p-6 rounded-2xl shadow border space-y-5">
-                    <h2 className="text-lg font-semibold text-gray-700">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow border space-y-5">
+                    <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                         System Controls
                     </h2>
 
@@ -190,11 +231,11 @@ function Settings() {
 function Toggle({ label, value, onChange }) {
     return (
         <div className="flex items-center justify-between">
-            <span className="text-gray-700">{label}</span>
+            <span className="text-gray-700 dark:text-gray-200">{label}</span>
 
             <button
                 onClick={onChange}
-                className={`w-12 h-6 flex items-center rounded-full p-1 transition ${value ? "bg-blue-500" : "bg-gray-300"
+                className={`w-12 h-6 flex items-center rounded-full p-1 transition ${value ? "bg-blue-500" : "bg-gray-300 dark:bg-gray-600"
                     }`}
             >
                 <div

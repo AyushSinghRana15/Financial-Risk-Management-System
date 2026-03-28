@@ -9,7 +9,6 @@ export default function NotificationPanel({ onClose }) {
         { id: 3, text: "Portfolio diversified", type: "success", read: true },
     ]);
 
-    // Close on outside click
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -20,17 +19,15 @@ export default function NotificationPanel({ onClose }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [onClose]);
 
-    // Mark single notification as read
     const markAsRead = (id) => {
         setNotifications((prev) => {
             const updated = prev.map((n) =>
                 n.id === id ? { ...n, read: true } : n
             );
-            return [...updated]; // force new reference
+            return [...updated];
         });
     };
 
-    // Mark all as read
     const markAllRead = () => {
         setNotifications((prev) =>
             prev.map((n) => ({ ...n, read: true }))
@@ -40,13 +37,13 @@ export default function NotificationPanel({ onClose }) {
     const getStyles = (type) => {
         switch (type) {
             case "warning":
-                return "text-yellow-600 bg-yellow-50";
+                return "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30";
             case "alert":
-                return "text-blue-600 bg-blue-50";
+                return "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30";
             case "success":
-                return "text-green-600 bg-green-50";
+                return "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30";
             default:
-                return "text-gray-600";
+                return "text-gray-600 dark:text-gray-400";
         }
     };
 
@@ -68,13 +65,13 @@ export default function NotificationPanel({ onClose }) {
     return (
         <div
             ref={panelRef}
-            className="absolute right-2 top-12 w-80 bg-white rounded-xl shadow-xl border z-50 animate-fadeIn"
+            className="absolute right-2 top-12 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-xl border dark:border-slate-700 z-50 animate-fadeIn"
         >
 
             {/* Header */}
-            <div className="flex justify-between items-center p-4 border-b">
+            <div className="flex justify-between items-center p-4 border-b dark:border-slate-700">
                 <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-gray-800">Notifications</h3>
+                    <h3 className="font-semibold text-gray-800 dark:text-white">Notifications</h3>
                     {unreadCount > 0 && (
                         <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                             {unreadCount}
@@ -84,7 +81,7 @@ export default function NotificationPanel({ onClose }) {
 
                 <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-600 text-sm"
+                    className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 text-sm"
                 >
                     ✕
                 </button>
@@ -94,7 +91,7 @@ export default function NotificationPanel({ onClose }) {
             {notifications.length > 0 && (
                 <div
                     onClick={markAllRead}
-                    className="text-xs text-blue-600 px-4 py-2 cursor-pointer hover:bg-gray-100"
+                    className="text-xs text-blue-600 dark:text-blue-400 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700"
                 >
                     Mark all as read
                 </div>
@@ -104,7 +101,7 @@ export default function NotificationPanel({ onClose }) {
             <div className="max-h-64 overflow-y-auto">
 
                 {notifications.length === 0 ? (
-                    <div className="p-6 text-center text-gray-500 text-sm">
+                    <div className="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">
                         No notifications
                     </div>
                 ) : (
@@ -113,13 +110,13 @@ export default function NotificationPanel({ onClose }) {
                             key={n.id}
                             onClick={() => markAsRead(n.id)}
                             className={`flex items-start gap-3 px-4 py-3 text-sm cursor-pointer transition
-                                ${n.read ? "bg-white" : "bg-gray-50"}
-                                hover:bg-gray-100`}
+                                ${n.read ? "bg-white dark:bg-slate-800" : "bg-gray-50 dark:bg-slate-700/50"}
+                                hover:bg-gray-100 dark:hover:bg-slate-700`}
                         >
                             <span className="text-lg">{getIcon(n.type)}</span>
 
                             <div className="flex-1">
-                                <p className={`${n.read ? "text-gray-500" : "text-gray-800 font-medium"}`}>
+                                <p className={`${n.read ? "text-gray-500 dark:text-gray-400" : "text-gray-800 dark:text-gray-200 font-medium"}`}>
                                     {n.text}
                                 </p>
                             </div>
@@ -142,12 +139,11 @@ export default function NotificationPanel({ onClose }) {
             {/* Footer */}
             <div
                 onClick={onClose}
-                className="p-3 text-center text-sm text-blue-600 cursor-pointer hover:bg-gray-100 border-t"
+                className="p-3 text-center text-sm text-blue-600 dark:text-blue-400 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 border-t dark:border-slate-700"
             >
                 Close
             </div>
 
-            {/* Animation */}
             <style>
                 {`
                 .animate-fadeIn {

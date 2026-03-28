@@ -136,7 +136,7 @@ export default function Dashboard() {
         <div className="p-8">
 
             {/* Title */}
-            <h1 className="text-3xl font-bold mb-8 text-gray-800">
+            <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">
                 Financial Risk Management Dashboard
             </h1>
 
@@ -146,10 +146,10 @@ export default function Dashboard() {
                     <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused] will-change-transform min-w-max">
                         {[...kpiCards, ...kpiCards].map((card, index) => (
                             <Link to={card.link} key={index}>
-                                <div className={`w-[260px] flex-shrink-0 bg-white p-5 rounded-xl shadow border-l-4 ${colorMap[card.color]} cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 hover:rotate-1`}>
-                                    <p className="text-gray-500 text-sm">{card.title}</p>
-                                    <h2 className="text-2xl font-bold mt-2">{card.value}</h2>
-                                    <p className="text-sm mt-1 text-gray-600">{card.change}</p>
+                                <div className={`w-[260px] flex-shrink-0 bg-white dark:bg-slate-800 p-5 rounded-xl shadow border-l-4 ${colorMap[card.color]} cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 hover:rotate-1`}>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">{card.title}</p>
+                                    <h2 className="text-2xl font-bold mt-2 text-gray-800 dark:text-white">{card.value}</h2>
+                                    <p className="text-sm mt-1 text-gray-600 dark:text-gray-400">{card.change}</p>
                                 </div>
                             </Link>
                         ))}
@@ -173,9 +173,9 @@ export default function Dashboard() {
                                     { name: "Liquidity Risk", link: "/liquidity-risk", color: "teal", desc: "Cash flow & funding risks" }
                                 ].map((mod, idx) => (
                                     <Link to={mod.link} key={idx}>
-                                        <div className={`w-[320px] flex-shrink-0 bg-white p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border-l-4 border-${mod.color}-500 cursor-pointer`}>
-                                            <h2 className="text-lg font-semibold mb-2">{mod.name}</h2>
-                                            <p className="text-gray-600">{mod.desc}</p>
+                                        <div className={`w-[320px] flex-shrink-0 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border-l-4 border-${mod.color}-500 cursor-pointer`}>
+                                            <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">{mod.name}</h2>
+                                            <p className="text-gray-600 dark:text-gray-400">{mod.desc}</p>
                                         </div>
                                     </Link>
                                 ))}
@@ -190,8 +190,8 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
 
                 {/* Portfolio Allocation */}
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-lg font-semibold mb-4">Portfolio Allocation</h2>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                    <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Portfolio Allocation</h2>
 
                     <ResponsiveContainer width="100%" height={250}>
                         <PieChart>
@@ -215,8 +215,8 @@ export default function Dashboard() {
                 </div>
 
                 {/* Risk Trend */}
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-lg font-semibold mb-4">Risk Trend</h2>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                    <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Risk Trend</h2>
 
                     <ResponsiveContainer width="100%" height={250}>
                         <LineChart data={Array.from({ length: 7 }, (_, i) => ({
@@ -232,11 +232,11 @@ export default function Dashboard() {
                 </div>
 
                 {/* AI Risk Alerts */}
-                <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition">
-                    <h2 className="text-lg font-semibold mb-4">Risk Alerts</h2>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow hover:shadow-md transition">
+                    <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Risk Alerts</h2>
 
                     {loading ? (
-                        <p className="text-gray-500 text-sm">Analyzing portfolio risk...</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">Analyzing portfolio risk...</p>
                     ) : (
                         <ul className="space-y-3 text-sm">
                             {alerts.length > 0 ? (
@@ -245,17 +245,17 @@ export default function Dashboard() {
                                         key={index}
                                         className={
                                             alert.toLowerCase().includes("high")
-                                                ? "text-red-500"
+                                                ? "text-red-500 dark:text-red-400"
                                                 : alert.toLowerCase().includes("consider")
-                                                    ? "text-yellow-500"
-                                                    : "text-green-500"
+                                                    ? "text-yellow-500 dark:text-yellow-400"
+                                                    : "text-green-500 dark:text-green-400"
                                         }
                                     >
                                         ⚠️ {alert}
                                     </li>
                                 ))
                             ) : (
-                                <li className="text-green-500">
+                                <li className="text-green-500 dark:text-green-400">
                                     ✅ No major risks detected
                                 </li>
                             )}
@@ -264,19 +264,19 @@ export default function Dashboard() {
                 </div>
 
                 {/* AI Insights */}
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-lg font-semibold mb-4">AI Insights</h2>
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
+                    <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">AI Insights</h2>
 
-                    <p><strong>Risk:</strong> High</p>
+                    <p className="text-gray-700 dark:text-gray-300"><strong>Risk:</strong> High</p>
 
-                    <ul className="list-disc ml-5 mt-2 text-gray-600">
+                    <ul className="list-disc ml-5 mt-2 text-gray-600 dark:text-gray-400">
                         <li>Portfolio is concentrated in crypto and equities</li>
                         <li>High volatility due to BTC exposure</li>
                         <li>Low diversification increases risk</li>
                     </ul>
 
-                    <p className="mt-3 font-medium">Suggestions:</p>
-                    <ul className="list-disc ml-5 text-gray-600">
+                    <p className="mt-3 font-medium text-gray-700 dark:text-gray-300">Suggestions:</p>
+                    <ul className="list-disc ml-5 text-gray-600 dark:text-gray-400">
                         <li>Diversify into bonds and gold</li>
                         <li>Reduce crypto allocation</li>
                     </ul>

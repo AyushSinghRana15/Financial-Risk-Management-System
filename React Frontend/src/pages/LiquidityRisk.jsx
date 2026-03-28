@@ -14,9 +14,6 @@ export default function LiquidityRisk() {
 
     const API_URL = "http://127.0.0.1:8000/liquidity";
 
-    // ----------------------------
-    // LOAD FEATURES
-    // ----------------------------
     useEffect(() => {
         axios.get(`${API_URL}/features`)
             .then(res => {
@@ -38,9 +35,6 @@ export default function LiquidityRisk() {
         }
     }, [userEmail]);
 
-    // ----------------------------
-    // HANDLE CHANGE
-    // ----------------------------
     const handleChange = (feature, value) => {
         setFormData(prev => ({
             ...prev,
@@ -48,9 +42,6 @@ export default function LiquidityRisk() {
         }));
     };
 
-    // ----------------------------
-    // PREDICT
-    // ----------------------------
     const predict = async () => {
     try {
         setLoading(true);
@@ -72,34 +63,31 @@ export default function LiquidityRisk() {
 
     } catch (err) {
         console.error("Prediction Error:", err);
-        alert("Prediction failed ❌");
+        alert("Prediction failed");
     } finally {
         setLoading(false);
     }
 };
 
-    // ----------------------------
-    // UI
-    // ----------------------------
     return (
-        <div className="p-6 bg-gray-100 min-h-screen">
+        <div className="p-6 bg-gray-100 dark:bg-slate-900 min-h-screen">
 
-            <h1 className="text-3xl font-bold mb-6">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
                 Liquidity Risk Prediction
             </h1>
 
-            <div className="bg-white p-6 rounded-xl shadow">
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
 
                 {/* INPUT GRID */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
                { 
                features.length === 0 ? (
-             <p className="text-gray-500">Loading features...</p>
+              <p className="text-gray-500 dark:text-gray-400 col-span-3">Loading features...</p>
     ) : (
         features.map((f, i) => (
             <div key={f}>
-                <label className="text-sm text-gray-600">
+                <label className="text-sm text-gray-600 dark:text-gray-300">
                     {labels[i] || f}
                 </label>
 
@@ -107,7 +95,7 @@ export default function LiquidityRisk() {
                     type="number"
                     value={formData[f] ?? ""}
                     onChange={(e) => handleChange(f, e.target.value)}
-                    className="w-full border p-2 rounded mt-1"
+                    className="w-full border dark:border-slate-600 p-2 rounded mt-1 bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
             </div>
         ))
@@ -119,24 +107,24 @@ export default function LiquidityRisk() {
                 <button
                     onClick={predict}
                     disabled={loading}
-                    className="mt-6 w-full py-3 bg-blue-600 text-white rounded-xl"
+                    className="mt-6 w-full py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:bg-gray-400"
                 >
                     {loading ? "Analyzing..." : "Predict Liquidity Risk"}
                 </button>
 
                 {/* RESULT */}
                 {result && (
-                    <div className="mt-6 p-5 bg-gray-50 rounded-xl shadow">
+                    <div className="mt-6 p-5 bg-gray-50 dark:bg-slate-700 rounded-xl shadow">
 
-                        <h2 className="text-lg font-semibold mb-3">
+                        <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white">
                             Result
                         </h2>
 
-                        <p className="text-xl font-bold text-blue-600">
+                        <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
                             {result.risk_level}
                         </p>
 
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                             Prediction Class: {result.prediction}
                         </p>
 
@@ -145,14 +133,14 @@ export default function LiquidityRisk() {
 
                 {/* Recent Predictions */}
                 {history.length > 0 && (
-                    <div className="mt-6 p-5 bg-gray-50 rounded-xl">
-                        <h3 className="font-semibold mb-3">Recent Predictions</h3>
+                    <div className="mt-6 p-5 bg-gray-50 dark:bg-slate-700 rounded-xl">
+                        <h3 className="font-semibold mb-3 text-gray-800 dark:text-white">Recent Predictions</h3>
                         <div className="space-y-2">
                             {history.map(h => (
-                                <div key={h.id} className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
-                                    <span className="text-sm">{new Date(h.recorded_at).toLocaleDateString()}</span>
-                                    <span className="font-medium">Class {h.liquidity_score}</span>
-                                    <span className="text-sm">{h.risk_label}</span>
+                                <div key={h.id} className="flex justify-between items-center bg-white dark:bg-slate-600 p-3 rounded-lg shadow-sm">
+                                    <span className="text-sm text-gray-700 dark:text-gray-200">{new Date(h.recorded_at).toLocaleDateString()}</span>
+                                    <span className="font-medium text-gray-800 dark:text-gray-100">Class {h.liquidity_score}</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">{h.risk_label}</span>
                                 </div>
                             ))}
                         </div>

@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 
 from database import SessionLocal, engine, Base
 from models import User, Portfolio, CreditPrediction, MarketRiskData, BusinessRisk
@@ -146,15 +147,15 @@ def get_dashboard_stats(email: str, db: Session = Depends(get_db)):
     
     latest_credit = db.query(CreditPrediction).filter(
         CreditPrediction.user_id == user.id
-    ).order_by(CreditPrediction.predicted_at.desc()).first()
+    ).order_by(desc(CreditPrediction.id)).first()
     
     latest_market = db.query(MarketRiskData).filter(
         MarketRiskData.user_id == user.id
-    ).order_by(MarketRiskData.recorded_at.desc()).first()
+    ).order_by(desc(MarketRiskData.id)).first()
     
     latest_business = db.query(BusinessRisk).filter(
         BusinessRisk.user_id == user.id
-    ).order_by(BusinessRisk.recorded_at.desc()).first()
+    ).order_by(desc(BusinessRisk.id)).first()
     
     return {
         "portfolio_value": portfolio_value,

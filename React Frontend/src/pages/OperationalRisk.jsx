@@ -27,9 +27,6 @@ export default function OperationalRisk() {
 
       const res = await predictOperationalRisk(form);
 
-      console.log("API Response:", res.data);
-
-      // safety check
       if (!res.data || res.data.error) {
         throw new Error(res.data?.error || "Invalid response from server");
       }
@@ -38,153 +35,141 @@ export default function OperationalRisk() {
 
     } catch (err) {
       console.error("Prediction Error:", err);
-      setError("⚠️ Failed to fetch prediction. Check backend.");
+      setError("Failed to fetch prediction. Check backend.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: "30px" }}>
+    <div className="p-6 bg-gray-100 dark:bg-slate-900 min-h-screen">
 
-      <h2 style={{ marginBottom: "20px" }}>
-        ⚙️ Operational Risk Analytics
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
+        Operational Risk Analytics
       </h2>
 
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "20px"
-      }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* LEFT: FORM */}
-        <div style={{
-          background: "#fff",
-          padding: "20px",
-          borderRadius: "12px",
-          boxShadow: "0 4px 10px rgba(0,0,0,0.1)"
-        }}>
-
-          <h3 style={{ marginBottom: "15px" }}>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow p-6">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
             Input Parameters
           </h3>
 
-          {/* Inputs */}
-          <div style={{ marginBottom: "12px" }}>
-            <label>Reassignment Count</label>
-            <input type="number" name="reassignment_count"
-              value={form.reassignment_count}
-              onChange={handleChange}
-              style={{ width: "100%", padding: "8px" }} />
-          </div>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1">Reassignment Count</label>
+              <input 
+                type="number" 
+                name="reassignment_count"
+                value={form.reassignment_count}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-          <div style={{ marginBottom: "12px" }}>
-            <label>Reopen Count</label>
-            <input type="number" name="reopen_count"
-              value={form.reopen_count}
-              onChange={handleChange}
-              style={{ width: "100%", padding: "8px" }} />
-          </div>
+            <div>
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1">Reopen Count</label>
+              <input 
+                type="number" 
+                name="reopen_count"
+                value={form.reopen_count}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-          <div style={{ marginBottom: "12px" }}>
-            <label>System Modification Count</label>
-            <input type="number" name="sys_mod_count"
-              value={form.sys_mod_count}
-              onChange={handleChange}
-              style={{ width: "100%", padding: "8px" }} />
-          </div>
+            <div>
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1">System Modification Count</label>
+              <input 
+                type="number" 
+                name="sys_mod_count"
+                value={form.sys_mod_count}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
 
-          <div style={{ marginBottom: "12px" }}>
-            <label>Active</label>
-            <select name="active"
-              value={form.active}
-              onChange={handleChange}
-              style={{ width: "100%", padding: "8px" }}>
-              <option>No</option>
-              <option>Yes</option>
-            </select>
-          </div>
+            <div>
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1">Active</label>
+              <select 
+                name="active"
+                value={form.active}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>No</option>
+                <option>Yes</option>
+              </select>
+            </div>
 
-          <div style={{ marginBottom: "12px" }}>
-            <label>Made SLA</label>
-            <select name="made_sla"
-              value={form.made_sla}
-              onChange={handleChange}
-              style={{ width: "100%", padding: "8px" }}>
-              <option>No</option>
-              <option>Yes</option>
-            </select>
+            <div>
+              <label className="text-sm font-medium text-gray-600 dark:text-gray-300 block mb-1">Made SLA</label>
+              <select 
+                name="made_sla"
+                value={form.made_sla}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>No</option>
+                <option>Yes</option>
+              </select>
+            </div>
           </div>
 
           <button
             onClick={handlePredict}
             disabled={loading}
-            style={{
-              width: "100%",
-              padding: "12px",
-              background: loading
-                ? "#9ca3af"
-                : "linear-gradient(to right, #2563eb, #1d4ed8)",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              fontWeight: "bold",
-              cursor: "pointer"
-            }}
+            className="w-full mt-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-colors disabled:bg-gray-400"
           >
-            {loading ? "⏳ Predicting..." : "🔍 Predict Risk"}
+            {loading ? "Predicting..." : "Predict Risk"}
           </button>
 
-          {/* Error */}
           {error && (
-            <p style={{ color: "red", marginTop: "10px" }}>
+            <p className="text-red-500 dark:text-red-400 mt-3 text-sm">
               {error}
             </p>
           )}
-
         </div>
 
         {/* RIGHT: RESULT */}
-        <div style={{
-          background: "#fff",
-          padding: "20px",
-          borderRadius: "12px",
-          boxShadow: "0 4px 10px rgba(0,0,0,0.1)"
-        }}>
-
-          <h3>Risk Analysis</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow p-6">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+            Risk Analysis
+          </h3>
 
           {!result && !loading && (
-            <p style={{ color: "#888" }}>
+            <p className="text-gray-400 dark:text-gray-500">
               Run prediction to see results
             </p>
           )}
 
           {result && (
-            <>
-              <h2 style={{
-                color: result.prediction === 1 ? "red" : "green"
-              }}>
+            <div className="space-y-4">
+              <h2 className={`text-2xl font-bold ${
+                result.prediction === 1 ? "text-red-500 dark:text-red-400" : "text-green-500 dark:text-green-400"
+              }`}>
                 {result.risk_level || "Unknown"}
               </h2>
 
-              <p>
-                <b>Low:</b>{" "}
-                {((result?.probabilities?.low ?? 0) * 100).toFixed(2)}%
-              </p>
+              <div className="space-y-2">
+                <p className="text-gray-700 dark:text-gray-300">
+                  <b>Low:</b>{" "}
+                  {((result?.probabilities?.low ?? 0) * 100).toFixed(2)}%
+                </p>
 
-              <p>
-                <b>Medium:</b>{" "}
-                {((result?.probabilities?.medium ?? 0) * 100).toFixed(2)}%
-              </p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  <b>Medium:</b>{" "}
+                  {((result?.probabilities?.medium ?? 0) * 100).toFixed(2)}%
+                </p>
 
-              <p>
-                <b>High:</b>{" "}
-                {((result?.probabilities?.high ?? 0) * 100).toFixed(2)}%
-              </p>
-            </>
+                <p className="text-gray-700 dark:text-gray-300">
+                  <b>High:</b>{" "}
+                  {((result?.probabilities?.high ?? 0) * 100).toFixed(2)}%
+                </p>
+              </div>
+            </div>
           )}
-
         </div>
 
       </div>
