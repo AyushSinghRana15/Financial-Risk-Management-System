@@ -16,25 +16,38 @@ import {
 
 export default function Dashboard() {
 
-    // 🔥 AI Risk Alerts State
+    // Parse email from stored JSON: { name, email }
+    const storedUser = (() => {
+        try { return JSON.parse(localStorage.getItem('user') || '{}'); }
+        catch { return {}; }
+    })();
+    const userEmail = storedUser.email || "";
+
+    const [stats, setStats] = useState(null);
+    const [portfolio, setPortfolio] = useState([]);
     const [alerts, setAlerts] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // 🔥 Fetch AI Risk Alerts
     useEffect(() => {
-        const fetchRiskAlerts = async () => {
-            try {
-                const portfolio = {
-                    Stocks: 40,
-                    Bonds: 20,
-                    Crypto: 20,
-                    Gold: 10,
-                    Oil: 10
-                };
+        if (!userEmail) {
+            setLoading(false);
+            return;
+        }
 
+        const fetchData = async () => {
+            try {
+                const [statsRes, portfolioRes] = await Promise.all([
+                    axios.get(`http://localhost:8000/dashboard/stats?email=${encodeURIComponent(userEmail)}`),
+                    axios.get(`http://localhost:8000/portfolio/get/${encodeURIComponent(userEmail)}`)
+                ]);
+
+                setStats(statsRes.data);
+                setPortfolio(portfolioRes.data.portfolio || []);
+
+                const portfolioData = portfolioRes.data.portfolio || [];
                 const prompt = `
                 Analyze this portfolio and return ONLY short risk alerts:
-                ${JSON.stringify(portfolio)}
+                ${JSON.stringify(portfolioData)}
 
                 Rules:
                 - Max 3 alerts
@@ -42,58 +55,57 @@ export default function Dashboard() {
                 - No explanation
                 `;
 
-                const res = await axios.post("http://localhost:8000/ai-risk-alerts", {
-                    prompt
-                });
-
-                const text = res.data.response || "";
-
-                const parsedAlerts = text
-                    .split("\n")
-                    .map(a => a.trim())
-                    .filter(a => a.length > 0);
-
+                const alertsRes = await axios.post("http://localhost:8000/ai-risk-alerts", { prompt });
+                const text = alertsRes.data.response || "";
+                const parsedAlerts = text.split("\n").map(a => a.trim()).filter(a => a.length > 0);
                 setAlerts(parsedAlerts);
 
             } catch (err) {
                 console.error(err);
-                setAlerts(["Failed to load AI risk alerts"]);
+                setAlerts(["Failed to load data"]);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchRiskAlerts();
-    }, []);
+        fetchData();
+    }, [userEmail]);
+
+    const formatCurrency = (value) => {
+        if (!value && value !== 0) return "—";
+        if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+        if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
+        return `$${value.toFixed(0)}`;
+    };
 
     const kpiCards = [
         {
             title: "Portfolio Value",
-            value: "$12.4M",
-            change: "+2.3% today",
+            value: stats ? formatCurrency(stats.portfolio_value) : "—",
+            change: stats ? (stats.portfolio_value > 0 ? "Live from DB" : "No assets yet") : "Loading...",
             color: "blue",
             link: "/portfolio-analytics"
         },
         {
             title: "Credit Risk Exposure",
-            value: "34%",
-            change: "Moderate",
+            value: stats ? (stats.credit_risk_score ? `${stats.credit_risk_score.toFixed(0)}%` : "N/A") : "—",
+            change: stats ? (stats.credit_risk_label || "No predictions yet") : "Loading...",
             color: "purple",
             link: "/credit-risk"
         },
         {
             title: "Market Volatility",
-            value: "18%",
-            change: "Medium",
+            value: stats ? (stats.market_risk_score ? `${stats.market_risk_score.toFixed(1)}%` : "N/A") : "—",
+            change: stats ? (stats.market_risk_level || "No predictions yet") : "Loading...",
             color: "red",
             link: "/market-risk"
         },
         {
-            title: "Overall Risk Score",
-            value: "78 / 100",
-            change: "Healthy",
+            title: "Business Risk Score",
+            value: stats ? (stats.business_risk_score ? `${stats.business_risk_score.toFixed(0)}%` : "N/A") : "—",
+            change: stats ? (stats.business_risk_label || "No predictions yet") : "Loading...",
             color: "green",
-            link: "/risk-analytics"
+            link: "/business-risk"
         }
     ];
 
@@ -115,7 +127,7 @@ export default function Dashboard() {
             {/* KPI SCROLL */}
             <div className="relative mb-10 overflow-hidden">
                 <div className="w-full h-[140px] overflow-hidden relative">
-                    <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused]">
+                    <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused] will-change-transform">
                         {[...kpiCards, ...kpiCards].map((card, index) => (
                             <Link to={card.link} key={index}>
                                 <div className={`w-[260px] flex-shrink-0 bg-white p-5 rounded-xl shadow border-l-4 ${colorMap[card.color]} cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 hover:rotate-1`}>
@@ -167,13 +179,16 @@ export default function Dashboard() {
 
                     <ResponsiveContainer width="100%" height={250}>
                         <PieChart>
-                            <Pie data={[
-                                { name: "Stocks", value: 40 },
-                                { name: "Bonds", value: 20 },
-                                { name: "Crypto", value: 20 },
-                                { name: "Gold", value: 10 },
-                                { name: "Oil", value: 10 }
-                            ]} dataKey="value" nameKey="name" outerRadius={80} label>
+                            <Pie 
+                                data={portfolio.length > 0 
+                                    ? portfolio.map(a => ({ name: a.asset_name, value: a.total_value }))
+                                    : [{ name: "No Assets", value: 1 }]
+                                } 
+                                dataKey="value" 
+                                nameKey="name" 
+                                outerRadius={80} 
+                                label
+                            >
                                 {["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6"].map((c, i) => (
                                     <Cell key={i} fill={c} />
                                 ))}

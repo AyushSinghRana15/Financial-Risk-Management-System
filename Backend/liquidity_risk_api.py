@@ -3,13 +3,26 @@
 # ----------------------------
 import pandas as pd
 import joblib
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 import numpy as np
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from database import SessionLocal
+from models import User, LiquidityRisk
 
 # ----------------------------
 # ROUTER INIT
 # ----------------------------
 router = APIRouter()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # ----------------------------
 # LOAD MODEL & SCALER
@@ -102,7 +115,7 @@ def sample():
 # PREDICT API
 # ----------------------------
 @router.post("/predict")
-def predict(data: dict):
+def predict(data: dict, db: Session = Depends(get_db)):
 
     try:
         # ----------------------------
@@ -160,14 +173,50 @@ def predict(data: dict):
         # ----------------------------
         # RESPONSE
         # ----------------------------
-        return {
+        result = {
             "prediction": pred,
             "risk_level": risk_level,
             "input_used": dict(zip(features, values))
         }
+
+        email = data.get("email")
+        if email:
+            user = db.query(User).filter(User.email == email).first()
+            if user:
+                record = LiquidityRisk(
+                    user_id=user.id,
+                    risk_score=float(pred),
+                    risk_label=risk_level
+                )
+                db.add(record)
+                db.commit()
+
+        return result
 
     except Exception as e:
         print("Prediction Error:", e)  # console debug
         return {
             "error": str(e)
         }
+
+@router.get("/history")
+def get_liquidity_history(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return {"history": []}
+    
+    records = db.query(LiquidityRisk).filter(
+        LiquidityRisk.user_id == user.id
+    ).order_by(LiquidityRisk.recorded_at.desc()).limit(10).all()
+    
+    return {
+        "history": [
+            {
+                "id": r.id,
+                "risk_score": r.risk_score,
+                "risk_label": r.risk_label,
+                "recorded_at": r.recorded_at.isoformat() if r.recorded_at else None
+            }
+            for r in records
+        ]
+    }

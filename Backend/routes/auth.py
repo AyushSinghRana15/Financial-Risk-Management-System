@@ -19,19 +19,20 @@ class GoogleUser(BaseModel):
 
 
 # =========================
-# 🔹 GOOGLE LOGIN (🔥 NEW)
+# 🔹 GOOGLE LOGIN (FIXED)
 # =========================
 @router.post("/google")
 def google_login(data: GoogleUser, db: Session = Depends(get_db)):
 
     user = db.query(User).filter(User.email == data.email).first()
 
-    # 🆕 Create user if not exists
+    # Create user if not exists
     if not user:
         user = User(
-            username=data.name,     # ⚠️ matches your DB
+            name=data.name,
             email=data.email,
-            is_verified=1           # Google users are verified
+            password_hash="google_oauth",
+            is_verified=True
         )
         db.add(user)
         db.commit()
@@ -39,13 +40,13 @@ def google_login(data: GoogleUser, db: Session = Depends(get_db)):
 
     return {
         "id": user.id,
-        "name": user.username,
+        "name": user.name,
         "email": user.email
     }
 
 
 # =========================
-# 🔹 SIGNUP
+# 🔹 SIGNUP (FIXED)
 # =========================
 @router.post("/signup")
 def signup(user: dict, db: Session = Depends(get_db)):
@@ -57,11 +58,11 @@ def signup(user: dict, db: Session = Depends(get_db)):
     token = str(uuid.uuid4())
 
     new_user = User(
-        username=user["name"],
+        name=user["name"],
         email=user["email"],
-        password=user["password"],  # ⚠️ hash later
+        password_hash=user["password"],  # TODO: hash this
         verification_token=token,
-        is_verified=0
+        is_verified=False
     )
 
     db.add(new_user)
@@ -83,7 +84,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=400, detail="Invalid token")
 
-    user.is_verified = 1
+    user.is_verified = True
     user.verification_token = None
     db.commit()
 
@@ -91,7 +92,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
 
 
 # =========================
-# 🔹 LOGIN
+# 🔹 LOGIN (FIXED)
 # =========================
 @router.post("/login")
 def login(user: dict, db: Session = Depends(get_db)):
@@ -101,14 +102,13 @@ def login(user: dict, db: Session = Depends(get_db)):
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if db_user.is_verified == 0:
+    if not db_user.is_verified:
         raise HTTPException(status_code=403, detail="Please verify your email first")
 
-    if db_user.password != user["password"]:
+    if db_user.password_hash != user["password"]:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     return {
-        "name": db_user.username,
-        "email": db_user.email,
-        "role": db_user.role
+        "name": db_user.name,
+        "email": db_user.email
     }

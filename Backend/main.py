@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from database import SessionLocal, engine, Base
-from models import User
+from models import User, Portfolio, CreditPrediction, MarketRiskData, BusinessRisk
 
 # Routers
 from business_risk_api import router as business_router
@@ -28,11 +28,6 @@ Base.metadata.create_all(bind=engine)
 # ================= APP =================
 app = FastAPI()
 
-#portfolio_router = APIRouter(prefix="/portfolio", tags=["Portfolio"])
-
-app.include_router(portfolio_router)
-
-# ================= CORS =================
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -43,6 +38,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(portfolio_router)
 
 # ================= DB DEPENDENCY =================
 def get_db():
@@ -88,15 +85,35 @@ def google_auth(data: dict, db: Session = Depends(get_db)):
     }
 
 # ================= PROFILE APIs =================
+@app.put("/profile")
+def update_profile(data: dict, db: Session = Depends(get_db)):
+
+    email = data.get("email")
+
+    user = db.query(User).filter(User.email == email).first()
+
+    if user:
+        user.name = data.get("name")
+        user.age = data.get("age")
+        user.risk_profile = data.get("risk_profile")
+
+        db.commit()
+        db.refresh(user)
+
+    return {"message": "Profile updated"}
+
+from fastapi import Query
+
 @app.get("/profile")
-def get_profile(db: Session = Depends(get_db)):
-    user = db.query(User).first()
+def get_profile(email: str = Query(...), db: Session = Depends(get_db)):
+    
+    user = db.query(User).filter(User.email == email).first()
 
     if not user:
         user = User(
-            username="ayush",
-            email="ayush@gmail.com",
-            password="google_oauth",
+            name=email.split("@")[0],
+            email=email,
+            password_hash="google_oauth",
             age=22,
             risk_profile="Medium"
         )
@@ -105,26 +122,50 @@ def get_profile(db: Session = Depends(get_db)):
         db.refresh(user)
 
     return {
-        "name": user.username,
+        "name": user.name,
         "email": user.email,
         "age": user.age,
         "risk_profile": user.risk_profile
     }
 
-@app.put("/profile")
-def update_profile(data: dict, db: Session = Depends(get_db)):
-    user = db.query(User).first()
 
-    if user:
-        user.username = data.get("name")
-        user.email = data.get("email")
-        user.age = data.get("age")
-        user.risk_profile = data.get("risk_profile")
+# ================= DASHBOARD STATS =================
+@app.get("/dashboard/stats")
+def get_dashboard_stats(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return {
+            "portfolio_value": 0,
+            "credit_risk_score": None,
+            "market_risk_level": None,
+            "business_risk_score": None
+        }
+    
+    portfolio_assets = db.query(Portfolio).filter(Portfolio.user_id == user.id).all()
+    portfolio_value = sum(a.total_value or 0 for a in portfolio_assets)
+    
+    latest_credit = db.query(CreditPrediction).filter(
+        CreditPrediction.user_id == user.id
+    ).order_by(CreditPrediction.predicted_at.desc()).first()
+    
+    latest_market = db.query(MarketRiskData).filter(
+        MarketRiskData.user_id == user.id
+    ).order_by(MarketRiskData.recorded_at.desc()).first()
+    
+    latest_business = db.query(BusinessRisk).filter(
+        BusinessRisk.user_id == user.id
+    ).order_by(BusinessRisk.recorded_at.desc()).first()
+    
+    return {
+        "portfolio_value": portfolio_value,
+        "credit_risk_score": latest_credit.risk_score * 100 if latest_credit else None,
+        "credit_risk_label": latest_credit.risk_label if latest_credit else None,
+        "market_risk_level": latest_market.risk_level if latest_market else None,
+        "market_risk_score": latest_market.risk_score * 100 if latest_market else None,
+        "business_risk_score": latest_business.risk_score * 100 if latest_business else None,
+        "business_risk_label": latest_business.risk_level if latest_business else None
+    }
 
-        db.commit()
-        db.refresh(user)
-
-    return {"message": "Profile updated"}
 
 # ================= AI INSIGHTS (Portfolio Based) =================
 @app.get("/ai-insights")

@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 function FinancialRisk() {
 
+  const userEmail = localStorage.getItem('user') || "";
+  
   const [form, setForm] = useState({
+    email: userEmail,
     ROA: 0.3,
     Leverage: 0.5,
     Asset_Turnover: 1.0,
@@ -12,6 +15,15 @@ function FinancialRisk() {
   });
 
   const [result, setResult] = useState(null);
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    if (userEmail) {
+      axios.get(`http://127.0.0.1:8000/financial/history?email=${encodeURIComponent(userEmail)}`)
+        .then(res => setHistory(res.data.history || []))
+        .catch(console.error);
+    }
+  }, [userEmail, result]);
 
   const handleChange = (key, value) => {
     setForm({ ...form, [key]: parseFloat(value) });
@@ -21,7 +33,7 @@ function FinancialRisk() {
     try {
       const res = await axios.post(
         "http://127.0.0.1:8000/financial/predict",
-        form
+        { ...form, email: userEmail }
       );
       setResult(res.data);
     } catch (err) {
@@ -104,6 +116,26 @@ function FinancialRisk() {
           >
             {result.result}
           </div>
+        </div>
+      )}
+
+      {history.length > 0 && (
+        <div style={{ marginTop: 20 }}>
+          <h3 style={{ fontWeight: "bold", marginBottom: 10 }}>Recent Predictions</h3>
+          {history.map(h => (
+            <div key={h.id} style={{ 
+              display: "flex", 
+              justifyContent: "space-between", 
+              padding: "10px", 
+              marginBottom: "5px", 
+              background: "#f8f9fa",
+              borderRadius: "5px"
+            }}>
+              <span style={{ fontSize: 12 }}>{new Date(h.recorded_at).toLocaleDateString()}</span>
+              <span>{(h.risk_score * 100).toFixed(1)}%</span>
+              <span>{h.risk_label}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>

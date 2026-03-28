@@ -30,7 +30,7 @@ else:
         max_overflow=10,
         pool_pre_ping=True,
         pool_recycle=300,
-        connect_args={"sslmode": "require"}
+        connect_args={"sslmode": "require", "channel_binding": "require"}
     )
 
 SessionLocal = sessionmaker(

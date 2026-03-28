@@ -16,12 +16,15 @@ import { FaChartLine } from "react-icons/fa";
 
 function MarketRisk() {
 
+    const userEmail = localStorage.getItem('user') || "";
+    
     const [features, setFeatures] = useState([]);
     const [inputs, setInputs] = useState({});
     const [prediction, setPrediction] = useState(null);
     const [riskLevel, setRiskLevel] = useState("");
     const [confidence, setConfidence] = useState("95%");
     const [rollingData, setRollingData] = useState([]);
+    const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -33,7 +36,13 @@ function MarketRisk() {
                 res.data.features.forEach(f => init[f] = 0);
                 setInputs(init);
             });
-    }, []);
+        
+        if (userEmail) {
+            axios.get(`http://localhost:8000/market_risk_history?email=${encodeURIComponent(userEmail)}`)
+                .then(res => setHistory(res.data.history || []))
+                .catch(console.error);
+        }
+    }, [userEmail]);
 
     // 🔥 FIXED CLEAN NAME FUNCTION
     const cleanFeatureName = (feature) => {
@@ -98,7 +107,7 @@ function MarketRisk() {
         try {
             const res = await axios.post(
                 "http://127.0.0.1:8000/predict_market_risk",
-                inputs
+                { ...inputs, email: userEmail }
             );
 
             const varValue = res.data.predicted_var;
@@ -119,6 +128,12 @@ function MarketRisk() {
             }
 
             setRollingData(series);
+
+            if (userEmail) {
+                axios.get(`http://localhost:8000/market_risk_history?email=${encodeURIComponent(userEmail)}`)
+                    .then(res => setHistory(res.data.history || []))
+                    .catch(console.error);
+            }
 
         } catch (err) {
             console.error(err);
@@ -161,17 +176,14 @@ function MarketRisk() {
                 </select>
             </div>
 
-            <div className="grid grid-cols-12 gap-6">
-
-                {/* LEFT */}
-                <div className="col-span-4 space-y-4">
-
-                    <h2 className="font-semibold text-lg">Market Indicators</h2>
-
+            {/* Market Indicators - 3 Column Grid */}
+            <div className="bg-white p-6 rounded-xl shadow">
+                <h2 className="font-semibold text-lg mb-4">Market Indicators</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {features.map((feature) => (
-                        <div key={feature} className="bg-white p-4 rounded-xl shadow border">
-
-                            <label className="text-sm font-medium text-gray-700">
+                        <div key={feature} className="bg-gray-50 p-3 rounded-lg border border-gray-100 hover:border-blue-200 transition-colors">
+                            <label className="text-xs font-medium text-gray-600 block mb-1">
                                 {cleanFeatureName(feature)}
                             </label>
 
@@ -179,126 +191,120 @@ function MarketRisk() {
                                 type="number"
                                 step="0.01"
                                 value={inputs[feature] || ""}
-                                placeholder="e.g. 0.01 or -0.02"
+                                placeholder="0.00"
                                 onChange={(e) =>
                                     handleChange(feature, e.target.value)
                                 }
-                                className="mt-2 w-full px-3 py-2 border rounded-lg"
+                                className="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
 
                             <p className="text-xs text-gray-400 mt-1">
-                                Enter value (0.01 = +1%, -0.02 = -2%)
+                                ±1% = 0.01
                             </p>
-
                         </div>
                     ))}
-
-                    <button
-                        onClick={predictRisk}
-                        disabled={loading}
-                        className="w-full py-3 bg-blue-600 text-white rounded-xl"
-                    >
-                        {loading ? "Predicting..." : "Predict Market Risk"}
-                    </button>
-
                 </div>
 
-                {/* RIGHT */}
-                <div className="col-span-8 space-y-6">
-
-                    {prediction === null ? (
-                        <div className="text-center text-gray-400 mt-20">
-                            Run prediction to see results
-                        </div>
-                    ) : (
-                        <>
-                            {/* KPI */}
-                            <div className="grid grid-cols-3 gap-4">
-
-                                <div className="bg-white p-5 rounded-xl shadow flex justify-between">
-                                    <div>
-                                        <p className="text-gray-500 text-sm">VaR</p>
-                                        <h2 className="text-2xl font-bold text-blue-600">
-                                            {(absVar * 100).toFixed(2)}%
-                                        </h2>
-                                    </div>
-                                    <FaChartLine className="text-blue-500 text-xl" />
-                                </div>
-
-                                <div className="bg-white p-5 rounded-xl shadow">
-                                    <p className="text-gray-500 text-sm">Risk</p>
-                                    <p className="font-semibold">{riskLevel}</p>
-                                </div>
-
-                                <div className="bg-white p-5 rounded-xl shadow">
-                                    <p className="text-gray-500 text-sm">Confidence</p>
-                                    <p className="font-semibold">{confidence}</p>
-                                </div>
-
-                            </div>
-
-                            {/* HYBRID GAUGE */}
-                            <div className="bg-white p-5 rounded-xl shadow">
-                                <h3 className="font-semibold mb-4">Risk Visualization</h3>
-
-                                <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
-                                    <div
-                                        className={`h-full ${getColor()} transition-all`}
-                                        style={{ width: `${Math.min(absVar * 200, 100)}%` }}
-                                    />
-
-                                    <div
-                                        className="absolute top-[-8px] text-xs"
-                                        style={{ left: `${Math.min(absVar * 200, 100)}%` }}
-                                    >
-                                        ▲
-                                    </div>
-                                </div>
-
-                                <div className="flex justify-between text-xs text-gray-500 mt-2">
-                                    <span>Low</span>
-                                    <span>Moderate</span>
-                                    <span>High</span>
-                                </div>
-
-                                <p className="mt-2 text-sm">
-                                    VaR: <b>{(absVar * 100).toFixed(2)}%</b>
-                                </p>
-                            </div>
-
-                            {/* BAR */}
-                            <div className="bg-white p-5 rounded-xl shadow">
-                                <ResponsiveContainer width="100%" height={250}>
-                                    <BarChart data={chartData}>
-                                        <XAxis dataKey="name" />
-                                        <YAxis />
-                                        <Tooltip />
-                                        <CartesianGrid strokeDasharray="3 3" />
-                                        <Bar dataKey="value" fill="#3b82f6" />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                            {/* LINE */}
-                            <div className="bg-white p-5 rounded-xl shadow">
-                                <h3 className="font-semibold mb-4">Rolling VaR</h3>
-
-                                <ResponsiveContainer width="100%" height={250}>
-                                    <LineChart data={rollingData}>
-                                        <XAxis dataKey="day" />
-                                        <YAxis />
-                                        <Tooltip />
-                                        <CartesianGrid strokeDasharray="3 3" />
-                                        <Line dataKey="value" stroke="#ef4444" />
-                                    </LineChart>
-                                </ResponsiveContainer>
-                            </div>
-
-                        </>
-                    )}
-
-                </div>
+                <button
+                    onClick={predictRisk}
+                    disabled={loading}
+                    className="w-full mt-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transform hover:scale-[1.01] transition-all shadow-md"
+                >
+                    {loading ? "Analyzing Market Risk..." : "Predict Market Risk"}
+                </button>
             </div>
+
+            {/* Results Section */}
+            {prediction === null ? (
+                <div className="bg-white p-12 rounded-xl shadow text-center text-gray-400">
+                    Run prediction to see results
+                </div>
+            ) : (
+                <>
+                    {/* KPI Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-white p-5 rounded-xl shadow flex justify-between">
+                            <div>
+                                <p className="text-gray-500 text-sm">VaR</p>
+                                <h2 className="text-2xl font-bold text-blue-600">
+                                    {(absVar * 100).toFixed(2)}%
+                                </h2>
+                            </div>
+                            <FaChartLine className="text-blue-500 text-xl" />
+                        </div>
+
+                        <div className="bg-white p-5 rounded-xl shadow">
+                            <p className="text-gray-500 text-sm">Risk</p>
+                            <p className="font-semibold">{riskLevel}</p>
+                        </div>
+
+                        <div className="bg-white p-5 rounded-xl shadow">
+                            <p className="text-gray-500 text-sm">Confidence</p>
+                            <p className="font-semibold">{confidence}</p>
+                        </div>
+                    </div>
+
+                    {/* HYBRID GAUGE */}
+                    <div className="bg-white p-5 rounded-xl shadow">
+                        <h3 className="font-semibold mb-4">Risk Visualization</h3>
+
+                        <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                                className={`h-full ${getColor()} transition-all`}
+                                style={{ width: `${Math.min(absVar * 200, 100)}%` }}
+                            />
+
+                            <div
+                                className="absolute top-[-8px] text-xs"
+                                style={{ left: `${Math.min(absVar * 200, 100)}%` }}
+                            >
+                                ▲
+                            </div>
+                        </div>
+
+                        <div className="flex justify-between text-xs text-gray-500 mt-2">
+                            <span>Low</span>
+                            <span>Moderate</span>
+                            <span>High</span>
+                        </div>
+
+                        <p className="mt-2 text-sm">
+                            VaR: <b>{(absVar * 100).toFixed(2)}%</b>
+                        </p>
+                    </div>
+
+                    {/* Charts - 2 Column Layout */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* BAR */}
+                        <div className="bg-white p-5 rounded-xl shadow">
+                            <ResponsiveContainer width="100%" height={250}>
+                                <BarChart data={chartData}>
+                                    <XAxis dataKey="name" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <Bar dataKey="value" fill="#3b82f6" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+
+                        {/* LINE */}
+                        <div className="bg-white p-5 rounded-xl shadow">
+                            <h3 className="font-semibold mb-4">Rolling VaR</h3>
+
+                            <ResponsiveContainer width="100%" height={250}>
+                                <LineChart data={rollingData}>
+                                    <XAxis dataKey="day" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <Line dataKey="value" stroke="#ef4444" />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

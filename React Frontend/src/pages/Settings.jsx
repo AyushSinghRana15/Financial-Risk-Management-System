@@ -1,14 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 function Settings() {
 
+    const storedUser = localStorage.getItem('user');
+    let userEmail = "";
+    let userName = "";
+    let userPicture = "";
+    
+    try {
+        if (storedUser && storedUser !== "[object Object]") {
+            const parsed = JSON.parse(storedUser);
+            userEmail = parsed.email || "";
+            userName = parsed.name || "";
+            userPicture = parsed.picture || "";
+        }
+    } catch (e) {
+        console.error("Failed to parse user from localStorage:", e);
+    }
+    
     const [form, setForm] = useState({
-        name: "",
-        email: "",
+        name: userName,
+        email: userEmail,
         risk: "Medium",
         alerts: true,
         realtime: true
     });
+
+    const [loading, setLoading] = useState(true);
+    const [saveSuccess, setSaveSuccess] = useState(false);
+
+    useEffect(() => {
+        if (userEmail) {
+            axios.get(`http://localhost:8000/profile?email=${encodeURIComponent(userEmail)}`)
+                .then(res => {
+                    const data = res.data;
+                    setForm(prev => ({
+                        ...prev,
+                        name: data.name || userName || "",
+                        email: data.email || userEmail,
+                        risk: data.risk_profile || "Medium"
+                    }));
+                })
+                .catch(console.error)
+                .finally(() => setLoading(false));
+        } else {
+            setLoading(false);
+        }
+    }, [userEmail]);
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -18,9 +57,20 @@ function Settings() {
         setForm({ ...form, [key]: !form[key] });
     };
 
-    const handleSave = () => {
-        console.log("Saved:", form);
-        alert("Settings saved (connect backend next)");
+    const handleSave = async () => {
+        try {
+            await axios.put("http://localhost:8000/profile", {
+                email: userEmail,
+                name: form.name,
+                age: 22,
+                risk_profile: form.risk
+            });
+            setSaveSuccess(true);
+            setTimeout(() => setSaveSuccess(false), 3000);
+        } catch (err) {
+            console.error(err);
+            alert("Failed to save settings");
+        }
     };
 
     return (
@@ -37,7 +87,40 @@ function Settings() {
                     </p>
                 </div>
 
-                {/* Profile Info (Read-only mindset but editable optional) */}
+                {loading ? (
+                    <div className="text-center py-10">Loading...</div>
+                ) : (
+                <>
+                {/* Google Profile Card */}
+                {(userPicture || form.name || form.email) && (
+                    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-2xl shadow-lg text-white">
+                        <div className="flex items-center gap-4">
+                            {userPicture ? (
+                                <img 
+                                    src={userPicture} 
+                                    alt="Profile" 
+                                    className="w-16 h-16 rounded-full border-2 border-white shadow-md"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 rounded-full bg-white/30 flex items-center justify-center text-2xl font-bold">
+                                    {form.name ? form.name.charAt(0).toUpperCase() : "?"}
+                                </div>
+                            )}
+                            <div>
+                                <h2 className="text-xl font-bold">{form.name || "User"}</h2>
+                                <p className="text-blue-100 text-sm">{form.email}</p>
+                                <span className="inline-flex items-center gap-1 mt-2 px-2 py-1 bg-white/20 rounded-full text-xs">
+                                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+                                    </svg>
+                                    Signed in with Google
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Profile Info */}
                 <div className="bg-white p-6 rounded-2xl shadow border space-y-4">
                     <h2 className="text-lg font-semibold text-gray-700">
                         Profile Info
@@ -57,8 +140,8 @@ function Settings() {
                         name="email"
                         placeholder="Email"
                         value={form.email}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        disabled
+                        className="w-full px-3 py-2 border rounded-lg bg-gray-50"
                     />
                 </div>
 
@@ -112,7 +195,17 @@ function Settings() {
                 >
                     Save Changes
                 </button>
-
+                
+                {saveSuccess && (
+                    <div className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-bounce">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Settings saved successfully!
+                    </div>
+                )}
+                </>
+                )}
             </div>
         </div>
     );

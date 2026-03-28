@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const API = "http://localhost:8000";
 
@@ -16,9 +17,19 @@ const FEATURES = [
 ];
 
 export default function BusinessRisk() {
+  const userEmail = localStorage.getItem('user') || "";
   const [values, setValues] = useState({});
   const [result, setResult] = useState(null);
+  const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (userEmail) {
+      axios.get(`${API}/business_risk_history?email=${encodeURIComponent(userEmail)}`)
+        .then(res => setHistory(res.data.history || []))
+        .catch(console.error);
+    }
+  }, [userEmail, result]);
 
   const handleChange = (key, value) => {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -26,7 +37,7 @@ export default function BusinessRisk() {
 
   const handlePredict = async () => {
     setLoading(true);
-    const payload = {};
+    const payload = { email: userEmail };
     FEATURES.forEach((f) => {
       payload[f.key] = parseFloat(values[f.key]) || 0;
     });
@@ -42,7 +53,7 @@ export default function BusinessRisk() {
       console.error(err);
     }
     setLoading(false);
-    document.querySelector('[style*="overflow"]')?.scrollTo({ top: 0, behavior: "smooth" }); //for automatic scrool upper after prediction
+    document.querySelector('[style*="overflow"]')?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const getRiskColor = (level) => {

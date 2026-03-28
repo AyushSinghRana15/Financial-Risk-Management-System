@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { predictFraudRisk } from "../services/api";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function ECommerceFraudRisk() {
 
+  const userEmail = localStorage.getItem('user') || "";
+  
   const [form, setForm] = useState({
     amount: 100,
     quantity: 1,
@@ -18,6 +20,15 @@ export default function ECommerceFraudRisk() {
   });
 
   const [result, setResult] = useState(null);
+  const [history, setHistory] = useState([]);
+
+  useEffect(() => {
+    if (userEmail) {
+      axios.get(`http://localhost:8000/fraud_history?email=${encodeURIComponent(userEmail)}`)
+        .then(res => setHistory(res.data.history || []))
+        .catch(console.error);
+    }
+  }, [userEmail, result]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,6 +37,7 @@ export default function ECommerceFraudRisk() {
 
   const handlePredict = async () => {
     const data = {
+      email: userEmail,
       amount: Number(form.amount),
       quantity: Number(form.quantity),
       payment_method: form.paymentMethod,
@@ -42,7 +54,7 @@ export default function ECommerceFraudRisk() {
     console.log("Sending data:", data);
 
     try {
-      const res = await predictFraudRisk(data);
+      const res = await axios.post("http://localhost:8000/predict_fraud", data);
       setResult(res.data);
     } catch (error) {
       console.error(error);
@@ -171,6 +183,27 @@ export default function ECommerceFraudRisk() {
               {(result.fraud_probability * 100).toFixed(2)}%
             </strong>
           </p>
+        </div>
+      )}
+
+      {/* Recent Predictions */}
+      {history.length > 0 && (
+        <div style={{ marginTop: "20px" }}>
+          <h3 style={{ fontWeight: "bold", marginBottom: "10px" }}>Recent Predictions</h3>
+          {history.map(h => (
+            <div key={h.id} style={{ 
+              display: "flex", 
+              justifyContent: "space-between", 
+              padding: "10px", 
+              marginBottom: "5px", 
+              background: "#f8f9fa",
+              borderRadius: "5px"
+            }}>
+              <span style={{ fontSize: 12 }}>{new Date(h.predicted_at).toLocaleDateString()}</span>
+              <span>${h.amount}</span>
+              <span>{h.label}</span>
+            </div>
+          ))}
         </div>
       )}
 

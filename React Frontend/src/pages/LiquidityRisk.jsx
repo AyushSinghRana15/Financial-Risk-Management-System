@@ -3,10 +3,13 @@ import axios from "axios";
 
 export default function LiquidityRisk() {
 
+    const userEmail = localStorage.getItem('user') || "";
+    
     const [features, setFeatures] = useState([]);
     const [labels, setLabels] = useState([]);
     const [formData, setFormData] = useState({});
     const [result, setResult] = useState(null);
+    const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const API_URL = "http://127.0.0.1:8000/liquidity";
@@ -29,8 +32,14 @@ export default function LiquidityRisk() {
             console.error("Feature API Error:", err);
             alert("Backend not connected");
               
-          } );
-    }, []);
+          });
+        
+        if (userEmail) {
+            axios.get(`${API_URL}/history?email=${encodeURIComponent(userEmail)}`)
+                .then(res => setHistory(res.data.history || []))
+                .catch(console.error);
+        }
+    }, [userEmail]);
 
     // ----------------------------
     // HANDLE CHANGE
@@ -52,13 +61,18 @@ export default function LiquidityRisk() {
 
         const res = await axios.post(
             `${API_URL}/predict`,
-            formData
+            { ...formData, email: userEmail }
         );
 
-        // ✅ YAHI PAR LOG KARNA HAI
         console.log("Prediction Response:", res.data);
 
         setResult(res.data);
+
+        if (userEmail) {
+            axios.get(`${API_URL}/history?email=${encodeURIComponent(userEmail)}`)
+                .then(res => setHistory(res.data.history || []))
+                .catch(console.error);
+        }
 
     } catch (err) {
         console.error("Prediction Error:", err);
@@ -130,6 +144,22 @@ export default function LiquidityRisk() {
                             Prediction Class: {result.prediction}
                         </p>
 
+                    </div>
+                )}
+
+                {/* Recent Predictions */}
+                {history.length > 0 && (
+                    <div className="mt-6 p-5 bg-gray-50 rounded-xl">
+                        <h3 className="font-semibold mb-3">Recent Predictions</h3>
+                        <div className="space-y-2">
+                            {history.map(h => (
+                                <div key={h.id} className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
+                                    <span className="text-sm">{new Date(h.recorded_at).toLocaleDateString()}</span>
+                                    <span className="font-medium">Class {h.liquidity_score}</span>
+                                    <span className="text-sm">{h.risk_label}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
 

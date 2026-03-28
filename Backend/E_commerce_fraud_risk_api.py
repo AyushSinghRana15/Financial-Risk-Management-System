@@ -1,9 +1,21 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 import pandas as pd
 import joblib
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from database import SessionLocal
+from models import User, FraudPrediction
 
 router = APIRouter()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # -------------------------------
 # Load Model & Features
@@ -53,7 +65,7 @@ device_map = {
 # -------------------------------
 
 @router.post("/predict_fraud")
-def predict_fraud(data: dict):
+def predict_fraud(data: dict, db: Session = Depends(get_db)):
     try:
         # ✅ correct feature order dataframe
         df = pd.DataFrame(columns=features)
@@ -85,11 +97,53 @@ def predict_fraud(data: dict):
         prediction = model.predict(df)[0]
         probability = model.predict_proba(df)[0][1]
 
-        return {
+        result = {
             "prediction": int(prediction),
             "fraud_probability": float(probability),
             "label": "Fraud" if prediction == 1 else "Legitimate"
         }
 
+        email = data.get("email")
+        if email:
+            user = db.query(User).filter(User.email == email).first()
+            if user:
+                record = FraudPrediction(
+                    user_id=user.id,
+                    amount=float(data.get("amount", 0)),
+                    payment_method=data.get("payment_method", ""),
+                    product_category=data.get("product_category", ""),
+                    fraud_probability=float(probability),
+                    label=result["label"]
+                )
+                db.add(record)
+                db.commit()
+
+        return result
+
     except Exception as e:
         return {"error": str(e)}
+
+@router.get("/fraud_history")
+def get_fraud_history(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return {"history": []}
+    
+    records = db.query(FraudPrediction).filter(
+        FraudPrediction.user_id == user.id
+    ).order_by(FraudPrediction.predicted_at.desc()).limit(10).all()
+    
+    return {
+        "history": [
+            {
+                "id": r.id,
+                "amount": r.amount,
+                "payment_method": r.payment_method,
+                "product_category": r.product_category,
+                "fraud_probability": r.fraud_probability,
+                "label": r.label,
+                "predicted_at": r.predicted_at.isoformat() if r.predicted_at else None
+            }
+            for r in records
+        ]
+    }

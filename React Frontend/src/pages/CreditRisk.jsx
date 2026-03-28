@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap } from "react-icons/fa";
 
 export default function CreditRisk() {
 
+    const userEmail = localStorage.getItem('user') || "";
+
     const [formData, setFormData] = useState({
+        email: userEmail,
         income: 150000,
         credit: 300000,
         annuity: 20000,
@@ -28,7 +31,16 @@ export default function CreditRisk() {
     });
 
     const [result, setResult] = useState(null);
+    const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (userEmail) {
+            axios.get(`http://localhost:8000/credit_predictions?email=${encodeURIComponent(userEmail)}`)
+                .then(res => setHistory(res.data.predictions || []))
+                .catch(console.error);
+        }
+    }, [userEmail, result]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -321,6 +333,24 @@ export default function CreditRisk() {
                         </div>
 
                         <p className="mt-2">{result.risk_level}</p>
+                    </div>
+                )}
+
+                {/* Recent Predictions */}
+                {history.length > 0 && (
+                    <div className="mt-6 p-5 bg-gray-50 rounded-xl">
+                        <h3 className="font-semibold mb-3">Recent Predictions</h3>
+                        <div className="space-y-2">
+                            {history.map(h => (
+                                <div key={h.id} className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
+                                    <span className="text-sm">{new Date(h.predicted_at).toLocaleDateString()}</span>
+                                    <span className="font-medium">{(h.risk_score * 100).toFixed(1)}%</span>
+                                    <span className={`text-sm ${h.risk_label === 'High Risk' ? 'text-red-500' : 'text-green-500'}`}>
+                                        {h.risk_label}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
 

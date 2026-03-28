@@ -1,9 +1,22 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 import pandas as pd
 import numpy as np
 import joblib
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from database import SessionLocal
+from models import User, CreditPrediction
 
 router = APIRouter()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # -------------------------
 # Load Model
@@ -19,7 +32,7 @@ feature_names = model.get_booster().feature_names
 # -------------------------
 
 @router.post("/predict_credit_risk")
-def predict_credit_risk(data: dict):
+def predict_credit_risk(data: dict, db: Session = Depends(get_db)):
 
     # -------------------------
     # Safe Input Extraction
@@ -141,8 +154,47 @@ def predict_credit_risk(data: dict):
     # Response
     # -------------------------
 
-    return {
+    result = {
         "default_probability": float(prob),
         "prediction": int(pred),
         "risk_level": "High Risk" if pred == 1 else "Low Risk"
+    }
+
+    # Save to DB if email provided
+    email = data.get("email")
+    if email:
+        user = db.query(User).filter(User.email == email).first()
+        if user:
+            prediction = CreditPrediction(
+                user_id=user.id,
+                risk_score=float(prob),
+                risk_label=result["risk_level"],
+                confidence=0.95
+            )
+            db.add(prediction)
+            db.commit()
+
+    return result
+
+@router.get("/credit_predictions")
+def get_credit_predictions(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return {"predictions": []}
+    
+    predictions = db.query(CreditPrediction).filter(
+        CreditPrediction.user_id == user.id
+    ).order_by(CreditPrediction.predicted_at.desc()).limit(10).all()
+    
+    return {
+        "predictions": [
+            {
+                "id": p.id,
+                "risk_score": p.risk_score,
+                "risk_label": p.risk_label,
+                "confidence": p.confidence,
+                "predicted_at": p.predicted_at.isoformat() if p.predicted_at else None
+            }
+            for p in predictions
+        ]
     }

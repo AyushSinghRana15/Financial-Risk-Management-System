@@ -25,7 +25,16 @@ def add_portfolio(data: PortfolioCreate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        user = User(
+            name=data.email.split("@")[0],
+            email=data.email,
+            password_hash="google_oauth",
+            age=22,
+            risk_profile="Medium"
+            )   
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
     total_value = data.quantity * data.current_price
 
@@ -87,3 +96,21 @@ def get_portfolio(email: str, db: Session = Depends(get_db)):
     return {
         "portfolio": portfolio_data
     }
+# DELETE ASSET
+@router.delete("/{portfolio_id}/{email}")
+def delete_portfolio(portfolio_id: int, email: str, db: Session = Depends(get_db)):
+
+    user = db.query(User).filter(User.email == email).first()
+
+    asset = db.query(Portfolio).filter(
+        Portfolio.id == portfolio_id,
+        Portfolio.user_id == user.id
+    ).first()
+
+    if not asset:
+        raise HTTPException(status_code=404, detail="Not allowed")
+
+    db.delete(asset)
+    db.commit()
+
+    return {"message": "Deleted"}
