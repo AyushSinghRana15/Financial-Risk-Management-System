@@ -63,6 +63,7 @@ export default function CreditRisk() {
             );
 
             setResult(response.data);
+            window.dispatchEvent(new Event("refreshDashboard"));
 
         } catch (error) {
             console.error("Prediction error:", error);

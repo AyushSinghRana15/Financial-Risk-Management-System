@@ -56,6 +56,7 @@ export default function ECommerceFraudRisk() {
     try {
       const res = await axios.post("http://localhost:8000/predict_fraud", data);
       setResult(res.data);
+      window.dispatchEvent(new Event("refreshDashboard"));
     } catch (error) {
       console.error(error);
     }

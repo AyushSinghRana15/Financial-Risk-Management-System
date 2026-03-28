@@ -49,6 +49,7 @@ export default function BusinessRisk() {
       });
       const data = await res.json();
       setResult(data);
+      window.dispatchEvent(new Event("refreshDashboard"));
     } catch (err) {
       console.error(err);
     }

@@ -67,6 +67,7 @@ export default function LiquidityRisk() {
         console.log("Prediction Response:", res.data);
 
         setResult(res.data);
+        window.dispatchEvent(new Event("refreshDashboard"));
 
         if (userEmail) {
             axios.get(`${API_URL}/history?email=${encodeURIComponent(userEmail)}`)

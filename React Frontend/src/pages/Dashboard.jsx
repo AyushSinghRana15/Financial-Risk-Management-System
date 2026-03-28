@@ -71,6 +71,22 @@ export default function Dashboard() {
         fetchData();
     }, [userEmail]);
 
+    useEffect(() => {
+        const handleRefresh = () => {
+            setLoading(true);
+            axios.get(`http://localhost:8000/dashboard/stats?email=${encodeURIComponent(userEmail)}`)
+                .then(res => setStats(res.data))
+                .catch(console.error);
+            axios.get(`http://localhost:8000/portfolio/get/${encodeURIComponent(userEmail)}`)
+                .then(res => setPortfolio(res.data.portfolio || []))
+                .catch(console.error);
+            setLoading(false);
+        };
+
+        window.addEventListener("refreshDashboard", handleRefresh);
+        return () => window.removeEventListener("refreshDashboard", handleRefresh);
+    }, [userEmail]);
+
     const formatCurrency = (value) => {
         if (!value && value !== 0) return "—";
         if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;

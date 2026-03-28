@@ -36,6 +36,7 @@ function FinancialRisk() {
         { ...form, email: userEmail }
       );
       setResult(res.data);
+      window.dispatchEvent(new Event("refreshDashboard"));
     } catch (err) {
       console.error(err);
       alert("API Error ❌");

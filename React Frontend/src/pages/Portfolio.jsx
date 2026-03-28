@@ -121,6 +121,7 @@ function Portfolio() {
             });
 
             fetchPortfolio();
+            window.dispatchEvent(new Event("refreshDashboard"));
 
             setForm({
                 asset_name: "",

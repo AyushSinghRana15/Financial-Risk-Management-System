@@ -128,6 +128,7 @@ function MarketRisk() {
             }
 
             setRollingData(series);
+            window.dispatchEvent(new Event("refreshDashboard"));
 
             if (userEmail) {
                 axios.get(`http://localhost:8000/market_risk_history?email=${encodeURIComponent(userEmail)}`)
