@@ -14,9 +14,11 @@ from final_financial_api import router as financial_router
 from routes.market import router as market_data_router
 from E_commerce_fraud_risk_api import router as fraud_router
 
+# Env
 from dotenv import load_dotenv
 load_dotenv()
 
+# AI Service
 from ai_service import get_ai_insights
 
 # ================= DB =================
@@ -66,9 +68,9 @@ def google_auth(data: dict, db: Session = Depends(get_db)):
 
     if not user:
         user = User(
-            name=data.get("name"),                  # ✅ matches model
+            name=data.get("name"),
             email=data.get("email"),
-            password_hash="google_oauth",          # ✅ matches model
+            password_hash="google_oauth",
             is_verified=True
         )
         db.add(user)
@@ -104,7 +106,6 @@ def get_profile(db: Session = Depends(get_db)):
         "risk_profile": user.risk_profile
     }
 
-
 @app.put("/profile")
 def update_profile(data: dict, db: Session = Depends(get_db)):
     user = db.query(User).first()
@@ -120,7 +121,7 @@ def update_profile(data: dict, db: Session = Depends(get_db)):
 
     return {"message": "Profile updated"}
 
-# ================= AI INSIGHTS =================
+# ================= AI INSIGHTS (Portfolio Based) =================
 @app.get("/ai-insights")
 def ai_insights(db: Session = Depends(get_db)):
     portfolio = [
@@ -130,3 +131,26 @@ def ai_insights(db: Session = Depends(get_db)):
 
     result = get_ai_insights(portfolio)
     return result
+
+# ================= AI RISK ALERTS (Prompt Based) =================
+@app.post("/ai-risk-alerts")
+def ai_risk_alerts(data: dict):
+    prompt = data.get("prompt", "")
+
+    result = get_ai_insights(prompt)
+
+    # ✅ Convert structured response → alerts
+    if isinstance(result, dict):
+        alerts = []
+
+        # from insights
+        alerts.extend(result.get("insights", [])[:2])
+
+        # from suggestions (optional)
+        alerts.extend(result.get("suggestions", [])[:1])
+
+        return {
+            "response": "\n".join(alerts)
+        }
+
+    return {"response": str(result)}
