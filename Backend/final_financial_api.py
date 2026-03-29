@@ -5,9 +5,11 @@ import numpy as np
 import joblib
 import sys
 import os
-BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.dirname(BACKEND_DIR)
-sys.path.append(BACKEND_DIR)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BASE_DIR)
+sys.path.append(BASE_DIR)
+
 from database import SessionLocal
 from models import User, FinancialRisk
 
@@ -23,7 +25,8 @@ def get_db():
 # -------------------------
 # LOAD MODEL
 # -------------------------
-model = joblib.load(os.path.join(ROOT_DIR, "Models", "final_financial_model.pkl"))
+MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+model = joblib.load(os.path.join(MODELS_PATH, "final_financial_model.pkl"))
 
 # 🔥 FIXED THRESHOLD
 threshold = 0.45

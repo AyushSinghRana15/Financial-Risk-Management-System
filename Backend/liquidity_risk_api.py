@@ -8,9 +8,11 @@ from sqlalchemy.orm import Session
 import numpy as np
 import sys
 import os
-BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.dirname(BACKEND_DIR)
-sys.path.append(BACKEND_DIR)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BASE_DIR)
+sys.path.append(BASE_DIR)
+
 from database import SessionLocal
 from models import User, LiquidityRisk
 
@@ -29,8 +31,9 @@ def get_db():
 # ----------------------------
 # LOAD MODEL & SCALER
 # ----------------------------
-model = joblib.load(os.path.join(ROOT_DIR, "Models", "liquidity_model.pkl"))
-scaler = joblib.load(os.path.join(ROOT_DIR, "Models", "scaler.pkl"))
+MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+model = joblib.load(os.path.join(MODELS_PATH, "liquidity_model.pkl"))
+scaler = joblib.load(os.path.join(MODELS_PATH, "scaler.pkl"))
 
 # ----------------------------
 # FEATURES (25)

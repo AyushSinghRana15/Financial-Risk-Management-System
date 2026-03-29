@@ -5,9 +5,11 @@ import numpy as np
 import joblib
 import sys
 import os
-BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.dirname(BACKEND_DIR)
-sys.path.append(BACKEND_DIR)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BASE_DIR)
+sys.path.append(BASE_DIR)
+
 from database import SessionLocal
 from models import User, CreditPrediction
 
@@ -20,11 +22,8 @@ def get_db():
     finally:
         db.close()
 
-# -------------------------
-# Load Model
-# -------------------------
-
-model = joblib.load(os.path.join(ROOT_DIR, "Models", "credit_risk_xgboost_model.pkl"))
+MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+model = joblib.load(os.path.join(MODELS_PATH, "credit_risk_xgboost_model.pkl"))
 
 # Get feature names directly from trained model
 feature_names = model.get_booster().feature_names
