@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -94,7 +94,7 @@ def google_auth(data: dict, db: Session = Depends(get_db)):
     credential = data.get("credential")
     
     if not credential:
-        return {"error": "No credential provided"}, 400
+        raise HTTPException(status_code=400, detail="No credential provided")
     
     try:
         CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
@@ -107,7 +107,7 @@ def google_auth(data: dict, db: Session = Depends(get_db)):
         print(f"Verified User: {email}")
         
     except ValueError:
-        return {"error": "Invalid token"}, 401
+        raise HTTPException(status_code=401, detail="Invalid token")
     
     user = db.query(User).filter(User.email == email).first()
 
@@ -142,11 +142,11 @@ def signup(data: dict, db: Session = Depends(get_db)):
     password = data.get("password")
     
     if not name or not email or not password:
-        return {"error": "Name, email, and password are required"}, 400
+        raise HTTPException(status_code=400, detail="Name, email, and password are required")
     
     existing_user = db.query(User).filter(User.email == email).first()
     if existing_user:
-        return {"error": "An account with this email already exists"}, 400
+        raise HTTPException(status_code=400, detail="An account with this email already exists")
     
     password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
@@ -172,18 +172,18 @@ def login(data: dict, db: Session = Depends(get_db)):
     password = data.get("password")
     
     if not email or not password:
-        return {"error": "Email and password are required"}, 400
+        raise HTTPException(status_code=400, detail="Email and password are required")
     
     user = db.query(User).filter(User.email == email).first()
     
     if not user:
-        return {"error": "No account found with this email"}, 401
+        raise HTTPException(status_code=401, detail="No account found with this email")
     
     if user.password_hash == "google_oauth":
-        return {"error": "This account was created using Google. Please sign in with Google."}, 401
+        raise HTTPException(status_code=401, detail="This account was created using Google. Please sign in with Google.")
     
     if not bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
-        return {"error": "Invalid password"}, 401
+        raise HTTPException(status_code=401, detail="Invalid password")
     
     return {
         "name": user.name,
