@@ -38,7 +38,7 @@ export default function CreditRisk() {
 
     useEffect(() => {
         if (userEmail) {
-            axios.get(`${API_ENDPOINTS.RISK.CREDIT}/history?email=${encodeURIComponent(userEmail)}`)
+            axios.get(`${API_ENDPOINTS.RISK.CREDIT_HISTORY}?email=${encodeURIComponent(userEmail)}`)
                 .then(res => setHistory(res.data.predictions || []))
                 .catch(console.error);
         }

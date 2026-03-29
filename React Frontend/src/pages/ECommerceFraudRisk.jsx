@@ -26,7 +26,7 @@ export default function ECommerceFraudRisk() {
 
   useEffect(() => {
     if (userEmail) {
-      axios.get(`${API_ENDPOINTS.RISK.FRAUD}/history?email=${encodeURIComponent(userEmail)}`)
+      axios.get(`${API_ENDPOINTS.RISK.FRAUD_HISTORY}?email=${encodeURIComponent(userEmail)}`)
         .then(res => setHistory(res.data.history || []))
         .catch(console.error);
     }
