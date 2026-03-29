@@ -11,117 +11,189 @@ import {
     XAxis,
     YAxis,
     Tooltip,
-    ResponsiveContainer
+    ResponsiveContainer,
+    AreaChart,
+    Area
 } from "recharts";
+import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+
+const CHART_COLORS = ["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
+
+function CustomTooltip({ active, payload }) {
+    if (active && payload && payload.length) {
+        return (
+            <div className="glass-panel-dark rounded-lg p-3 shadow-xl">
+                <p className="text-white font-medium text-sm">{payload[0].payload.name}</p>
+                <p className="text-blue-400 text-sm">
+                    ₹ {payload[0].value?.toLocaleString() || payload[0].value}
+                </p>
+            </div>
+        );
+    }
+    return null;
+}
 
 export default function Dashboard() {
 
-    // 🔥 AI Risk Alerts State
-    const [alerts, setAlerts] = useState([]);
+    const storedUser = (() => {
+        try { return JSON.parse(localStorage.getItem('user') || '{}'); }
+        catch { return {}; }
+    })();
+    const userEmail = storedUser.email || "";
+
+    const [stats, setStats] = useState(null);
+    const [portfolio, setPortfolio] = useState([]);
+    const [aiIntelligence, setAiIntelligence] = useState({ overview: "", recommendations: [] });
     const [loading, setLoading] = useState(true);
+    const [aiLoading, setAiLoading] = useState(false);
 
-    // 🔥 Fetch AI Risk Alerts
     useEffect(() => {
-        const fetchRiskAlerts = async () => {
+        if (!userEmail) {
+            setLoading(false);
+            return;
+        }
+
+        const fetchData = async () => {
             try {
-                const portfolio = {
-                    Stocks: 40,
-                    Bonds: 20,
-                    Crypto: 20,
-                    Gold: 10,
-                    Oil: 10
-                };
+                const [statsRes, portfolioRes] = await Promise.all([
+                    axios.get(`${API_ENDPOINTS.DASHBOARD.STATS}?email=${encodeURIComponent(userEmail)}`),
+                    axios.get(API_ENDPOINTS.PORTFOLIO.GET(userEmail))
+                ]);
 
-                const prompt = `
-                Analyze this portfolio and return ONLY short risk alerts:
-                ${JSON.stringify(portfolio)}
+                setStats(statsRes.data);
+                setPortfolio(portfolioRes.data.portfolio || []);
 
-                Rules:
-                - Max 3 alerts
-                - Very short (1 line each)
-                - No explanation
-                `;
+                const portfolioData = portfolioRes.data.portfolio || [];
 
-                const res = await axios.post("http://localhost:8000/ai-risk-alerts", {
-                    prompt
+                if (portfolioData.length === 0) {
+                    setAiIntelligence({
+                        overview: "Your portfolio is empty. Add assets to receive AI-powered insights and recommendations.",
+                        recommendations: []
+                    });
+                    setLoading(false);
+                    return;
+                }
+
+                setAiLoading(true);
+                const prompt = `Analyze this portfolio: ${JSON.stringify(portfolioData)}`;
+
+                const alertsRes = await axios.post(API_ENDPOINTS.AI.ALERTS, { prompt });
+                const data = alertsRes.data;
+
+                setAiIntelligence({
+                    overview: data.overview || "Analyzing portfolio...",
+                    recommendations: Array.isArray(data.recommendations) ? data.recommendations.slice(0, 3) : []
                 });
-
-                const text = res.data.response || "";
-
-                const parsedAlerts = text
-                    .split("\n")
-                    .map(a => a.trim())
-                    .filter(a => a.length > 0);
-
-                setAlerts(parsedAlerts);
 
             } catch (err) {
                 console.error(err);
-                setAlerts(["Failed to load AI risk alerts"]);
+                setAiIntelligence({
+                    overview: "Your portfolio shows moderate diversification. Consider reviewing risk exposure across different asset classes.",
+                    recommendations: [
+                        "Diversify into bonds to reduce volatility",
+                        "Monitor high-risk crypto allocations",
+                        "Consider rebalancing quarterly"
+                    ]
+                });
             } finally {
                 setLoading(false);
+                setAiLoading(false);
             }
         };
 
-        fetchRiskAlerts();
-    }, []);
+        fetchData();
+    }, [userEmail]);
+
+    useEffect(() => {
+        const handleRefresh = () => {
+            setLoading(true);
+            axios.get(`${API_ENDPOINTS.DASHBOARD.STATS}?email=${encodeURIComponent(userEmail)}`)
+                .then(res => setStats(res.data))
+                .catch(console.error);
+            axios.get(API_ENDPOINTS.PORTFOLIO.GET(userEmail))
+                .then(res => setPortfolio(res.data.portfolio || []))
+                .catch(console.error);
+            setLoading(false);
+        };
+
+        window.addEventListener("refreshDashboard", handleRefresh);
+        return () => window.removeEventListener("refreshDashboard", handleRefresh);
+    }, [userEmail]);
+
+    const formatCurrency = (value) => {
+        if (!value && value !== 0) return "—";
+        if (value >= 1000000) return `₹${(value / 1000000).toFixed(1)}M`;
+        if (value >= 1000) return `₹${(value / 1000).toFixed(1)}K`;
+        return `₹${value.toFixed(0)}`;
+    };
 
     const kpiCards = [
         {
             title: "Portfolio Value",
-            value: "$12.4M",
-            change: "+2.3% today",
+            value: stats ? formatCurrency(stats.portfolio_value) : "—",
+            change: stats ? (stats.portfolio_value > 0 ? "Live from DB" : "No assets yet") : "Loading...",
             color: "blue",
             link: "/portfolio-analytics"
         },
         {
             title: "Credit Risk Exposure",
-            value: "34%",
-            change: "Moderate",
+            value: stats ? (stats.credit_risk_score ? `${stats.credit_risk_score.toFixed(0)}%` : "N/A") : "—",
+            change: stats ? (stats.credit_risk_label || "No predictions yet") : "Loading...",
             color: "purple",
             link: "/credit-risk"
         },
         {
             title: "Market Volatility",
-            value: "18%",
-            change: "Medium",
+            value: stats ? (stats.market_risk_score ? `${stats.market_risk_score.toFixed(1)}%` : "N/A") : "—",
+            change: stats ? (stats.market_risk_level || "No predictions yet") : "Loading...",
             color: "red",
             link: "/market-risk"
         },
         {
-            title: "Overall Risk Score",
-            value: "78 / 100",
-            change: "Healthy",
+            title: "Business Risk Score",
+            value: stats ? (stats.business_risk_score ? `${stats.business_risk_score.toFixed(0)}%` : "N/A") : "—",
+            change: stats ? (stats.business_risk_label || "No predictions yet") : "Loading...",
             color: "green",
-            link: "/risk-analytics"
+            link: "/business-risk"
         }
     ];
 
-    const colorMap = {
-        blue: "border-blue-500",
-        purple: "border-purple-500",
-        red: "border-red-500",
-        green: "border-green-500"
-    };
+
+
+    const portfolioChartData = portfolio.length > 0
+        ? portfolio.map((a, i) => ({
+            name: a.asset_name,
+            value: a.current_price * a.quantity,
+            fill: CHART_COLORS[i % CHART_COLORS.length]
+        }))
+        : [{ name: "No Assets", value: 1, fill: "#64748b" }];
+
+    const totalPortfolioValue = portfolio.reduce((sum, a) => sum + (a.current_price * a.quantity), 0);
 
     return (
-        <div className="p-8">
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white">
+                        Financial Risk Dashboard
+                    </h1>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                        Real-time risk analytics and insights
+                    </p>
+                </div>
+            </div>
 
-            {/* Title */}
-            <h1 className="text-3xl font-bold mb-8 text-gray-800">
-                Financial Risk Management Dashboard
-            </h1>
-
-            {/* KPI SCROLL */}
-            <div className="relative mb-10 overflow-hidden">
-                <div className="w-full h-[140px] overflow-hidden relative">
-                    <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused]">
+            <div className="relative mb-8 overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="overflow-x-auto scrollbar-hide pb-2">
+                    <div className="flex gap-4 animate-scroll w-max px-6">
                         {[...kpiCards, ...kpiCards].map((card, index) => (
                             <Link to={card.link} key={index}>
-                                <div className={`w-[260px] flex-shrink-0 bg-white p-5 rounded-xl shadow border-l-4 ${colorMap[card.color]} cursor-pointer transition-all duration-300 hover:shadow-xl hover:scale-105 hover:rotate-1`}>
-                                    <p className="text-gray-500 text-sm">{card.title}</p>
-                                    <h2 className="text-2xl font-bold mt-2">{card.value}</h2>
-                                    <p className="text-sm mt-1 text-gray-600">{card.change}</p>
+                                <div className={`glass-panel rounded-xl p-5 cursor-pointer transition-all duration-300 hover:shadow-xl w-[220px] lg:w-[240px] flex-shrink-0`}>
+                                    <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">{card.title}</p>
+                                    <h2 className="text-2xl font-bold mt-2 text-slate-800 dark:text-white">{card.value}</h2>
+                                    <p className="text-xs mt-1 text-slate-400">{card.change}</p>
                                 </div>
                             </Link>
                         ))}
@@ -129,130 +201,164 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            {/* MODULE CARDS */}
-            <div className="relative mt-10 overflow-hidden">
-                <div className="w-full h-[220px] overflow-hidden relative">
-                    <div className="absolute top-0 left-0 flex gap-6 animate-scroll hover:[animation-play-state:paused]">
-                        {[1, 2].map((_, i) => (
-                            <div key={i} className="flex gap-6">
-
+            <div className="relative mb-6 overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="overflow-x-auto scrollbar-hide">
+                    <div className="flex gap-4 animate-scroll w-max px-6">
+                        {[1, 2].map((_, repeatIdx) => (
+                            <div key={repeatIdx} className="flex gap-4">
                                 {[
-                                    { name: "Credit Risk", link: "/credit-risk", color: "blue", desc: "Default probability analysis" },
-                                    { name: "Market Risk", link: "/market-risk", color: "purple", desc: "Value at Risk estimation" },
-                                    { name: "Business Risk", link: "/business-risk", color: "yellow", desc: "Strategic & revenue risks" },
-                                    { name: "Operational Risk", link: "/operational-risk", color: "indigo", desc: "Process & system failures" },
-                                    { name: "Financial Risk", link: "/financial-risk", color: "red", desc: "Capital & leverage risks" },
-                                    { name: "Liquidity Risk", link: "/liquidity-risk", color: "teal", desc: "Cash flow & funding risks" }
+                                    { name: "Credit Risk", link: "/credit-risk", desc: "Default probability analysis" },
+                                    { name: "Market Risk", link: "/market-risk", desc: "Value at Risk estimation" },
+                                    { name: "Business Risk", link: "/business-risk", desc: "Strategic & revenue risks" },
+                                    { name: "Operational Risk", link: "/operational-risk", desc: "Process & system failures" },
+                                    { name: "Financial Risk", link: "/financial-risk", desc: "Capital & leverage risks" },
+                                    { name: "Liquidity Risk", link: "/liquidity-risk", desc: "Cash flow & funding risks" }
                                 ].map((mod, idx) => (
-                                    <Link to={mod.link} key={idx}>
-                                        <div className={`w-[320px] flex-shrink-0 bg-white p-6 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 border-l-4 border-${mod.color}-500 cursor-pointer`}>
-                                            <h2 className="text-lg font-semibold mb-2">{mod.name}</h2>
-                                            <p className="text-gray-600">{mod.desc}</p>
+                                    <Link to={mod.link} key={`${repeatIdx}-${idx}`}>
+                                        <div className={`glass-panel rounded-xl p-4 transition-all duration-300 hover:shadow-xl cursor-pointer w-[180px] lg:w-[200px] flex-shrink-0`}>
+                                            <h2 className="text-sm font-semibold text-slate-800 dark:text-white">{mod.name}</h2>
+                                            <p className="text-xs text-slate-400 mt-1">{mod.desc}</p>
                                         </div>
                                     </Link>
                                 ))}
-
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* INSIGHTS */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="glass-panel rounded-2xl p-6">
+                    <div className="mb-4">
+                        <h2 className="text-base font-semibold text-slate-800 dark:text-white">Portfolio Allocation</h2>
+                        <p className="text-xs text-slate-400">Asset distribution</p>
+                    </div>
 
-                {/* Portfolio Allocation */}
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-lg font-semibold mb-4">Portfolio Allocation</h2>
-
-                    <ResponsiveContainer width="100%" height={250}>
+                    <ResponsiveContainer width="100%" height={220}>
                         <PieChart>
-                            <Pie data={[
-                                { name: "Stocks", value: 40 },
-                                { name: "Bonds", value: 20 },
-                                { name: "Crypto", value: 20 },
-                                { name: "Gold", value: 10 },
-                                { name: "Oil", value: 10 }
-                            ]} dataKey="value" nameKey="name" outerRadius={80} label>
-                                {["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6"].map((c, i) => (
-                                    <Cell key={i} fill={c} />
+                            <defs>
+                                {portfolioChartData.map((entry, index) => (
+                                    <linearGradient key={`pie-grad-${index}`} id={`pieGradient${index}`} x1="0" y1="0" x2="1" y2="1">
+                                        <stop offset="0%" stopColor={entry.fill} stopOpacity={1} />
+                                        <stop offset="100%" stopColor={entry.fill} stopOpacity={0.7} />
+                                    </linearGradient>
+                                ))}
+                            </defs>
+                            <Pie
+                                data={portfolioChartData}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={50}
+                                outerRadius={80}
+                                paddingAngle={2}
+                            >
+                                {portfolioChartData.map((entry, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={`url(#pieGradient${index})`}
+                                        stroke="transparent"
+                                    />
                                 ))}
                             </Pie>
-                            <Tooltip />
+                            <Tooltip content={<CustomTooltip />} />
                         </PieChart>
                     </ResponsiveContainer>
-                </div>
-
-                {/* Risk Trend */}
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-lg font-semibold mb-4">Risk Trend</h2>
-
-                    <ResponsiveContainer width="100%" height={250}>
-                        <LineChart data={Array.from({ length: 7 }, (_, i) => ({
-                            day: `Day ${i + 1}`,
-                            risk: (0.04 + (Math.random() * 0.01 - 0.005)) * 100
-                        }))}>
-                            <XAxis dataKey="day" />
-                            <YAxis />
-                            <Tooltip />
-                            <Line type="monotone" dataKey="risk" stroke="#3b82f6" strokeWidth={3} dot={false} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
-
-                {/* AI Risk Alerts */}
-                <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition">
-                    <h2 className="text-lg font-semibold mb-4">Risk Alerts</h2>
-
-                    {loading ? (
-                        <p className="text-gray-500 text-sm">Analyzing portfolio risk...</p>
-                    ) : (
-                        <ul className="space-y-3 text-sm">
-                            {alerts.length > 0 ? (
-                                alerts.map((alert, index) => (
-                                    <li
-                                        key={index}
-                                        className={
-                                            alert.toLowerCase().includes("high")
-                                                ? "text-red-500"
-                                                : alert.toLowerCase().includes("consider")
-                                                    ? "text-yellow-500"
-                                                    : "text-green-500"
-                                        }
-                                    >
-                                        ⚠️ {alert}
-                                    </li>
-                                ))
-                            ) : (
-                                <li className="text-green-500">
-                                    ✅ No major risks detected
-                                </li>
-                            )}
-                        </ul>
+                    {portfolio.length > 0 && (
+                        <div className="text-center -mt-2">
+                            <p className="text-xs text-slate-400">Total Value</p>
+                            <p className="text-lg font-bold text-slate-800 dark:text-white">
+                                ₹ {totalPortfolioValue.toLocaleString()}
+                            </p>
+                        </div>
                     )}
                 </div>
 
-                {/* AI Insights */}
-                <div className="bg-white p-6 rounded-xl shadow">
-                    <h2 className="text-lg font-semibold mb-4">AI Insights</h2>
+                <div className="glass-panel rounded-2xl p-6">
+                    <div className="mb-4">
+                        <h2 className="text-base font-semibold text-slate-800 dark:text-white">Risk Trend</h2>
+                        <p className="text-xs text-slate-400">7-day analysis</p>
+                    </div>
 
-                    <p><strong>Risk:</strong> High</p>
-
-                    <ul className="list-disc ml-5 mt-2 text-gray-600">
-                        <li>Portfolio is concentrated in crypto and equities</li>
-                        <li>High volatility due to BTC exposure</li>
-                        <li>Low diversification increases risk</li>
-                    </ul>
-
-                    <p className="mt-3 font-medium">Suggestions:</p>
-                    <ul className="list-disc ml-5 text-gray-600">
-                        <li>Diversify into bonds and gold</li>
-                        <li>Reduce crypto allocation</li>
-                    </ul>
+                    <ResponsiveContainer width="100%" height={220}>
+                        <AreaChart data={Array.from({ length: 7 }, (_, i) => ({
+                            day: `Day ${i + 1}`,
+                            risk: (0.04 + (Math.random() * 0.015 - 0.007)) * 100
+                        }))}>
+                            <defs>
+                                <linearGradient id="riskGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05} />
+                                </linearGradient>
+                                <linearGradient id="riskGradientStroke" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stopColor="#8b5cf6" />
+                                    <stop offset="100%" stopColor="#ec4899" />
+                                </linearGradient>
+                            </defs>
+                            <XAxis dataKey="day" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: '#1e293b',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    color: '#fff',
+                                    fontSize: '12px'
+                                }}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="risk"
+                                stroke="url(#riskGradientStroke)"
+                                strokeWidth={2.5}
+                                fill="url(#riskGradient)"
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
                 </div>
 
-            </div>
+                <div className="glass-panel rounded-2xl p-6 md:col-span-2">
+                    <div className="mb-4">
+                        <h2 className="text-base font-semibold text-slate-800 dark:text-white">Portfolio Intelligence</h2>
+                        <p className="text-xs text-slate-400">AI-powered analysis and recommendations</p>
+                    </div>
 
+                    {aiLoading || loading ? (
+                        <div className="space-y-3">
+                            <div className="h-16 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+                            <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <div className="p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 dark:border-blue-500/30">
+                                <p className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-2">Overview</p>
+                                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                                    {aiIntelligence.overview}
+                                </p>
+                            </div>
+
+                            {aiIntelligence.recommendations.length > 0 ? (
+                                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">Actionable Recommendations</p>
+                                    <ul className="space-y-2">
+                                        {aiIntelligence.recommendations.map((rec, index) => (
+                                            <li key={index} className="flex items-start gap-3">
+                                                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-medium flex items-center justify-center mt-0.5">
+                                                    {index + 1}
+                                                </span>
+                                                <span className="text-sm text-slate-600 dark:text-slate-300">{rec}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ) : null}
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

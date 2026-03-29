@@ -1,20 +1,53 @@
 import pandas as pd
 import joblib
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 import yfinance as yf
 import numpy as np
+import sys
+import os
+
+CURRENT_FILE_PATH = os.path.abspath(__file__)
+BACKEND_DIR = os.path.dirname(CURRENT_FILE_PATH)
+SRC_DIR = os.path.dirname(BACKEND_DIR)
+
+MODELS_PATH = os.path.join(SRC_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(SRC_DIR, "models")
+
+MODEL_FILE = os.path.join(MODELS_PATH, "ml_var_model.pkl")
+
+sys.path.append(BACKEND_DIR)
+from database import SessionLocal
+from models import User, MarketRiskData
 
 router = APIRouter()
 
-# ----------------------------
-# LOAD MARKET RISK MODEL
-# ----------------------------
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-model_package = joblib.load("../Models/ml_var_model.pkl")
+model_package = None
+model = None
+features = []
+residual_var = None
 
-model = model_package["model"]
-features = model_package["features"]
-residual_var = model_package["residual_var"]
+if os.path.exists(MODEL_FILE):
+    try:
+        model_package = joblib.load(MODEL_FILE)
+        model = model_package["model"]
+        features = model_package["features"]
+        residual_var = model_package["residual_var"]
+        print(f"✅ Successfully loaded: {MODEL_FILE}")
+    except Exception as e:
+        print(f"❌ Error loading model file: {e}")
+else:
+    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+    if os.path.exists(MODELS_PATH):
+        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
 # ----------------------------
 # FEATURE NAME CLEANING
@@ -116,7 +149,7 @@ def get_live_market_data():
 # ----------------------------
 
 @router.post("/predict_market_risk")
-def predict_market_risk(data: dict):
+def predict_market_risk(data: dict, db: Session = Depends(get_db)):
 
     confidence = data.get("confidence", "95%")
 
@@ -149,9 +182,47 @@ def predict_market_risk(data: dict):
     # RESPONSE
     # ----------------------------
 
-    return {
+    result = {
         "predicted_var": float(var_prediction),
         "residual_variance": float(residual_var),
         "confidence_level": confidence,
         "risk_level": risk_level
+    }
+
+    email = data.get("email")
+    if email:
+        user = db.query(User).filter(User.email == email).first()
+        if user:
+            record = MarketRiskData(
+                user_id=user.id,
+                symbol="Portfolio",
+                risk_score=float(var_prediction),
+                risk_level=risk_level
+            )
+            db.add(record)
+            db.commit()
+
+    return result
+
+@router.get("/market_risk_history")
+def get_market_risk_history(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return {"history": []}
+    
+    records = db.query(MarketRiskData).filter(
+        MarketRiskData.user_id == user.id
+    ).order_by(MarketRiskData.recorded_at.desc()).limit(10).all()
+    
+    return {
+        "history": [
+            {
+                "id": r.id,
+                "symbol": r.symbol,
+                "risk_score": r.risk_score,
+                "risk_level": r.risk_level,
+                "recorded_at": r.recorded_at.isoformat() if r.recorded_at else None
+            }
+            for r in records
+        ]
     }

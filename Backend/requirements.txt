@@ -1,5 +1,6 @@
 annotated-doc==0.0.4
 annotated-types==0.7.0
+google-auth==2.36.0
 anyio==4.12.1
 bcrypt==5.0.0
 beautifulsoup4==4.14.3
@@ -45,3 +46,5 @@ uvicorn==0.42.0
 websockets==16.0
 xgboost==3.2.0
 yfinance==1.2.0
+gunicorn==23.0.0
+psycopg2-binary==2.9.10

@@ -1,25 +1,76 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 import pandas as pd
 import numpy as np
 import joblib
+import sys
+import os
+
+CURRENT_FILE_PATH = os.path.abspath(__file__)
+BACKEND_DIR = os.path.dirname(CURRENT_FILE_PATH)
+SRC_DIR = os.path.dirname(BACKEND_DIR)
+
+MODELS_PATH = os.path.join(SRC_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(SRC_DIR, "models")
+
+MODEL_FILE = os.path.join(MODELS_PATH, "credit_risk_xgboost_model.pkl")
+
+sys.path.append(BACKEND_DIR)
+from database import SessionLocal
+from models import User, CreditPrediction
 
 router = APIRouter()
 
-# -------------------------
-# Load Model
-# -------------------------
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-model = joblib.load("../Models/balanced_xgboost_model.pkl")
+model = None
+feature_names = []
 
-# Get feature names directly from trained model
-feature_names = model.get_booster().feature_names
+if os.path.exists(MODEL_FILE):
+    try:
+        model = joblib.load(MODEL_FILE)
+        if hasattr(model, "get_booster"):
+            feature_names = model.get_booster().feature_names
+        else:
+            feature_names = getattr(model, "feature_names_in_", [])
+        print(f"✅ Successfully loaded: {MODEL_FILE}")
+    except Exception as e:
+        print(f"❌ Error loading model file: {e}")
+else:
+    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+    if os.path.exists(MODELS_PATH):
+        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
 # -------------------------
 # Credit Risk Endpoint
 # -------------------------
 
 @router.post("/predict_credit_risk")
-def predict_credit_risk(data: dict):
+def predict_credit_risk(data: dict, db: Session = Depends(get_db)):
+    if model is None:
+        print("Model is None, attempting late load...")
+        if os.path.exists(MODEL_FILE):
+            try:
+                globals()['model'] = joblib.load(MODEL_FILE)
+                if hasattr(globals()['model'], "get_booster"):
+                    globals()['feature_names'] = globals()['model'].get_booster().feature_names
+                print("✅ Late load successful")
+            except Exception as e:
+                print(f"❌ Late load failed: {e}")
+        
+        if model is None:
+            return {
+                "status": "error",
+                "message": "Credit model not initialized. Please check server logs.",
+                "risk_level": "Unknown",
+                "default_probability": 0.5
+            }
 
     # -------------------------
     # Safe Input Extraction
@@ -141,8 +192,47 @@ def predict_credit_risk(data: dict):
     # Response
     # -------------------------
 
-    return {
+    result = {
         "default_probability": float(prob),
         "prediction": int(pred),
         "risk_level": "High Risk" if pred == 1 else "Low Risk"
+    }
+
+    # Save to DB if email provided
+    email = data.get("email")
+    if email:
+        user = db.query(User).filter(User.email == email).first()
+        if user:
+            prediction = CreditPrediction(
+                user_id=user.id,
+                risk_score=float(prob),
+                risk_label=result["risk_level"],
+                confidence=0.95
+            )
+            db.add(prediction)
+            db.commit()
+
+    return result
+
+@router.get("/credit_predictions")
+def get_credit_predictions(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return {"predictions": []}
+    
+    predictions = db.query(CreditPrediction).filter(
+        CreditPrediction.user_id == user.id
+    ).order_by(CreditPrediction.predicted_at.desc()).limit(10).all()
+    
+    return {
+        "predictions": [
+            {
+                "id": p.id,
+                "risk_score": p.risk_score,
+                "risk_label": p.risk_label,
+                "confidence": p.confidence,
+                "predicted_at": p.predicted_at.isoformat() if p.predicted_at else None
+            }
+            for p in predictions
+        ]
     }

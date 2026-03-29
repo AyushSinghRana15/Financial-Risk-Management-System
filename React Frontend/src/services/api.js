@@ -1,13 +1,12 @@
 import axios from "axios";
+import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 
 const API = axios.create({
-    baseURL: "http://localhost:8000"
+    baseURL: API_BASE_URL
 });
 
-// ✅ EXPORT DEFAULT
 export default API;
 
-// existing functions
 export const predictCreditRisk = (data) => {
     return API.post("/predict/credit", data);
 };

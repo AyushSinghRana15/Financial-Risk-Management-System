@@ -29,19 +29,18 @@ const volatilityData = [
 
 function RiskAnalytics() {
     return (
-        <div className="p-10 bg-gray-100 min-h-screen">
+        <div className="p-10 bg-gray-100 dark:bg-slate-900 min-h-screen">
 
-            <h1 className="text-3xl font-bold mb-8">
+            <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">
                 Risk Analytics
             </h1>
 
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
                 {/* Return Distribution */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
 
-                <div className="bg-white p-6 rounded-xl shadow">
-
-                    <h2 className="text-xl font-semibold mb-4">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
                         Return Distribution
                     </h2>
 
@@ -51,9 +50,9 @@ function RiskAnalytics() {
 
                             <CartesianGrid strokeDasharray="3 3" />
 
-                            <XAxis dataKey="range" />
+                            <XAxis dataKey="range" stroke="#6b7280" />
 
-                            <YAxis />
+                            <YAxis stroke="#6b7280" />
 
                             <Tooltip />
 
@@ -66,10 +65,9 @@ function RiskAnalytics() {
                 </div>
 
                 {/* Volatility */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
 
-                <div className="bg-white p-6 rounded-xl shadow">
-
-                    <h2 className="text-xl font-semibold mb-4">
+                    <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
                         Rolling Volatility
                     </h2>
 
@@ -79,9 +77,9 @@ function RiskAnalytics() {
 
                             <CartesianGrid strokeDasharray="3 3" />
 
-                            <XAxis dataKey="day" />
+                            <XAxis dataKey="day" stroke="#6b7280" />
 
-                            <YAxis />
+                            <YAxis stroke="#6b7280" />
 
                             <Tooltip />
 
