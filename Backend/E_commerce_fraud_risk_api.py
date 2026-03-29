@@ -5,10 +5,18 @@ import joblib
 import os
 import sys
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.dirname(BASE_DIR)
-sys.path.append(BASE_DIR)
+CURRENT_FILE_PATH = os.path.abspath(__file__)
+BACKEND_DIR = os.path.dirname(CURRENT_FILE_PATH)
+SRC_DIR = os.path.dirname(BACKEND_DIR)
 
+MODELS_PATH = os.path.join(SRC_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(SRC_DIR, "models")
+
+MODEL_FILE = os.path.join(MODELS_PATH, "E_commerce_fraud_xgboost_model.pkl")
+FEATURES_FILE = os.path.join(MODELS_PATH, "E_commerce_model_features.pkl")
+
+sys.path.append(BACKEND_DIR)
 from database import SessionLocal
 from models import User, FraudPrediction
 
@@ -21,29 +29,21 @@ def get_db():
     finally:
         db.close()
 
-# -------------------------------
-# Load Model & Features
-# -------------------------------
-MODELS_PATH = os.path.join(ROOT_DIR, "Models")
-if not os.path.exists(MODELS_PATH):
-    MODELS_PATH = os.path.join(ROOT_DIR, "models")
-
 model = None
 features = []
-
-MODEL_FILE = os.path.join(MODELS_PATH, "E_commerce_fraud_xgboost_model.pkl")
-FEATURES_FILE = os.path.join(MODELS_PATH, "E_commerce_model_features.pkl")
 
 if os.path.exists(MODEL_FILE):
     try:
         model = joblib.load(MODEL_FILE)
         if os.path.exists(FEATURES_FILE):
             features = joblib.load(FEATURES_FILE)
-        print(f"Successfully loaded e-commerce fraud models from {MODELS_PATH}")
+        print(f"✅ Successfully loaded: {MODEL_FILE}")
     except Exception as e:
-        print(f"Error loading e-commerce fraud models: {e}")
+        print(f"❌ Error loading model file: {e}")
 else:
-    print(f"Model file not found at {MODEL_FILE}")
+    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+    if os.path.exists(MODELS_PATH):
+        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
 # -------------------------------
 # Mappings

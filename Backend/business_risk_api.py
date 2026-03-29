@@ -5,10 +5,15 @@ from sqlalchemy.orm import Session
 import sys
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.dirname(BASE_DIR)
-sys.path.append(BASE_DIR)
+CURRENT_FILE_PATH = os.path.abspath(__file__)
+BACKEND_DIR = os.path.dirname(CURRENT_FILE_PATH)
+SRC_DIR = os.path.dirname(BACKEND_DIR)
 
+MODELS_PATH = os.path.join(SRC_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(SRC_DIR, "models")
+
+sys.path.append(BACKEND_DIR)
 from database import SessionLocal
 from models import User, BusinessRisk
 
@@ -20,10 +25,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-MODELS_PATH = os.path.join(ROOT_DIR, "Models")
-if not os.path.exists(MODELS_PATH):
-    MODELS_PATH = os.path.join(ROOT_DIR, "models")
 
 model = None
 threshold = None
@@ -41,11 +42,13 @@ if os.path.exists(MODEL_FILE):
         if hasattr(model, "get_booster"):
             raw_features = list(model.get_booster().feature_names)
         feature_keys = [f"feature_{i}" for i in range(len(raw_features))]
-        print(f"Successfully loaded business risk models from {MODELS_PATH}")
+        print(f"✅ Successfully loaded: {MODEL_FILE}")
     except Exception as e:
-        print(f"Error loading business risk models: {e}")
+        print(f"❌ Error loading model file: {e}")
 else:
-    print(f"Model file not found at {MODEL_FILE}")
+    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+    if os.path.exists(MODELS_PATH):
+        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
 @router.get("/business_features")
 def get_business_features():

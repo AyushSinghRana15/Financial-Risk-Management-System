@@ -6,10 +6,17 @@ import joblib
 import sys
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.dirname(BASE_DIR)
-sys.path.append(BASE_DIR)
+CURRENT_FILE_PATH = os.path.abspath(__file__)
+BACKEND_DIR = os.path.dirname(CURRENT_FILE_PATH)
+SRC_DIR = os.path.dirname(BACKEND_DIR)
 
+MODELS_PATH = os.path.join(SRC_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(SRC_DIR, "models")
+
+MODEL_FILE = os.path.join(MODELS_PATH, "credit_risk_xgboost_model.pkl")
+
+sys.path.append(BACKEND_DIR)
 from database import SessionLocal
 from models import User, CreditPrediction
 
@@ -22,11 +29,6 @@ def get_db():
     finally:
         db.close()
 
-MODELS_PATH = os.path.join(ROOT_DIR, "Models")
-if not os.path.exists(MODELS_PATH):
-    MODELS_PATH = os.path.join(ROOT_DIR, "models")
-
-MODEL_FILE = os.path.join(MODELS_PATH, "credit_risk_xgb_model.pkl")
 model = None
 feature_names = []
 
@@ -37,11 +39,13 @@ if os.path.exists(MODEL_FILE):
             feature_names = model.get_booster().feature_names
         else:
             feature_names = getattr(model, "feature_names_in_", [])
-        print(f"Successfully loaded credit_risk_xgboost_model.pkl from {MODELS_PATH}")
+        print(f"✅ Successfully loaded: {MODEL_FILE}")
     except Exception as e:
-        print(f"Error loading credit_risk_xgboost_model.pkl: {e}")
+        print(f"❌ Error loading model file: {e}")
 else:
-    print(f"Model file not found at {MODEL_FILE}")
+    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+    if os.path.exists(MODELS_PATH):
+        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
 # -------------------------
 # Credit Risk Endpoint
