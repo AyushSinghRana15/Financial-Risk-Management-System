@@ -44,20 +44,20 @@ Base.metadata.create_all(bind=engine)
 # ================= APP =================
 app = FastAPI()
 
-FRONTEND_URL = os.getenv("FRONTEND_URL", "")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "").rstrip("/")
 
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:3000",
     FRONTEND_URL,
-    "https://*.vercel.app",
 ]
 origins = [o for o in origins if o]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
