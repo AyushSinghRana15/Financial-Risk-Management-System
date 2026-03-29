@@ -26,7 +26,7 @@ MODELS_PATH = os.path.join(ROOT_DIR, "Models")
 if not os.path.exists(MODELS_PATH):
     MODELS_PATH = os.path.join(ROOT_DIR, "models")
 
-MODEL_FILE = os.path.join(MODELS_PATH, "credit_risk_xgboost_model.pkl")
+MODEL_FILE = os.path.join(MODELS_PATH, "credit_risk_xgb_model.pkl")
 model = None
 feature_names = []
 
