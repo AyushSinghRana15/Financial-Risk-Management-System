@@ -1,6 +1,6 @@
 import pandas as pd
 import joblib
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import sys
 import os
@@ -22,18 +22,30 @@ def get_db():
         db.close()
 
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(ROOT_DIR, "models")
+
 model = None
 threshold = None
 feature_keys = []
 raw_features = []
-try:
-    model = joblib.load(os.path.join(MODELS_PATH, "xgboost_business_risk_model.pkl"))
-    threshold = joblib.load(os.path.join(MODELS_PATH, "business_risk_threshold.pkl"))
-    raw_features = list(model.get_booster().feature_names)
-    feature_keys = [f"feature_{i}" for i in range(len(raw_features))]
-    print(f"Successfully loaded business risk models from {MODELS_PATH}")
-except Exception as e:
-    print(f"Error loading business risk models: {e}")
+
+MODEL_FILE = os.path.join(MODELS_PATH, "xgboost_business_risk_model.pkl")
+THRESHOLD_FILE = os.path.join(MODELS_PATH, "business_risk_threshold.pkl")
+
+if os.path.exists(MODEL_FILE):
+    try:
+        model = joblib.load(MODEL_FILE)
+        threshold_file = joblib.load(THRESHOLD_FILE) if os.path.exists(THRESHOLD_FILE) else 0.5
+        threshold = threshold_file
+        if hasattr(model, "get_booster"):
+            raw_features = list(model.get_booster().feature_names)
+        feature_keys = [f"feature_{i}" for i in range(len(raw_features))]
+        print(f"Successfully loaded business risk models from {MODELS_PATH}")
+    except Exception as e:
+        print(f"Error loading business risk models: {e}")
+else:
+    print(f"Model file not found at {MODEL_FILE}")
 
 @router.get("/business_features")
 def get_business_features():

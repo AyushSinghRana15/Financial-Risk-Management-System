@@ -23,14 +23,25 @@ def get_db():
         db.close()
 
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(ROOT_DIR, "models")
+
+MODEL_FILE = os.path.join(MODELS_PATH, "credit_risk_xgboost_model.pkl")
 model = None
 feature_names = []
-try:
-    model = joblib.load(os.path.join(MODELS_PATH, "credit_risk_xgboost_model.pkl"))
-    feature_names = model.get_booster().feature_names
-    print(f"Successfully loaded credit_risk_xgboost_model.pkl from {MODELS_PATH}")
-except Exception as e:
-    print(f"Error loading credit_risk_xgboost_model.pkl: {e}")
+
+if os.path.exists(MODEL_FILE):
+    try:
+        model = joblib.load(MODEL_FILE)
+        if hasattr(model, "get_booster"):
+            feature_names = model.get_booster().feature_names
+        else:
+            feature_names = getattr(model, "feature_names_in_", [])
+        print(f"Successfully loaded credit_risk_xgboost_model.pkl from {MODELS_PATH}")
+    except Exception as e:
+        print(f"Error loading credit_risk_xgboost_model.pkl: {e}")
+else:
+    print(f"Model file not found at {MODEL_FILE}")
 
 # -------------------------
 # Credit Risk Endpoint
@@ -38,6 +49,8 @@ except Exception as e:
 
 @router.post("/predict_credit_risk")
 def predict_credit_risk(data: dict, db: Session = Depends(get_db)):
+    if model is None:
+        raise HTTPException(status_code=500, detail=f"Model not loaded. Check server logs.")
 
     # -------------------------
     # Safe Input Extraction

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import pandas as pd
 import joblib
@@ -25,14 +25,25 @@ def get_db():
 # Load Model & Features
 # -------------------------------
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(ROOT_DIR, "models")
+
 model = None
 features = []
-try:
-    model = joblib.load(os.path.join(MODELS_PATH, "E_commerce_fraud_xgboost_model.pkl"))
-    features = joblib.load(os.path.join(MODELS_PATH, "E_commerce_model_features.pkl"))
-    print(f"Successfully loaded e-commerce fraud models from {MODELS_PATH}")
-except Exception as e:
-    print(f"Error loading e-commerce fraud models: {e}")
+
+MODEL_FILE = os.path.join(MODELS_PATH, "E_commerce_fraud_xgboost_model.pkl")
+FEATURES_FILE = os.path.join(MODELS_PATH, "E_commerce_model_features.pkl")
+
+if os.path.exists(MODEL_FILE):
+    try:
+        model = joblib.load(MODEL_FILE)
+        if os.path.exists(FEATURES_FILE):
+            features = joblib.load(FEATURES_FILE)
+        print(f"Successfully loaded e-commerce fraud models from {MODELS_PATH}")
+    except Exception as e:
+        print(f"Error loading e-commerce fraud models: {e}")
+else:
+    print(f"Model file not found at {MODEL_FILE}")
 
 # -------------------------------
 # Mappings

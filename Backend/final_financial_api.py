@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import numpy as np
@@ -26,10 +26,17 @@ def get_db():
 # LOAD MODEL
 # -------------------------
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(ROOT_DIR, "models")
+
+MODEL_FILE = os.path.join(MODELS_PATH, "final_financial_model.pkl")
 model = None
 try:
-    model = joblib.load(os.path.join(MODELS_PATH, "final_financial_model.pkl"))
-    print(f"Successfully loaded final_financial_model.pkl from {MODELS_PATH}")
+    if os.path.exists(MODEL_FILE):
+        model = joblib.load(MODEL_FILE)
+        print(f"Successfully loaded final_financial_model.pkl from {MODELS_PATH}")
+    else:
+        print(f"Model file not found at {MODEL_FILE}")
 except Exception as e:
     print(f"Error loading final_financial_model.pkl: {e}")
 

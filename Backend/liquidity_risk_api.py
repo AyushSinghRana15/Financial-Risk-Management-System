@@ -3,7 +3,7 @@
 # ----------------------------
 import pandas as pd
 import joblib
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import numpy as np
 import sys
@@ -32,14 +32,24 @@ def get_db():
 # LOAD MODEL & SCALER
 # ----------------------------
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(ROOT_DIR, "models")
+
 model = None
 scaler = None
-try:
-    model = joblib.load(os.path.join(MODELS_PATH, "liquidity_model.pkl"))
-    scaler = joblib.load(os.path.join(MODELS_PATH, "scaler.pkl"))
-    print(f"Successfully loaded liquidity_model.pkl and scaler.pkl from {MODELS_PATH}")
-except Exception as e:
-    print(f"Error loading liquidity models: {e}")
+
+MODEL_FILE = os.path.join(MODELS_PATH, "liquidity_model.pkl")
+SCALER_FILE = os.path.join(MODELS_PATH, "scaler.pkl")
+
+if os.path.exists(MODEL_FILE):
+    try:
+        model = joblib.load(MODEL_FILE)
+        scaler = joblib.load(SCALER_FILE) if os.path.exists(SCALER_FILE) else None
+        print(f"Successfully loaded liquidity_model.pkl and scaler.pkl from {MODELS_PATH}")
+    except Exception as e:
+        print(f"Error loading liquidity models: {e}")
+else:
+    print(f"Model file not found at {MODEL_FILE}")
 
 # ----------------------------
 # FEATURES (25)

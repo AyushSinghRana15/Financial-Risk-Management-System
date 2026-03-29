@@ -1,6 +1,6 @@
 import pandas as pd
 import joblib
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import yfinance as yf
 import numpy as np
@@ -24,18 +24,26 @@ def get_db():
         db.close()
 
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(ROOT_DIR, "models")
+
+MODEL_FILE = os.path.join(MODELS_PATH, "ml_var_model.pkl")
 model_package = None
 model = None
 features = []
 residual_var = None
-try:
-    model_package = joblib.load(os.path.join(MODELS_PATH, "ml_var_model.pkl"))
-    model = model_package["model"]
-    features = model_package["features"]
-    residual_var = model_package["residual_var"]
-    print(f"Successfully loaded ml_var_model.pkl from {MODELS_PATH}")
-except Exception as e:
-    print(f"Error loading ml_var_model.pkl: {e}")
+
+if os.path.exists(MODEL_FILE):
+    try:
+        model_package = joblib.load(MODEL_FILE)
+        model = model_package["model"]
+        features = model_package["features"]
+        residual_var = model_package["residual_var"]
+        print(f"Successfully loaded ml_var_model.pkl from {MODELS_PATH}")
+    except Exception as e:
+        print(f"Error loading ml_var_model.pkl: {e}")
+else:
+    print(f"Model file not found at {MODEL_FILE}")
 
 # ----------------------------
 # FEATURE NAME CLEANING
