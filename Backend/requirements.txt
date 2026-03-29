@@ -46,5 +46,4 @@ uvicorn==0.42.0
 websockets==16.0
 xgboost==3.2.0
 yfinance==1.2.0
-google-auth==2.35.0
 gunicorn==23.0.0
