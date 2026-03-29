@@ -82,21 +82,19 @@ function About() {
     }, [flowStep, isPlaying]);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
 
-            {/* Hero Section - True Edge to Edge with Shine Animation */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white rounded-b-[3rem] shadow-2xl -mx-4 sm:-mx-6 md:-mx-8 lg:-mx-10 -mt-4 sm:-mt-6 md:-mt-8 lg:-mt-10">
+            {/* Hero Section - Glass Panel Card */}
+            <div className="relative overflow-hidden glass-panel rounded-2xl shadow-xl mb-8">
                 
-                {/* Shine Effect */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute top-0 left-0 w-[200%] h-[200%] bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine opacity-60"></div>
-                </div>
+                {/* Gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 opacity-90"></div>
 
                 {/* Floating decorative orbs */}
                 <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-float"></div>
                 <div className="absolute bottom-10 right-20 w-40 h-40 bg-purple-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "1s" }}></div>
 
-                <div className="relative max-w-5xl mx-auto px-6 py-16 text-center">
+                <div className="relative max-w-5xl mx-auto px-6 py-12 text-center">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-white mb-4">
                         FinRisk
                     </h1>

@@ -63,7 +63,7 @@ export default function Dashboard() {
                 setPortfolio(portfolioRes.data.portfolio || []);
 
                 const portfolioData = portfolioRes.data.portfolio || [];
-                
+
                 if (portfolioData.length === 0) {
                     setAiIntelligence({
                         overview: "Your portfolio is empty. Add assets to receive AI-powered insights and recommendations.",
@@ -74,43 +74,25 @@ export default function Dashboard() {
                 }
 
                 setAiLoading(true);
-                const prompt = `
-                Analyze this portfolio and respond ONLY with valid JSON in this exact format:
-                {"overview": "2-3 sentence overview of portfolio status and risk", "recommendations": ["recommendation 1", "recommendation 2", "recommendation 3"]}
-                
-                Portfolio: ${JSON.stringify(portfolioData)}
-                `;
+                const prompt = `Analyze this portfolio: ${JSON.stringify(portfolioData)}`;
 
                 const alertsRes = await axios.post("http://localhost:8000/ai-risk-alerts", { prompt });
-                const text = alertsRes.data.response || "";
-                
-                try {
-                    const jsonMatch = text.match(/\{[\s\S]*\}/);
-                    if (jsonMatch) {
-                        const parsed = JSON.parse(jsonMatch[0]);
-                        setAiIntelligence({
-                            overview: parsed.overview || "Analyzing portfolio...",
-                            recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations.slice(0, 3) : []
-                        });
-                    } else {
-                        throw new Error("No JSON found");
-                    }
-                } catch {
-                    setAiIntelligence({
-                        overview: "Your portfolio shows moderate diversification. Consider reviewing risk exposure across different asset classes.",
-                        recommendations: [
-                            "Diversify into bonds to reduce volatility",
-                            "Monitor high-risk crypto allocations",
-                            "Consider rebalancing quarterly"
-                        ]
-                    });
-                }
+                const data = alertsRes.data;
+
+                setAiIntelligence({
+                    overview: data.overview || "Analyzing portfolio...",
+                    recommendations: Array.isArray(data.recommendations) ? data.recommendations.slice(0, 3) : []
+                });
 
             } catch (err) {
                 console.error(err);
                 setAiIntelligence({
-                    overview: "Unable to analyze portfolio at this time.",
-                    recommendations: []
+                    overview: "Your portfolio shows moderate diversification. Consider reviewing risk exposure across different asset classes.",
+                    recommendations: [
+                        "Diversify into bonds to reduce volatility",
+                        "Monitor high-risk crypto allocations",
+                        "Consider rebalancing quarterly"
+                    ]
                 });
             } finally {
                 setLoading(false);
@@ -177,9 +159,9 @@ export default function Dashboard() {
 
 
 
-    const portfolioChartData = portfolio.length > 0 
-        ? portfolio.map((a, i) => ({ 
-            name: a.asset_name, 
+    const portfolioChartData = portfolio.length > 0
+        ? portfolio.map((a, i) => ({
+            name: a.asset_name,
             value: a.current_price * a.quantity,
             fill: CHART_COLORS[i % CHART_COLORS.length]
         }))
@@ -200,11 +182,11 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <div className="relative mb-8">
-                <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
-                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+            <div className="relative mb-8 overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
                 <div className="overflow-x-auto scrollbar-hide pb-2">
-                    <div className="flex gap-4 animate-scroll hover:[animation-play-state:paused] w-max px-4">
+                    <div className="flex gap-4 animate-scroll w-max px-6">
                         {[...kpiCards, ...kpiCards].map((card, index) => (
                             <Link to={card.link} key={index}>
                                 <div className={`glass-panel rounded-xl p-5 cursor-pointer transition-all duration-300 hover:shadow-xl w-[220px] lg:w-[240px] flex-shrink-0`}>
@@ -218,22 +200,32 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-                {[
-                    { name: "Credit Risk", link: "/credit-risk", desc: "Default probability analysis" },
-                    { name: "Market Risk", link: "/market-risk", desc: "Value at Risk estimation" },
-                    { name: "Business Risk", link: "/business-risk", desc: "Strategic & revenue risks" },
-                    { name: "Operational Risk", link: "/operational-risk", desc: "Process & system failures" },
-                    { name: "Financial Risk", link: "/financial-risk", desc: "Capital & leverage risks" },
-                    { name: "Liquidity Risk", link: "/liquidity-risk", desc: "Cash flow & funding risks" }
-                ].map((mod, idx) => (
-                    <Link to={mod.link} key={idx}>
-                        <div className={`glass-panel rounded-xl p-4 transition-all duration-300 hover:shadow-xl cursor-pointer h-full`}>
-                            <h2 className="text-sm font-semibold text-slate-800 dark:text-white">{mod.name}</h2>
-                            <p className="text-xs text-slate-400 mt-1">{mod.desc}</p>
-                        </div>
-                    </Link>
-                ))}
+            <div className="relative mb-6 overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="overflow-x-auto scrollbar-hide">
+                    <div className="flex gap-4 animate-scroll w-max px-6">
+                        {[1, 2].map((_, repeatIdx) => (
+                            <div key={repeatIdx} className="flex gap-4">
+                                {[
+                                    { name: "Credit Risk", link: "/credit-risk", desc: "Default probability analysis" },
+                                    { name: "Market Risk", link: "/market-risk", desc: "Value at Risk estimation" },
+                                    { name: "Business Risk", link: "/business-risk", desc: "Strategic & revenue risks" },
+                                    { name: "Operational Risk", link: "/operational-risk", desc: "Process & system failures" },
+                                    { name: "Financial Risk", link: "/financial-risk", desc: "Capital & leverage risks" },
+                                    { name: "Liquidity Risk", link: "/liquidity-risk", desc: "Cash flow & funding risks" }
+                                ].map((mod, idx) => (
+                                    <Link to={mod.link} key={`${repeatIdx}-${idx}`}>
+                                        <div className={`glass-panel rounded-xl p-4 transition-all duration-300 hover:shadow-xl cursor-pointer w-[180px] lg:w-[200px] flex-shrink-0`}>
+                                            <h2 className="text-sm font-semibold text-slate-800 dark:text-white">{mod.name}</h2>
+                                            <p className="text-xs text-slate-400 mt-1">{mod.desc}</p>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -253,10 +245,10 @@ export default function Dashboard() {
                                     </linearGradient>
                                 ))}
                             </defs>
-                            <Pie 
-                                data={portfolioChartData} 
-                                dataKey="value" 
-                                nameKey="name" 
+                            <Pie
+                                data={portfolioChartData}
+                                dataKey="value"
+                                nameKey="name"
                                 cx="50%"
                                 cy="50%"
                                 innerRadius={50}
@@ -264,8 +256,8 @@ export default function Dashboard() {
                                 paddingAngle={2}
                             >
                                 {portfolioChartData.map((entry, index) => (
-                                    <Cell 
-                                        key={`cell-${index}`} 
+                                    <Cell
+                                        key={`cell-${index}`}
                                         fill={`url(#pieGradient${index})`}
                                         stroke="transparent"
                                     />
@@ -297,8 +289,8 @@ export default function Dashboard() {
                         }))}>
                             <defs>
                                 <linearGradient id="riskGradient" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4}/>
-                                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05}/>
+                                    <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.4} />
+                                    <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.05} />
                                 </linearGradient>
                                 <linearGradient id="riskGradientStroke" x1="0" y1="0" x2="1" y2="0">
                                     <stop offset="0%" stopColor="#8b5cf6" />
@@ -307,21 +299,21 @@ export default function Dashboard() {
                             </defs>
                             <XAxis dataKey="day" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
                             <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
-                            <Tooltip 
-                                contentStyle={{ 
-                                    backgroundColor: '#1e293b', 
-                                    border: 'none', 
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: '#1e293b',
+                                    border: 'none',
                                     borderRadius: '8px',
                                     color: '#fff',
                                     fontSize: '12px'
                                 }}
                             />
-                            <Area 
-                                type="monotone" 
-                                dataKey="risk" 
+                            <Area
+                                type="monotone"
+                                dataKey="risk"
                                 stroke="url(#riskGradientStroke)"
                                 strokeWidth={2.5}
-                                fill="url(#riskGradient)" 
+                                fill="url(#riskGradient)"
                             />
                         </AreaChart>
                     </ResponsiveContainer>
@@ -346,7 +338,7 @@ export default function Dashboard() {
                                     {aiIntelligence.overview}
                                 </p>
                             </div>
-                            
+
                             {aiIntelligence.recommendations.length > 0 ? (
                                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                                     <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3">Actionable Recommendations</p>

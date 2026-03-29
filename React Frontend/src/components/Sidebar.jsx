@@ -66,8 +66,8 @@ export default function Sidebar() {
           className={`
             group relative flex items-center ${collapsed ? "justify-center" : "gap-3"} px-3 py-2.5 rounded-xl mb-1
             transition-all duration-300 cursor-pointer
-            ${active 
-              ? color 
+            ${active
+              ? color
                 ? `bg-gradient-to-r ${color.active} ${color.text} shadow-lg ${color.glow}`
                 : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30"
               : "text-slate-400 hover:text-white hover:bg-slate-800/50"
@@ -113,7 +113,7 @@ export default function Sidebar() {
       </button>
 
       {mobileOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
@@ -133,7 +133,7 @@ export default function Sidebar() {
         `}
       >
         <div className="flex-1 flex flex-col min-h-0">
-          <div className={`flex items-center ${collapsed ? "justify-center px-2" : "justify-between px-4"} pt-4 pb-2`}>
+          <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"} ${collapsed ? "px-2" : "px-4"} pt-4 pb-6 mb-6`}>
             {!collapsed && (
               <div className="flex items-center gap-2">
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0">
@@ -144,7 +144,7 @@ export default function Sidebar() {
                 </span>
               </div>
             )}
-            
+
             <button
               onClick={() => setCollapsed(!collapsed)}
               className={`p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all hidden lg:block ${collapsed ? "mx-auto" : ""}`}

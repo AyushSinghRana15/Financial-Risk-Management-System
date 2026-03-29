@@ -5,7 +5,7 @@ const BASE_URL = "http://127.0.0.1:8000";
 
 function getRelativeTime(timestamp) {
     if (!timestamp) return "Just now";
-    
+
     const now = new Date();
     const then = new Date(timestamp);
     const diffMs = now - then;
@@ -13,7 +13,7 @@ function getRelativeTime(timestamp) {
     const diffMin = Math.floor(diffSec / 60);
     const diffHr = Math.floor(diffMin / 60);
     const diffDays = Math.floor(diffHr / 24);
-    
+
     if (diffSec < 60) return "Just now";
     if (diffMin < 60) return `${diffMin}m ago`;
     if (diffHr < 24) return `${diffHr}h ago`;
@@ -109,7 +109,7 @@ export default function NotificationPanel({ onClose }) {
     return (
         <div
             ref={panelRef}
-            className="absolute right-2 top-12 w-96 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 z-50 animate-scaleIn"
+            className="absolute right-0 top-12 w-[360px] sm:w-96 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 z-[100] animate-scaleIn"
         >
             <style>{`
                 @keyframes scaleIn {

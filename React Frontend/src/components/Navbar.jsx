@@ -59,7 +59,7 @@ function Navbar() {
     ];
 
     return (
-        <div className="glass-panel border-t-0 border-x-0 border-b border-slate-200/20 dark:border-slate-700/30">
+        <div className="glass-panel border-t-0 border-x-0 border-b border-slate-200/20 dark:border-slate-700/30 relative z-50">
             <div className="flex items-center px-6 py-3">
                 <div className="flex-1" />
 

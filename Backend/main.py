@@ -283,21 +283,24 @@ def ai_risk_alerts(data: dict):
 
     result = get_ai_insights(prompt)
 
-    # ✅ Convert structured response → alerts
     if isinstance(result, dict):
-        alerts = []
-
-        # from insights
-        alerts.extend(result.get("insights", [])[:2])
-
-        # from suggestions (optional)
-        alerts.extend(result.get("suggestions", [])[:1])
-
+        insights = result.get("insights", [])
+        suggestions = result.get("suggestions", [])
+        
+        overview = ". ".join(insights[:2]) if insights else "Analyzing portfolio..."
+        recommendations = suggestions[:3] if suggestions else []
+        
         return {
-            "response": "\n".join(alerts)
+            "overview": overview,
+            "recommendations": recommendations,
+            "response": f"{overview}\n\nRecommendations:\n" + "\n".join([f"- {r}" for r in recommendations])
         }
 
-    return {"response": str(result)}
+    return {
+        "overview": "Unable to analyze portfolio at this time.",
+        "recommendations": [],
+        "response": str(result)
+    }
 
 
 # ================= NOTIFICATIONS =================
