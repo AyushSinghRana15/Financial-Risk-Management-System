@@ -17,8 +17,8 @@ def get_db():
     finally:
         db.close()
 
-model = joblib.load("../Models/xgboost_business_risk_model.pkl")
-threshold = joblib.load("../Models/business_risk_threshold.pkl")
+model = joblib.load("Models/xgboost_business_risk_model.pkl")
+threshold = joblib.load("Models/business_risk_threshold.pkl")
 
 raw_features = list(model.get_booster().feature_names)
 # Use index-based keys to avoid special character issues

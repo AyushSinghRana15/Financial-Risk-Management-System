@@ -21,7 +21,7 @@ def get_db():
 # -------------------------
 # LOAD MODEL
 # -------------------------
-model = joblib.load("../Models/final_financial_model.pkl")
+model = joblib.load("Models/final_financial_model.pkl")
 
 # 🔥 FIXED THRESHOLD
 threshold = 0.45

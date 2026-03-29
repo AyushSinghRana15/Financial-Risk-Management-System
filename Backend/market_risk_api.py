@@ -23,7 +23,7 @@ def get_db():
 # LOAD MARKET RISK MODEL
 # ----------------------------
 
-model_package = joblib.load("../Models/ml_var_model.pkl")
+model_package = joblib.load("Models/ml_var_model.pkl")
 
 model = model_package["model"]
 features = model_package["features"]

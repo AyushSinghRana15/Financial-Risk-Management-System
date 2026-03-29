@@ -27,8 +27,8 @@ def get_db():
 # ----------------------------
 # LOAD MODEL & SCALER
 # ----------------------------
-model = joblib.load("../Models/liquidity_model.pkl")
-scaler = joblib.load("../Models/scaler.pkl")
+model = joblib.load("Models/liquidity_model.pkl")
+scaler = joblib.load("Models/scaler.pkl")
 
 # ----------------------------
 # FEATURES (25)
