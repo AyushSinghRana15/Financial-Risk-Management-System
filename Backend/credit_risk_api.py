@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import pandas as pd
 import numpy as np
@@ -10,9 +10,7 @@ CURRENT_FILE_PATH = os.path.abspath(__file__)
 BACKEND_DIR = os.path.dirname(CURRENT_FILE_PATH)
 SRC_DIR = os.path.dirname(BACKEND_DIR)
 
-MODELS_PATH = "/opt/render/project/src/Models"
-if not os.path.exists(MODELS_PATH):
-    MODELS_PATH = os.path.join(SRC_DIR, "Models")
+MODELS_PATH = os.path.join(SRC_DIR, "Models")
 if not os.path.exists(MODELS_PATH):
     MODELS_PATH = os.path.join(SRC_DIR, "models")
 
@@ -56,7 +54,23 @@ else:
 @router.post("/predict_credit_risk")
 def predict_credit_risk(data: dict, db: Session = Depends(get_db)):
     if model is None:
-        raise HTTPException(status_code=500, detail=f"Model not loaded. Check server logs.")
+        print("Model is None, attempting late load...")
+        if os.path.exists(MODEL_FILE):
+            try:
+                globals()['model'] = joblib.load(MODEL_FILE)
+                if hasattr(globals()['model'], "get_booster"):
+                    globals()['feature_names'] = globals()['model'].get_booster().feature_names
+                print("✅ Late load successful")
+            except Exception as e:
+                print(f"❌ Late load failed: {e}")
+        
+        if model is None:
+            return {
+                "status": "error",
+                "message": "Credit model not initialized. Please check server logs.",
+                "risk_level": "Unknown",
+                "default_probability": 0.5
+            }
 
     # -------------------------
     # Safe Input Extraction
