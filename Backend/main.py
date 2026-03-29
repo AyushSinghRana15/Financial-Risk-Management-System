@@ -52,8 +52,14 @@ origins = [o for o in origins if o]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://finrisk.online"],
-    allow_methods=["*"],
+    allow_origins=[
+        "https://finrisk.online",
+        "https://www.finrisk.online", # Add the www version just in case
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"], # Explicitly allow OPTIONS
     allow_headers=["*"],
 )
 
@@ -222,10 +228,19 @@ def ai_insights(db: Session = Depends(get_db)):
     return result
 
 # ================= AI RISK ALERTS (Prompt Based) =================
-@app.post("/ai-risk-alerts")
-def ai_risk_alerts(data: dict):
+@app.api_route("/ai-risk-alerts", methods=["GET", "POST"])
+def ai_risk_alerts(data: dict = None):
+    # Handle GET requests (triggered by page reloads/initial visits)
+    if data is None:
+        return {
+            "overview": "System ready. Analysis will appear here when a prompt is provided.",
+            "recommendations": [],
+            "response": "Waiting for user input..."
+        }
+
     prompt = data.get("prompt", "")
 
+    # Call your AI service
     result = get_ai_insights(prompt)
 
     if isinstance(result, dict):
@@ -246,7 +261,6 @@ def ai_risk_alerts(data: dict):
         "recommendations": [],
         "response": str(result)
     }
-
 
 # ================= NOTIFICATIONS =================
 @app.get("/notifications")
