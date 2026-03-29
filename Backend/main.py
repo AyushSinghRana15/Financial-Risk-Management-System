@@ -44,6 +44,12 @@ Base.metadata.create_all(bind=engine)
 # ================= APP =================
 app = FastAPI()
 
+# Render dynamic PORT
+if __name__ != "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    app.config = {"port": port}
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
