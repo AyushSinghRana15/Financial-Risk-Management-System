@@ -29,13 +29,6 @@ from google.auth.transport import requests
 # AI Service
 from ai_service import get_ai_insights
 
-# Google Auth
-from google.oauth2 import id_token
-from google.auth.transport import requests
-
-# Password Hashing
-import bcrypt
-
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 # ================= DB =================
@@ -132,63 +125,6 @@ def google_auth(data: dict, db: Session = Depends(get_db)):
         "name": user.name,
         "email": user.email,
         "picture": picture
-    }
-
-# ================= EMAIL AUTH - SIGNUP =================
-@app.post("/auth/signup")
-def signup(data: dict, db: Session = Depends(get_db)):
-    name = data.get("name")
-    email = data.get("email")
-    password = data.get("password")
-    
-    if not name or not email or not password:
-        raise HTTPException(status_code=400, detail="Name, email, and password are required")
-    
-    existing_user = db.query(User).filter(User.email == email).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="An account with this email already exists")
-    
-    password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    
-    new_user = User(
-        name=name,
-        email=email,
-        password_hash=password_hash,
-        is_verified=True
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    
-    return {
-        "name": new_user.name,
-        "email": new_user.email
-    }
-
-# ================= EMAIL AUTH - LOGIN =================
-@app.post("/auth/login")
-def login(data: dict, db: Session = Depends(get_db)):
-    email = data.get("email")
-    password = data.get("password")
-    
-    if not email or not password:
-        raise HTTPException(status_code=400, detail="Email and password are required")
-    
-    user = db.query(User).filter(User.email == email).first()
-    
-    if not user:
-        raise HTTPException(status_code=401, detail="No account found with this email")
-    
-    if user.password_hash == "google_oauth":
-        raise HTTPException(status_code=401, detail="This account was created using Google. Please sign in with Google.")
-    
-    if not bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
-        raise HTTPException(status_code=401, detail="Invalid password")
-    
-    return {
-        "name": user.name,
-        "email": user.email,
-        "picture": user.picture
     }
 
 # ================= PROFILE APIs =================
