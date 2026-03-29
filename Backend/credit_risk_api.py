@@ -23,7 +23,7 @@ def get_db():
 # Load Model
 # -------------------------
 
-model = joblib.load(os.path.join(BASE_DIR, "Models", "balanced_xgboost_model.pkl"))
+model = joblib.load(os.path.join(BASE_DIR, "Models", "credit_risk_xgboost_model.pkl"))
 
 # Get feature names directly from trained model
 feature_names = model.get_booster().feature_names

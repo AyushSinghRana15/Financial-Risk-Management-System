@@ -44,6 +44,7 @@ function Market() {
     };
 
     const formatPrice = (name, price) => {
+        if (price === undefined || price === null) return "N/A";
         if (name.includes("BTC") || name.includes("ETH")) return `$${price}`;
         if (name.includes("Gold")) return `₹ ${price}`;
         return price.toLocaleString();
