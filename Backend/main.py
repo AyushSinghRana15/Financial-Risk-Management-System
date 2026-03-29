@@ -52,8 +52,7 @@ origins = [o for o in origins if o]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=["https://finrisk.online"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
