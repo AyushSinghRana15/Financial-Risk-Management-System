@@ -22,16 +22,18 @@ def get_db():
         db.close()
 
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+model = None
+threshold = None
+feature_keys = []
+raw_features = []
 try:
     model = joblib.load(os.path.join(MODELS_PATH, "xgboost_business_risk_model.pkl"))
     threshold = joblib.load(os.path.join(MODELS_PATH, "business_risk_threshold.pkl"))
+    raw_features = list(model.get_booster().feature_names)
+    feature_keys = [f"feature_{i}" for i in range(len(raw_features))]
     print(f"Successfully loaded business risk models from {MODELS_PATH}")
 except Exception as e:
     print(f"Error loading business risk models: {e}")
-
-raw_features = list(model.get_booster().feature_names)
-# Use index-based keys to avoid special character issues
-feature_keys = [f"feature_{i}" for i in range(len(raw_features))]
 
 @router.get("/business_features")
 def get_business_features():

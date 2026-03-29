@@ -25,6 +25,8 @@ def get_db():
 # Load Model & Features
 # -------------------------------
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+model = None
+features = []
 try:
     model = joblib.load(os.path.join(MODELS_PATH, "E_commerce_fraud_xgboost_model.pkl"))
     features = joblib.load(os.path.join(MODELS_PATH, "E_commerce_model_features.pkl"))

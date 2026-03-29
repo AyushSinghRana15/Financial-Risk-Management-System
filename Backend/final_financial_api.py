@@ -26,6 +26,7 @@ def get_db():
 # LOAD MODEL
 # -------------------------
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+model = None
 try:
     model = joblib.load(os.path.join(MODELS_PATH, "final_financial_model.pkl"))
     print(f"Successfully loaded final_financial_model.pkl from {MODELS_PATH}")

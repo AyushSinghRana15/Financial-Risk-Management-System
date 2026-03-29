@@ -32,6 +32,8 @@ def get_db():
 # LOAD MODEL & SCALER
 # ----------------------------
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
+model = None
+scaler = None
 try:
     model = joblib.load(os.path.join(MODELS_PATH, "liquidity_model.pkl"))
     scaler = joblib.load(os.path.join(MODELS_PATH, "scaler.pkl"))
