@@ -6,7 +6,6 @@ import NotificationPanel from "./NotificationPanel";
 const BASE_URL = "http://127.0.0.1:8000";
 
 function Navbar() {
-
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -47,151 +46,121 @@ function Navbar() {
     };
 
     const linkClass = (path) =>
-        `cursor-pointer text-sm font-medium transition ${location.pathname === path
-            ? "text-blue-600 dark:text-blue-400"
-            : "text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+        `cursor-pointer text-sm font-medium transition-colors duration-200 ${location.pathname === path
+            ? "text-blue-500 dark:text-blue-400"
+            : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
         }`;
 
+    const navItems = [
+        { path: "/dashboard", label: "Home" },
+        { path: "/portfolio", label: "Portfolio" },
+        { path: "/market", label: "Market" },
+        { path: "/about", label: "About" },
+    ];
+
     return (
-        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b dark:border-slate-700 flex items-center px-6 py-4 sticky top-0 z-50">
+        <div className="glass-panel border-t-0 border-x-0 border-b border-slate-200/20 dark:border-slate-700/30">
+            <div className="flex items-center px-6 py-3">
+                <div className="flex-1" />
 
-            {/* LEFT: Logo */}
-            <div
-                onClick={() => navigate("/dashboard")}
-                className="flex items-center gap-3 cursor-pointer group"
-            >
-                <div className="p-2 bg-blue-600 rounded-lg group-hover:bg-blue-700 transition">
-                    <FaChartLine className="text-white" size={20} />
-                </div>
-                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-blue-600 dark:from-white dark:to-blue-400">
-                    FinRisk
-                </span>
-            </div>
+                <div className="flex items-center gap-5">
+                    <nav className="hidden md:flex items-center gap-5">
+                        {navItems.map(item => (
+                            <span 
+                                key={item.path} 
+                                onClick={() => navigate(item.path)} 
+                                className={linkClass(item.path)}
+                            >
+                                {item.label}
+                            </span>
+                        ))}
+                    </nav>
 
-            {/* SPACER */}
-            <div className="flex-1"></div>
-
-            {/* RIGHT SECTION */}
-            <div className="flex items-center gap-6">
-
-                {/* Nav Links */}
-                <div className="flex items-center gap-6">
-
-                    <span onClick={() => navigate("/dashboard")} className={linkClass("/dashboard")}>
-                        Home
-                    </span>
-
-                    <span onClick={() => navigate("/portfolio")} className={linkClass("/portfolio")}>
-                        Portfolio
-                    </span>
-
-                    <span onClick={() => navigate("/market")} className={linkClass("/market")}>
-                        Market
-                    </span>
-
-                    <span onClick={() => navigate("/about")} className={linkClass("/about")}>
-                        About
-                    </span>
-
-                </div>
-
-                {/* Notification */}
-                <div className="relative">
-                    <div
-                        onClick={() => setNotifOpen(!notifOpen)}
-                        className="relative cursor-pointer"
-                    >
-                        <FaBell className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition" size={18} />
-                        {unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                        )}
-                    </div>
-
-                    {notifOpen && <NotificationPanel onClose={() => setNotifOpen(false)} />}
-                </div>
-
-                {/* Auth Section */}
-                {!user || !user.name ? (
-                    <button
-                        onClick={() => navigate("/login")}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
-                    >
-                        Login
-                    </button>
-                ) : (
-                    <div className="relative flex items-center gap-3">
-
-                        {/* First Name Label */}
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden sm:block">
-                            {user.name?.split(" ")[0]}
-                        </span>
-
-                        {/* Avatar */}
+                    <div className="relative">
                         <div
-                            onClick={() => setMenuOpen(!menuOpen)}
-                            className="w-9 h-9 rounded-full bg-blue-600 text-white 
-                            flex items-center justify-center font-semibold 
-                            cursor-pointer hover:scale-105 transition overflow-hidden"
+                            onClick={() => setNotifOpen(!notifOpen)}
+                            className="relative cursor-pointer p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
                         >
-                            {user.picture ? (
-                                <img 
-                                    src={user.picture} 
-                                    alt={user.name} 
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                getInitials(user.name)
+                            <FaBell size={18} />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                             )}
                         </div>
 
-                        {/* Dropdown */}
-                        {menuOpen && (
-                            <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-lg border dark:border-slate-700 overflow-hidden">
-
-                                <div className="p-4 border-b dark:border-slate-700">
-                                    <p className="font-semibold text-gray-800 dark:text-white">{user.name}</p>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
-                                </div>
-
-                                <div className="py-2">
-
-                                    <div
-                                        onClick={() => {
-                                            navigate("/profile");
-                                            setMenuOpen(false);
-                                        }}
-                                        className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200"
-                                    >
-                                        Profile
-                                    </div>
-
-                                    <div
-                                        onClick={() => {
-                                            navigate("/settings");
-                                            setMenuOpen(false);
-                                        }}
-                                        className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer text-sm text-gray-700 dark:text-gray-200"
-                                    >
-                                        Settings
-                                    </div>
-
-                                    <div
-                                        onClick={logout}
-                                        className="px-4 py-2 text-red-500 hover:bg-gray-100 dark:hover:bg-slate-700 cursor-pointer text-sm"
-                                    >
-                                        Logout
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        )}
-
+                        {notifOpen && <NotificationPanel onClose={() => setNotifOpen(false)} />}
                     </div>
-                )}
 
+                    {!user || !user.name ? (
+                        <button
+                            onClick={() => navigate("/login")}
+                            className="px-4 py-1.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
+                        >
+                            Login
+                        </button>
+                    ) : (
+                        <div className="relative flex items-center gap-3">
+                            <span className="hidden lg:block text-sm font-medium text-slate-600 dark:text-slate-300">
+                                {user.name?.split(" ")[0]}
+                            </span>
+
+                            <div
+                                onClick={() => setMenuOpen(!menuOpen)}
+                                className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white 
+                                flex items-center justify-center font-semibold text-sm
+                                cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-blue-500/25 overflow-hidden"
+                            >
+                                {user.picture ? (
+                                    <img 
+                                        src={user.picture} 
+                                        alt={user.name} 
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    getInitials(user.name)
+                                )}
+                            </div>
+
+                            {menuOpen && (
+                                <div className="absolute right-0 mt-2 w-56 glass-panel rounded-xl shadow-xl overflow-hidden z-50">
+                                    <div className="p-4 border-b border-slate-200/20 dark:border-slate-700/50">
+                                        <p className="font-semibold text-slate-800 dark:text-white">{user.name}</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+                                    </div>
+
+                                    <div className="py-1">
+                                        <div
+                                            onClick={() => {
+                                                navigate("/profile");
+                                                setMenuOpen(false);
+                                            }}
+                                            className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer text-sm text-slate-700 dark:text-slate-200 transition-colors"
+                                        >
+                                            Profile
+                                        </div>
+
+                                        <div
+                                            onClick={() => {
+                                                navigate("/settings");
+                                                setMenuOpen(false);
+                                            }}
+                                            className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer text-sm text-slate-700 dark:text-slate-200 transition-colors"
+                                        >
+                                            Settings
+                                        </div>
+
+                                        <div
+                                            onClick={logout}
+                                            className="px-4 py-2 text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700/50 cursor-pointer text-sm transition-colors"
+                                        >
+                                            Logout
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
-
         </div>
     );
 }

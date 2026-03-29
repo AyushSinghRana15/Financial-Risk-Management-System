@@ -16,7 +16,8 @@ import { FaChartLine, FaSync, FaChevronDown, FaChevronUp } from "react-icons/fa"
 
 function MarketRisk() {
 
-    const userEmail = localStorage.getItem('user') || "";
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userEmail = user?.email || "";
     
     const [features, setFeatures] = useState([]);
     const [inputs, setInputs] = useState({});
@@ -25,7 +26,6 @@ function MarketRisk() {
     const [confidence, setConfidence] = useState("95%");
     const [rollingData, setRollingData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [fetchingLive, setFetchingLive] = useState(false);
 
     useEffect(() => {
         axios.get("http://127.0.0.1:8000/market_features")
@@ -91,26 +91,7 @@ function MarketRisk() {
         setInputs(prev => ({ ...prev, [feature]: num }));
     };
 
-    const fetchLiveData = async () => {
-        setFetchingLive(true);
-        try {
-            const res = await axios.get("http://127.0.0.1:8000/market_live_data");
-            const liveData = res.data;
-            
-            const newInputs = { ...inputs };
-            Object.keys(liveData).forEach(key => {
-                if (key in newInputs) {
-                    newInputs[key] = liveData[key];
-                }
-            });
-            setInputs(newInputs);
-        } catch (err) {
-            console.error("Failed to fetch live data:", err);
-            alert("Failed to fetch live market data");
-        } finally {
-            setFetchingLive(false);
-        }
-    };
+
 
     const predictRisk = async () => {
         setLoading(true);
@@ -186,14 +167,6 @@ function MarketRisk() {
             <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="font-semibold text-lg text-gray-800 dark:text-white">Market Indicators</h2>
-                    <button
-                        onClick={fetchLiveData}
-                        disabled={fetchingLive}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg text-sm font-medium hover:from-green-600 hover:to-emerald-700 transition-all disabled:opacity-50"
-                    >
-                        <FaSync className={fetchingLive ? "animate-spin" : ""} />
-                        {fetchingLive ? "Fetching..." : "Auto-Fill Live Data"}
-                    </button>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

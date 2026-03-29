@@ -3,7 +3,8 @@ import axios from "axios";
 
 export default function LiquidityRisk() {
 
-    const userEmail = localStorage.getItem('user') || "";
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userEmail = user?.email || "";
     
     const [features, setFeatures] = useState([]);
     const [labels, setLabels] = useState([]);

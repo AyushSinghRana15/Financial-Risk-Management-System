@@ -13,6 +13,7 @@ export default {
       animation: {
         scroll: "scroll 25s linear infinite",
         float: "float 6s ease-in-out infinite",
+        shine: "shine 8s infinite linear",
       },
       keyframes: {
         scroll: {
@@ -22,6 +23,10 @@ export default {
         float: {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-15px)" },
+        },
+        shine: {
+          "0%": { transform: "translateX(-100%) rotate(25deg)" },
+          "100%": { transform: "translateX(200%) rotate(25deg)" },
         },
       },
     },

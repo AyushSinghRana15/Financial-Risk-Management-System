@@ -33,6 +33,9 @@ from ai_service import get_ai_insights
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
+# Password Hashing
+import bcrypt
+
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 # ================= DB =================
@@ -120,6 +123,63 @@ def google_auth(data: dict, db: Session = Depends(get_db)):
         "name": user.name,
         "email": user.email,
         "picture": picture
+    }
+
+# ================= EMAIL AUTH - SIGNUP =================
+@app.post("/auth/signup")
+def signup(data: dict, db: Session = Depends(get_db)):
+    name = data.get("name")
+    email = data.get("email")
+    password = data.get("password")
+    
+    if not name or not email or not password:
+        return {"error": "Name, email, and password are required"}, 400
+    
+    existing_user = db.query(User).filter(User.email == email).first()
+    if existing_user:
+        return {"error": "An account with this email already exists"}, 400
+    
+    password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
+    new_user = User(
+        name=name,
+        email=email,
+        password_hash=password_hash,
+        is_verified=True
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return {
+        "name": new_user.name,
+        "email": new_user.email
+    }
+
+# ================= EMAIL AUTH - LOGIN =================
+@app.post("/auth/login")
+def login(data: dict, db: Session = Depends(get_db)):
+    email = data.get("email")
+    password = data.get("password")
+    
+    if not email or not password:
+        return {"error": "Email and password are required"}, 400
+    
+    user = db.query(User).filter(User.email == email).first()
+    
+    if not user:
+        return {"error": "No account found with this email"}, 401
+    
+    if user.password_hash == "google_oauth":
+        return {"error": "This account was created using Google. Please sign in with Google."}, 401
+    
+    if not bcrypt.checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
+        return {"error": "Invalid password"}, 401
+    
+    return {
+        "name": user.name,
+        "email": user.email,
+        "picture": user.picture
     }
 
 # ================= PROFILE APIs =================
@@ -276,7 +336,7 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
                 "id": notification_id,
                 "text": f"High Credit Risk Alert: Your risk score is {risk_score:.1f}%",
                 "type": "warning",
-                "timestamp": latest_credit.created_at.isoformat() if latest_credit.created_at else datetime.now().isoformat(),
+                "timestamp": latest_credit.predicted_at.isoformat() if latest_credit.predicted_at else datetime.now().isoformat(),
                 "read": False
             })
             notification_id += 1
@@ -285,7 +345,7 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
                 "id": notification_id,
                 "text": f"Moderate Credit Risk: Your risk score is {risk_score:.1f}%",
                 "type": "info",
-                "timestamp": latest_credit.created_at.isoformat() if latest_credit.created_at else datetime.now().isoformat(),
+                "timestamp": latest_credit.predicted_at.isoformat() if latest_credit.predicted_at else datetime.now().isoformat(),
                 "read": False
             })
             notification_id += 1
@@ -297,7 +357,7 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
                 "id": notification_id,
                 "text": f"Market VaR Alert: Value at Risk exceeds {risk_score:.1f}%",
                 "type": "warning",
-                "timestamp": latest_market.created_at.isoformat() if latest_market.created_at else datetime.now().isoformat(),
+                "timestamp": latest_market.recorded_at.isoformat() if latest_market.recorded_at else datetime.now().isoformat(),
                 "read": False
             })
             notification_id += 1
@@ -306,7 +366,7 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
                 "id": notification_id,
                 "text": f"Elevated Market Risk: VaR at {risk_score:.1f}%",
                 "type": "info",
-                "timestamp": latest_market.created_at.isoformat() if latest_market.created_at else datetime.now().isoformat(),
+                "timestamp": latest_market.recorded_at.isoformat() if latest_market.recorded_at else datetime.now().isoformat(),
                 "read": False
             })
             notification_id += 1

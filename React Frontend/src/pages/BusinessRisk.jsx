@@ -16,7 +16,8 @@ const FEATURES = [
 ];
 
 export default function BusinessRisk() {
-  const userEmail = localStorage.getItem('user') || "";
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const userEmail = user?.email || "";
   const [values, setValues] = useState({});
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);

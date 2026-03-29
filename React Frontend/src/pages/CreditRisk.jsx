@@ -4,7 +4,8 @@ import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap } from "react-icons/fa
 
 export default function CreditRisk() {
 
-    const userEmail = localStorage.getItem('user') || "";
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userEmail = user?.email || "";
 
     const [formData, setFormData] = useState({
         email: userEmail,
