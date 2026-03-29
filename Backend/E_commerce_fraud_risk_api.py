@@ -25,11 +25,12 @@ def get_db():
 # Load Model & Features
 # -------------------------------
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
-
-model = joblib.load(os.path.join(MODELS_PATH, "E_commerce_fraud_xgboost_model.pkl"))
-
-# ✅ load feature order
-features = joblib.load(os.path.join(MODELS_PATH, "E_commerce_model_features.pkl"))
+try:
+    model = joblib.load(os.path.join(MODELS_PATH, "E_commerce_fraud_xgboost_model.pkl"))
+    features = joblib.load(os.path.join(MODELS_PATH, "E_commerce_model_features.pkl"))
+    print(f"Successfully loaded e-commerce fraud models from {MODELS_PATH}")
+except Exception as e:
+    print(f"Error loading e-commerce fraud models: {e}")
 
 # -------------------------------
 # Mappings

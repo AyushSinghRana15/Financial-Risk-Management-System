@@ -26,7 +26,11 @@ def get_db():
 # LOAD MODEL
 # -------------------------
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
-model = joblib.load(os.path.join(MODELS_PATH, "final_financial_model.pkl"))
+try:
+    model = joblib.load(os.path.join(MODELS_PATH, "final_financial_model.pkl"))
+    print(f"Successfully loaded final_financial_model.pkl from {MODELS_PATH}")
+except Exception as e:
+    print(f"Error loading final_financial_model.pkl: {e}")
 
 # 🔥 FIXED THRESHOLD
 threshold = 0.45

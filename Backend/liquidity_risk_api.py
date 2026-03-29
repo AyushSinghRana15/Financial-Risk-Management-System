@@ -32,8 +32,12 @@ def get_db():
 # LOAD MODEL & SCALER
 # ----------------------------
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
-model = joblib.load(os.path.join(MODELS_PATH, "liquidity_model.pkl"))
-scaler = joblib.load(os.path.join(MODELS_PATH, "scaler.pkl"))
+try:
+    model = joblib.load(os.path.join(MODELS_PATH, "liquidity_model.pkl"))
+    scaler = joblib.load(os.path.join(MODELS_PATH, "scaler.pkl"))
+    print(f"Successfully loaded liquidity_model.pkl and scaler.pkl from {MODELS_PATH}")
+except Exception as e:
+    print(f"Error loading liquidity models: {e}")
 
 # ----------------------------
 # FEATURES (25)

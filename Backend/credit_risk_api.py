@@ -23,7 +23,11 @@ def get_db():
         db.close()
 
 MODELS_PATH = os.path.join(ROOT_DIR, "Models")
-model = joblib.load(os.path.join(MODELS_PATH, "credit_risk_xgboost_model.pkl"))
+try:
+    model = joblib.load(os.path.join(MODELS_PATH, "credit_risk_xgboost_model.pkl"))
+    print(f"Successfully loaded credit_risk_xgboost_model.pkl from {MODELS_PATH}")
+except Exception as e:
+    print(f"Error loading credit_risk_xgboost_model.pkl: {e}")
 
 # Get feature names directly from trained model
 feature_names = model.get_booster().feature_names
