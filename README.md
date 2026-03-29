@@ -81,48 +81,114 @@ FinRisk transforms complex financial data into actionable insights through:
 
 ```
 FinRisk/
-├── Backend/                      # FastAPI Engine
-│   ├── main.py                  # Application entry point
-│   ├── ai_service.py            # OpenRouter AI integration
-│   ├── database.py              # SQLAlchemy configuration
-│   ├── models.py                # Database schemas
-│   ├── portfolio.py              # Portfolio management API
-│   ├── credit_risk_api.py       # Credit risk predictions
-│   ├── market_risk_api.py       # Market/VaR calculations
-│   ├── business_risk_api.py     # Business risk analysis
-│   ├── liquidity_risk_api.py    # Liquidity assessment
-│   ├── final_financial_api.py   # Financial risk module
-│   ├── operational_risk_api.py  # Operational risk scoring
+│
+├── Backend/                          # FastAPI REST API
+│   ├── main.py                       # App entry, CORS, routers
+│   ├── ai_service.py                 # OpenRouter AI integration
+│   ├── database.py                   # SQLAlchemy engine setup
+│   ├── models.py                    # User, Portfolio, Risk schemas
+│   ├── portfolio.py                  # Portfolio CRUD operations
+│   │
+│   ├── credit_risk_api.py           # Credit risk ML predictions
+│   ├── market_risk_api.py           # VaR calculations
+│   ├── business_risk_api.py          # Business risk analysis
+│   ├── liquidity_risk_api.py         # Liquidity assessment
+│   ├── final_financial_api.py        # Financial risk module
+│   ├── operational_risk_api.py       # Operational risk scoring
 │   ├── E_commerce_fraud_risk_api.py  # Fraud detection
-│   ├── requirements.txt          # Python dependencies
-│   └── README.md                # Backend documentation
+│   │
+│   ├── migrate.py                   # DB migration & seeding
+│   ├── routes/                      # API route handlers
+│   │   └── market.py               # Market data endpoints
+│   │
+│   ├── .env                        # Environment variables
+│   ├── requirements.txt             # Python dependencies
+│   ├── test_db.py                   # Test database utilities
+│   └── README.md                   # Backend documentation
 │
-├── Models/                      # Trained ML Models (.pkl)
-├── Notebooks/                   # Research & Model Training
-├── React Frontend/              # React Dashboard
+├── Models/                           # Trained ML Models
+│   ├── credit_risk_model.pkl       # Credit risk XGBoost model
+│   ├── fraud_detection_model.pkl    # Fraud detection model
+│   └── ...
+│
+├── Notebooks/                        # Research & Training
+│   ├── Credit_Risk_Model.ipynb     # Credit risk training
+│   ├── Fraud_Detection.ipynb       # Fraud model training
+│   └── ...
+│
+├── React Frontend/                   # React Dashboard
+│   ├── public/
+│   │   └── vite.svg               # Vite default logo (unused)
+│   │
 │   ├── src/
-│   │   ├── components/          # Reusable UI components
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── Sidebar.jsx
-│   │   │   ├── NotificationPanel.jsx
-│   │   │   └── ProtectedRoute.jsx
-│   │   ├── pages/              # Application pages
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── Portfolio.jsx
-│   │   │   ├── PortfolioAnalytics.jsx
-│   │   │   ├── CreditRisk.jsx
-│   │   │   ├── MarketRisk.jsx
-│   │   │   ├── BusinessRisk.jsx
-│   │   │   ├── Login.jsx
-│   │   │   └── ...
-│   │   ├── index.css           # Global styles
-│   │   └── App.jsx            # Main application
-│   ├── package.json
-│   └── README.md
+│   │   ├── components/            # Reusable UI components
+│   │   │   ├── Navbar.jsx         # Top navigation bar
+│   │   │   ├── Sidebar.jsx        # Collapsible sidebar nav
+│   │   │   ├── NotificationPanel.jsx  # Notifications dropdown
+│   │   │   ├── ProtectedRoute.jsx  # Auth guard component
+│   │   │   └── ProfileSection.jsx # User profile page
+│   │   │
+│   │   ├── pages/                # Application pages
+│   │   │   ├── Dashboard.jsx     # Main dashboard
+│   │   │   ├── Portfolio.jsx      # Portfolio management
+│   │   │   ├── PortfolioAnalytics.jsx  # Analytics & charts
+│   │   │   ├── Market.jsx        # Market data viewer
+│   │   │   ├── About.jsx         # About & tech stack
+│   │   │   ├── Login.jsx         # Auth page
+│   │   │   ├── Settings.jsx      # User settings
+│   │   │   │
+│   │   │   └── risk/            # Risk prediction pages
+│   │   │       ├── CreditRisk.jsx
+│   │   │       ├── MarketRisk.jsx
+│   │   │       ├── BusinessRisk.jsx
+│   │   │       ├── LiquidityRisk.jsx
+│   │   │       ├── FinancialRisk.jsx
+│   │   │       ├── OperationalRisk.jsx
+│   │   │       └── ECommerceFraudRisk.jsx
+│   │   │
+│   │   ├── App.jsx              # Main app with routing
+│   │   ├── main.jsx            # React entry point
+│   │   └── index.css          # Global styles & animations
+│   │
+│   ├── index.html               # HTML entry point
+│   ├── package.json             # Node dependencies
+│   ├── vite.config.js          # Vite configuration
+│   ├── tailwind.config.js      # Tailwind theme config
+│   ├── postcss.config.js        # PostCSS for Tailwind
+│   └── README.md               # Frontend documentation
 │
-├── Streamlit/                   # Legacy Interactive Simulators
-└── README.md                    # This file
+├── Streamlit/                       # Legacy Interactive Apps
+│   ├── app.py                    # Risk simulator
+│   └── requirements.txt
+│
+├── README.md                       # Project documentation
+└── .gitignore                     # Git ignore rules
 ```
+
+### **Frontend File Details**
+
+| File | Purpose |
+|------|---------|
+| `App.jsx` | Main app with React Router, DashboardLayout wrapper |
+| `index.css` | Global styles: glassmorphism, animations, scrollbar styling |
+| `Navbar.jsx` | Top bar with nav links, notifications, user menu |
+| `Sidebar.jsx` | Collapsible sidebar with lucide icons |
+| `Dashboard.jsx` | KPI cards, charts, portfolio intelligence |
+| `Portfolio.jsx` | Asset management with add/edit/delete |
+| `PortfolioAnalytics.jsx` | Charts: allocation, performance, correlation |
+| `Login.jsx` | Google OAuth + email/password auth |
+| `Risk pages` | Individual ML-powered risk prediction forms |
+
+### **Backend File Details**
+
+| File | Purpose |
+|------|---------|
+| `main.py` | FastAPI app, CORS, routers for all modules |
+| `ai_service.py` | OpenRouter API wrapper for AI analysis |
+| `database.py` | SQLAlchemy SessionLocal, engine creation |
+| `models.py` | User, Portfolio, CreditPrediction, MarketRiskData, BusinessRisk schemas |
+| `portfolio.py` | Portfolio CRUD with yfinance price updates |
+| `*_api.py` | Individual risk module API handlers |
 
 ---
 
