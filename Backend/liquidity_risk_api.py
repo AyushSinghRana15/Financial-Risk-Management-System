@@ -8,8 +8,7 @@ from sqlalchemy.orm import Session
 import numpy as np
 import sys
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 from database import SessionLocal
 from models import User, LiquidityRisk
 
