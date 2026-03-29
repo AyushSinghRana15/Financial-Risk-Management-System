@@ -44,11 +44,7 @@ Base.metadata.create_all(bind=engine)
 # ================= APP =================
 app = FastAPI()
 
-# Render dynamic PORT
-if __name__ != "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))
-    app.config = {"port": port}
+FRONTEND_URL = os.getenv("FRONTEND_URL", "")
 
 app.add_middleware(
     CORSMiddleware,
@@ -56,8 +52,13 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
+        FRONTEND_URL,
         "https://*.vercel.app",
-        os.getenv("FRONTEND_URL", "")
+    ].filter(None),  # Remove empty strings
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
     ],
     allow_credentials=True,
     allow_methods=["*"],
