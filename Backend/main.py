@@ -46,18 +46,22 @@ app = FastAPI()
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "")
 
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    FRONTEND_URL,
+    "https://*.vercel.app",
+]
+origins = [o for o in origins if o]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        FRONTEND_URL,
-        "https://*.vercel.app",
-    ].filter(None),  # Remove empty strings
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.include_router(portfolio_router)
