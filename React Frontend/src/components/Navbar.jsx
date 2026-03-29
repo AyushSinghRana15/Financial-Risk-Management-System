@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaBell, FaChartLine } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPanel from "./NotificationPanel";
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { API_ENDPOINTS } from "../config/api";
 
 function Navbar() {
     const navigate = useNavigate();

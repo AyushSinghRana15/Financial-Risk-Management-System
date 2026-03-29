@@ -6,10 +6,9 @@ import {
     Tooltip,
     ResponsiveContainer
 } from "recharts";
+import { API_ENDPOINTS } from "../config/api";
 
 const COLORS = ["#2563eb", "#16a34a", "#dc2626", "#f59e0b", "#8b5cf6", "#ec4899"];
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
 function Portfolio() {
 

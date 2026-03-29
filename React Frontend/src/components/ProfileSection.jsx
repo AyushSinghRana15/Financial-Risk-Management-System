@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function ProfileSection() {
 
@@ -34,7 +35,7 @@ export default function ProfileSection() {
             return;
         }
 
-        axios.get(`http://localhost:8000/profile?email=${encodeURIComponent(userEmail)}`)
+        axios.get(`${API_ENDPOINTS.PROFILE}?email=${encodeURIComponent(userEmail)}`)
             .then(res => {
                 const data = res.data;
                 setUser(prev => ({

@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap } from "react-icons/fa";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function CreditRisk() {
 
@@ -39,7 +38,7 @@ export default function CreditRisk() {
 
     useEffect(() => {
         if (userEmail) {
-            axios.get(`http://localhost:8000/credit_predictions?email=${encodeURIComponent(userEmail)}`)
+            axios.get(`${API_ENDPOINTS.RISK.CREDIT}/history?email=${encodeURIComponent(userEmail)}`)
                 .then(res => setHistory(res.data.predictions || []))
                 .catch(console.error);
         }

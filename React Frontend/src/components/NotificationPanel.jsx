@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ShieldAlert, TrendingUp, CheckCircle, Info, X, Trash2 } from "lucide-react";
-
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { API_ENDPOINTS } from "../config/api";
 
 function getRelativeTime(timestamp) {
     if (!timestamp) return "Just now";

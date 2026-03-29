@@ -1,6 +1,5 @@
 import { useState } from "react";
-
-const API = "http://localhost:8000";
+import { API_ENDPOINTS } from "../config/api";
 
 const FEATURES = [
   { key: "feature_32", label: "Current Ratio", placeholder: "e.g. 1.5", hint: "Current Assets / Current Liabilities" },

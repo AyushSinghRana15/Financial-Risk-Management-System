@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
 export default function ECommerceFraudRisk() {
 
@@ -25,7 +26,7 @@ export default function ECommerceFraudRisk() {
 
   useEffect(() => {
     if (userEmail) {
-      axios.get(`http://localhost:8000/fraud_history?email=${encodeURIComponent(userEmail)}`)
+      axios.get(`${API_ENDPOINTS.RISK.FRAUD}/history?email=${encodeURIComponent(userEmail)}`)
         .then(res => setHistory(res.data.history || []))
         .catch(console.error);
     }
@@ -53,7 +54,7 @@ export default function ECommerceFraudRisk() {
     };
 
     try {
-      const res = await axios.post("http://localhost:8000/predict_fraud", data);
+      const res = await axios.post(API_ENDPOINTS.RISK.FRAUD, data);
       setResult(res.data);
       window.dispatchEvent(new Event("refreshDashboard"));
     } catch (error) {

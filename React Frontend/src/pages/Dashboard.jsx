@@ -15,8 +15,7 @@ import {
     AreaChart,
     Area
 } from "recharts";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { API_ENDPOINTS } from "../config/api";
 
 const CHART_COLORS = ["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 
@@ -78,7 +77,7 @@ export default function Dashboard() {
                 setAiLoading(true);
                 const prompt = `Analyze this portfolio: ${JSON.stringify(portfolioData)}`;
 
-                const alertsRes = await axios.post("http://localhost:8000/ai-risk-alerts", { prompt });
+                const alertsRes = await axios.post(API_ENDPOINTS.AI.ALERTS, { prompt });
                 const data = alertsRes.data;
 
                 setAiIntelligence({

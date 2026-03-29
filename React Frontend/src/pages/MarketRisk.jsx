@@ -13,8 +13,7 @@ import {
 } from "recharts";
 
 import { FaChartLine, FaSync, FaChevronDown, FaChevronUp } from "react-icons/fa";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { API_ENDPOINTS } from "../config/api";
 
 function MarketRisk() {
 

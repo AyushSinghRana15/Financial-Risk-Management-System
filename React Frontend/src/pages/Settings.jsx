@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
 function Settings() {
 
@@ -44,7 +45,7 @@ function Settings() {
 
     useEffect(() => {
         if (userEmail) {
-            axios.get(`http://localhost:8000/profile?email=${encodeURIComponent(userEmail)}`)
+            axios.get(`${API_ENDPOINTS.PROFILE}?email=${encodeURIComponent(userEmail)}`)
                 .then(res => {
                     const data = res.data;
                     setForm(prev => ({
@@ -71,7 +72,7 @@ function Settings() {
 
     const handleSave = async () => {
         try {
-            await axios.put("http://localhost:8000/profile", {
+            await axios.put(API_ENDPOINTS.PROFILE, {
                 email: userEmail,
                 name: form.name,
                 age: 22,

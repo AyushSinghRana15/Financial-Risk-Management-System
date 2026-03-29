@@ -4,8 +4,7 @@ import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
 import { FaChartLine, FaQuestionCircle, FaTimes, FaExclamationTriangle, FaExternalLinkAlt, FaEnvelope, FaLock, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
 import FinRiskLogo from "../assets/FinRisk.png";
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+import { API_ENDPOINTS } from "../config/api";
 
 function OriginHelpModal({ onClose }) {
   return (
