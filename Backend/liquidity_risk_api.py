@@ -53,8 +53,6 @@ else:
     print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
     if os.path.exists(MODELS_PATH):
         print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
-else:
-    print(f"Model file not found at {MODEL_FILE}")
 
 # ----------------------------
 # FEATURES (25)
