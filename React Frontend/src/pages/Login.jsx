@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
 import { FaChartLine, FaQuestionCircle, FaTimes, FaExclamationTriangle, FaExternalLinkAlt, FaEnvelope, FaLock, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
+import FinRiskLogo from "../assets/FinRisk.png";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -236,8 +237,8 @@ export default function Login() {
       <div className="relative z-10 glass-panel rounded-2xl shadow-[0_0_80px_rgba(59,130,246,0.15)] p-8 w-full max-w-md mx-4">
         
         <div className="text-center space-y-4 mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-lg shadow-blue-500/25 group hover:scale-105 transition-transform duration-300">
-            <FaChartLine className="text-white text-2xl" />
+          <div className="inline-flex items-center justify-center w-20 h-20 group hover:scale-105 transition-transform duration-300">
+            <img src={FinRiskLogo} alt="FinRisk Logo" className="w-full h-full object-contain" />
           </div>
           
           <div>

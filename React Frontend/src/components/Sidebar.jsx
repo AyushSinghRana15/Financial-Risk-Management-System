@@ -13,6 +13,7 @@ import {
   BarChart2,
   Menu
 } from "lucide-react";
+import FinRiskLogo from "../assets/FinRisk.png";
 
 const NAV_ITEMS = {
   main: [
@@ -134,20 +135,29 @@ export default function Sidebar() {
       >
         <div className="flex-1 flex flex-col min-h-0">
           <div className={`flex items-center ${collapsed ? "justify-center" : "justify-between"} ${collapsed ? "px-2" : "px-4"} pt-4 pb-6 mb-6`}>
-            {!collapsed && (
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0">
-                  <TrendingUp className="text-white" size={16} />
-                </div>
-                <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-300">
-                  FinRisk
-                </span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {!collapsed && (
+                <>
+                  <div className="w-9 h-9 flex-shrink-0">
+                    <img 
+                      src={FinRiskLogo} 
+                      alt="FinRisk Logo" 
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-300">
+                    FinRisk
+                  </span>
+                </>
+              )}
+              {collapsed && (
+                <span className="text-lg font-bold text-white">FR</span>
+              )}
+            </div>
 
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className={`p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all hidden lg:block ${collapsed ? "mx-auto" : ""}`}
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all hidden lg:block"
             >
               <Menu size={18} />
             </button>
