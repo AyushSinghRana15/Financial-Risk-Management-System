@@ -13,7 +13,7 @@ import {
 } from "recharts";
 
 import { FaChartLine, FaSync, FaChevronDown, FaChevronUp } from "react-icons/fa";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 
 function MarketRisk() {
 

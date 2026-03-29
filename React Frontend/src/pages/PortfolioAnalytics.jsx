@@ -13,7 +13,7 @@ import {
     Legend
 } from "recharts";
 import { FaChartPie, FaChartBar, FaWallet, FaArrowUp, FaArrowDown, FaSync } from "react-icons/fa";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 

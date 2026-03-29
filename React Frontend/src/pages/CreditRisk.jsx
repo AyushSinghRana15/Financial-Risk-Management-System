@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap } from "react-icons/fa";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 
 export default function CreditRisk() {
 
