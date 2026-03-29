@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 from database import SessionLocal
 from models import User, BusinessRisk
 
@@ -17,8 +18,8 @@ def get_db():
     finally:
         db.close()
 
-model = joblib.load("Models/xgboost_business_risk_model.pkl")
-threshold = joblib.load("Models/business_risk_threshold.pkl")
+model = joblib.load(os.path.join(BASE_DIR, "Models", "xgboost_business_risk_model.pkl"))
+threshold = joblib.load(os.path.join(BASE_DIR, "Models", "business_risk_threshold.pkl"))
 
 raw_features = list(model.get_booster().feature_names)
 # Use index-based keys to avoid special character issues
