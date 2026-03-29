@@ -6,7 +6,9 @@ import yfinance as yf
 import numpy as np
 import sys
 import os
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BACKEND_DIR)
+sys.path.append(BACKEND_DIR)
 from database import SessionLocal
 from models import User, MarketRiskData
 
@@ -23,7 +25,7 @@ def get_db():
 # LOAD MARKET RISK MODEL
 # ----------------------------
 
-model_package = joblib.load(os.path.join(BASE_DIR, "Models", "ml_var_model.pkl"))
+model_package = joblib.load(os.path.join(ROOT_DIR, "Models", "ml_var_model.pkl"))
 
 model = model_package["model"]
 features = model_package["features"]

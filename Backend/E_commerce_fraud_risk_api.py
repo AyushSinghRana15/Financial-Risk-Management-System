@@ -4,6 +4,9 @@ import pandas as pd
 import joblib
 import os
 import sys
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BACKEND_DIR)
+sys.path.append(BACKEND_DIR)
 from database import SessionLocal
 from models import User, FraudPrediction
 
@@ -20,8 +23,7 @@ def get_db():
 # Load Model & Features
 # -------------------------------
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODELS_PATH = os.path.join(BASE_DIR, "Models")
+MODELS_PATH = os.path.join(ROOT_DIR, "Models")
 
 model = joblib.load(os.path.join(MODELS_PATH, "E_commerce_fraud_xgboost_model.pkl"))
 
