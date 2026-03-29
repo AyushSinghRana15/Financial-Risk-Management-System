@@ -142,7 +142,7 @@ function Portfolio() {
         if (!USER_EMAIL) return;
 
         try {
-            await fetch(`${API_BASE_URL}/portfolio/delete/${id}?email=${USER_EMAIL}`, {
+            await fetch(`${API_BASE_URL}/portfolio/${id}/${USER_EMAIL}`, {
                 method: "DELETE",
             });
 

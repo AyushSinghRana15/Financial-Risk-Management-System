@@ -10,7 +10,9 @@ CURRENT_FILE_PATH = os.path.abspath(__file__)
 BACKEND_DIR = os.path.dirname(CURRENT_FILE_PATH)
 SRC_DIR = os.path.dirname(BACKEND_DIR)
 
-MODELS_PATH = os.path.join(SRC_DIR, "Models")
+MODELS_PATH = "/opt/render/project/src/Models"
+if not os.path.exists(MODELS_PATH):
+    MODELS_PATH = os.path.join(SRC_DIR, "Models")
 if not os.path.exists(MODELS_PATH):
     MODELS_PATH = os.path.join(SRC_DIR, "models")
 
