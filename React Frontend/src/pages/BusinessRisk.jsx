@@ -32,7 +32,7 @@ export default function BusinessRisk() {
       payload[f.key] = parseFloat(values[f.key]) || 0;
     });
     try {
-      const res = await fetch(`${API}/predict_business_risk`, {
+      const res = await fetch(API_ENDPOINTS.RISK.BUSINESS, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

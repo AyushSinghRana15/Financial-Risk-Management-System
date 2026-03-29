@@ -50,7 +50,7 @@ export default function NotificationPanel({ onClose }) {
             }
 
             try {
-                const res = await fetch(`${BASE_URL}/notifications?email=${userEmail}`);
+                const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?email=${userEmail}`);
                 if (!res.ok) throw new Error("Failed to fetch");
                 const data = await res.json();
                 setNotifications(data);

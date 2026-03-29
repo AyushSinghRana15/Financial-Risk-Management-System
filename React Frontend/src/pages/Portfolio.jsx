@@ -6,7 +6,7 @@ import {
     Tooltip,
     ResponsiveContainer
 } from "recharts";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 
 const COLORS = ["#2563eb", "#16a34a", "#dc2626", "#f59e0b", "#8b5cf6", "#ec4899"];
 
@@ -46,7 +46,7 @@ function Portfolio() {
         if (!USER_EMAIL) return;
 
         try {
-            const res = await fetch(`${BASE_URL}/profile?email=${USER_EMAIL}`);
+            const res = await fetch(`${API_ENDPOINTS.PROFILE}?email=${USER_EMAIL}`);
             const data = await res.json();
             setProfile(data);
         } catch (err) {
@@ -58,7 +58,7 @@ function Portfolio() {
         if (!USER_EMAIL) return;
 
         try {
-            const res = await fetch(`${BASE_URL}/portfolio/get/${USER_EMAIL}`);
+            const res = await fetch(API_ENDPOINTS.PORTFOLIO.GET(USER_EMAIL));
             const data = await res.json();
 
             if (data.portfolio) {
@@ -73,7 +73,7 @@ function Portfolio() {
         if (!USER_EMAIL) return;
 
         try {
-            const res = await fetch(`${BASE_URL}/risk-analysis/${USER_EMAIL}`);
+            const res = await fetch(`${API_ENDPOINTS.AI.ALERTS}`);
             const data = await res.json();
             setRisk(data);
         } catch (err) {
@@ -111,7 +111,7 @@ function Portfolio() {
         };
 
         try {
-            await fetch(`${BASE_URL}/portfolio/add`, {
+            await fetch(API_ENDPOINTS.PORTFOLIO.ADD, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -142,7 +142,7 @@ function Portfolio() {
         if (!USER_EMAIL) return;
 
         try {
-            await fetch(`${BASE_URL}/portfolio/${id}/${USER_EMAIL}`, {
+            await fetch(`${API_BASE_URL}/portfolio/delete/${id}?email=${USER_EMAIL}`, {
                 method: "DELETE",
             });
 

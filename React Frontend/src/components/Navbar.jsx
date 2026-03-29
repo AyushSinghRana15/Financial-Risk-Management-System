@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaBell, FaChartLine } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPanel from "./NotificationPanel";
-import { API_ENDPOINTS } from "../config/api";
+import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 
 function Navbar() {
     const navigate = useNavigate();
@@ -22,7 +22,7 @@ function Navbar() {
                 return;
             }
             try {
-                const res = await fetch(`${BASE_URL}/notifications?email=${userEmail}`);
+                const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?email=${userEmail}`);
                 const data = await res.json();
                 const unread = data.filter(n => !n.read).length;
                 setUnreadCount(unread);
