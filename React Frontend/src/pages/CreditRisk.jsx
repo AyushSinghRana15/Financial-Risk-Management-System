@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap } from "react-icons/fa";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 export default function CreditRisk() {
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -59,7 +61,7 @@ export default function CreditRisk() {
             setLoading(true);
 
             const response = await axios.post(
-                "http://127.0.0.1:8000/predict_credit_risk",
+                `${API_BASE_URL}/predict/credit`,
                 formData
             );
 

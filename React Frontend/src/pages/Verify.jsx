@@ -2,6 +2,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 export default function Verify() {
   const { token } = useParams();
   const navigate = useNavigate();
@@ -12,7 +14,7 @@ export default function Verify() {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const res = await axios.get(`http://127.0.0.1:8000/verify/${token}`);
+        const res = await axios.get(`${API_BASE_URL}/verify/${token}`);
 
         setMessage(res.data.message || "Email verified successfully!");
 

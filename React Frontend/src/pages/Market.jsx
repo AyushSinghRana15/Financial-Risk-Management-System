@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaChevronDown, FaChevronUp, FaSync } from "react-icons/fa";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 function Market() {
 
     const [data, setData] = useState({});
@@ -19,7 +21,7 @@ function Market() {
 
     const fetchMarket = async () => {
         try {
-            const res = await axios.get("http://127.0.0.1:8000/market-data");
+            const res = await axios.get(`${API_BASE_URL}/market-data`);
             setData(res.data);
         } catch (err) {
             console.error(err);

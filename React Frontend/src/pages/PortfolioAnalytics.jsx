@@ -14,6 +14,8 @@ import {
 } from "recharts";
 import { FaChartPie, FaChartBar, FaWallet, FaArrowUp, FaArrowDown, FaSync } from "react-icons/fa";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 
 const ASSET_TYPE_COLORS = {
@@ -81,7 +83,7 @@ export default function PortfolioAnalytics() {
         }
 
         try {
-            const res = await fetch(`http://127.0.0.1:8000/portfolio/get/${encodeURIComponent(userEmail)}`);
+            const res = await fetch(`${API_BASE_URL}/portfolio/get/${encodeURIComponent(userEmail)}`);
             const data = await res.json();
 
             if (data.portfolio) {

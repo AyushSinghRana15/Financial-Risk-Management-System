@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 function FinancialRisk() {
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -20,7 +22,7 @@ function FinancialRisk() {
 
   useEffect(() => {
     if (userEmail) {
-      axios.get(`http://127.0.0.1:8000/financial/history?email=${encodeURIComponent(userEmail)}`)
+      axios.get(`${API_BASE_URL}/financial/history?email=${encodeURIComponent(userEmail)}`)
         .then(res => setHistory(res.data.history || []))
         .catch(console.error);
     }
@@ -33,7 +35,7 @@ function FinancialRisk() {
   const predict = async () => {
     try {
       const res = await axios.post(
-        "http://127.0.0.1:8000/financial/predict",
+        `${API_BASE_URL}/financial/predict`,
         { ...form, email: userEmail }
       );
       setResult(res.data);

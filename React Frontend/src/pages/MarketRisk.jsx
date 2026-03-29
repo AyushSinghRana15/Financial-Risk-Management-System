@@ -14,6 +14,8 @@ import {
 
 import { FaChartLine, FaSync, FaChevronDown, FaChevronUp } from "react-icons/fa";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 function MarketRisk() {
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -28,7 +30,7 @@ function MarketRisk() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        axios.get("http://127.0.0.1:8000/market_features")
+        axios.get(`${API_BASE_URL}/market_features`)
             .then(res => {
                 setFeatures(res.data.features);
 
@@ -98,7 +100,7 @@ function MarketRisk() {
 
         try {
             const res = await axios.post(
-                "http://127.0.0.1:8000/predict_market_risk",
+                `${API_BASE_URL}/predict/market`,
                 { ...inputs, email: userEmail }
             );
 

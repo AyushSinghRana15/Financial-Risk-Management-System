@@ -16,6 +16,8 @@ import {
     Area
 } from "recharts";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 const CHART_COLORS = ["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 
 function CustomTooltip({ active, payload }) {
@@ -55,8 +57,8 @@ export default function Dashboard() {
         const fetchData = async () => {
             try {
                 const [statsRes, portfolioRes] = await Promise.all([
-                    axios.get(`http://localhost:8000/dashboard/stats?email=${encodeURIComponent(userEmail)}`),
-                    axios.get(`http://localhost:8000/portfolio/get/${encodeURIComponent(userEmail)}`)
+                    axios.get(`${API_BASE_URL}/dashboard/stats?email=${encodeURIComponent(userEmail)}`),
+                    axios.get(`${API_BASE_URL}/portfolio/get/${encodeURIComponent(userEmail)}`)
                 ]);
 
                 setStats(statsRes.data);
@@ -106,10 +108,10 @@ export default function Dashboard() {
     useEffect(() => {
         const handleRefresh = () => {
             setLoading(true);
-            axios.get(`http://localhost:8000/dashboard/stats?email=${encodeURIComponent(userEmail)}`)
+            axios.get(`${API_BASE_URL}/dashboard/stats?email=${encodeURIComponent(userEmail)}`)
                 .then(res => setStats(res.data))
                 .catch(console.error);
-            axios.get(`http://localhost:8000/portfolio/get/${encodeURIComponent(userEmail)}`)
+            axios.get(`${API_BASE_URL}/portfolio/get/${encodeURIComponent(userEmail)}`)
                 .then(res => setPortfolio(res.data.portfolio || []))
                 .catch(console.error);
             setLoading(false);

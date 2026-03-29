@@ -4,6 +4,8 @@ import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
 import { FaChartLine, FaQuestionCircle, FaTimes, FaExclamationTriangle, FaExternalLinkAlt, FaEnvelope, FaLock, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 function OriginHelpModal({ onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -158,7 +160,7 @@ export default function Login() {
   const handleGoogleSuccess = async (res) => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/auth/google",
+        `${API_BASE_URL}/auth/google`,
         { credential: res.credential }
       );
       localStorage.setItem("user", JSON.stringify(response.data));
@@ -193,7 +195,7 @@ export default function Login() {
         : { name: formData.name, email: formData.email, password: formData.password };
 
       const response = await axios.post(
-        `http://127.0.0.1:8000${endpoint}`,
+        `${API_BASE_URL}${endpoint}`,
         payload
       );
 

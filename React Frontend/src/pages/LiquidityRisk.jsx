@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 export default function LiquidityRisk() {
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -13,10 +15,8 @@ export default function LiquidityRisk() {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const API_URL = "http://127.0.0.1:8000/liquidity";
-
     useEffect(() => {
-        axios.get(`${API_URL}/features`)
+        axios.get(`${API_BASE_URL}/liquidity/features`)
             .then(res => {
                 setFeatures(res.data.features);
                 setLabels(res.data.labels);
@@ -49,7 +49,7 @@ export default function LiquidityRisk() {
         setResult(null);
 
         const res = await axios.post(
-            `${API_URL}/predict`,
+            `${API_BASE_URL}/liquidity/predict`,
             { ...formData, email: userEmail }
         );
 
@@ -57,7 +57,7 @@ export default function LiquidityRisk() {
         window.dispatchEvent(new Event("refreshDashboard"));
 
         if (userEmail) {
-            axios.get(`${API_URL}/history?email=${encodeURIComponent(userEmail)}`)
+            axios.get(`${API_BASE_URL}/liquidity/history?email=${encodeURIComponent(userEmail)}`)
                 .then(res => setHistory(res.data.history || []))
                 .catch(console.error);
         }

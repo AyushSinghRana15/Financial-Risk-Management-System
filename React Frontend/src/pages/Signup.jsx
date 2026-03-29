@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
 export default function Signup() {
   const navigate = useNavigate();
 
@@ -23,7 +25,7 @@ export default function Signup() {
     setMessage("");
 
     try {
-      const res = await axios.post("http://127.0.0.1:8000/signup", {
+      const res = await axios.post(`${API_BASE_URL}/signup`, {
         name,
         email,
         password,
