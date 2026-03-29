@@ -20,7 +20,7 @@ function Market() {
 
     const fetchMarket = async () => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/market-data`);
+            const res = await axios.get(API_ENDPOINTS.MARKET.DATA);
             setData(res.data);
         } catch (err) {
             console.error(err);

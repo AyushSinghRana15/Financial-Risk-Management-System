@@ -56,8 +56,8 @@ export default function Dashboard() {
         const fetchData = async () => {
             try {
                 const [statsRes, portfolioRes] = await Promise.all([
-                    axios.get(`${API_BASE_URL}/dashboard/stats?email=${encodeURIComponent(userEmail)}`),
-                    axios.get(`${API_BASE_URL}/portfolio/get/${encodeURIComponent(userEmail)}`)
+                    axios.get(`${API_ENDPOINTS.DASHBOARD.STATS}?email=${encodeURIComponent(userEmail)}`),
+                    axios.get(API_ENDPOINTS.PORTFOLIO.GET(userEmail))
                 ]);
 
                 setStats(statsRes.data);
@@ -107,10 +107,10 @@ export default function Dashboard() {
     useEffect(() => {
         const handleRefresh = () => {
             setLoading(true);
-            axios.get(`${API_BASE_URL}/dashboard/stats?email=${encodeURIComponent(userEmail)}`)
+            axios.get(`${API_ENDPOINTS.DASHBOARD.STATS}?email=${encodeURIComponent(userEmail)}`)
                 .then(res => setStats(res.data))
                 .catch(console.error);
-            axios.get(`${API_BASE_URL}/portfolio/get/${encodeURIComponent(userEmail)}`)
+            axios.get(API_ENDPOINTS.PORTFOLIO.GET(userEmail))
                 .then(res => setPortfolio(res.data.portfolio || []))
                 .catch(console.error);
             setLoading(false);

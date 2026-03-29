@@ -13,7 +13,7 @@ export default function Verify() {
   useEffect(() => {
     const verifyUser = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/verify/${token}`);
+        const res = await axios.get(`${API_BASE_URL}/auth/verify/${token}`);
 
         setMessage(res.data.message || "Email verified successfully!");
 

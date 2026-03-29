@@ -15,7 +15,7 @@ export default function LiquidityRisk() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        axios.get(`${API_BASE_URL}/liquidity/features`)
+        axios.get(API_ENDPOINTS.RISK.LIQUIDITY_FEATURES)
             .then(res => {
                 setFeatures(res.data.features);
                 setLabels(res.data.labels);
@@ -29,7 +29,7 @@ export default function LiquidityRisk() {
           });
         
         if (userEmail) {
-            axios.get(`${API_URL}/history?email=${encodeURIComponent(userEmail)}`)
+            axios.get(`${API_ENDPOINTS.RISK.LIQUIDITY_HISTORY}?email=${encodeURIComponent(userEmail)}`)
                 .then(res => setHistory(res.data.history || []))
                 .catch(console.error);
         }
@@ -48,7 +48,7 @@ export default function LiquidityRisk() {
         setResult(null);
 
         const res = await axios.post(
-            `${API_BASE_URL}/liquidity/predict`,
+            API_ENDPOINTS.RISK.LIQUIDITY,
             { ...formData, email: userEmail }
         );
 
@@ -56,7 +56,7 @@ export default function LiquidityRisk() {
         window.dispatchEvent(new Event("refreshDashboard"));
 
         if (userEmail) {
-            axios.get(`${API_BASE_URL}/liquidity/history?email=${encodeURIComponent(userEmail)}`)
+            axios.get(`${API_ENDPOINTS.RISK.LIQUIDITY_HISTORY}?email=${encodeURIComponent(userEmail)}`)
                 .then(res => setHistory(res.data.history || []))
                 .catch(console.error);
         }

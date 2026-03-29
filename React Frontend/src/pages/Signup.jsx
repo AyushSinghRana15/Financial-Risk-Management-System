@@ -24,7 +24,7 @@ export default function Signup() {
     setMessage("");
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/signup`, {
+      const res = await axios.post(API_ENDPOINTS.AUTH.SIGNUP, {
         name,
         email,
         password,

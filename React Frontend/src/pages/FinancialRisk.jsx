@@ -21,7 +21,7 @@ function FinancialRisk() {
 
   useEffect(() => {
     if (userEmail) {
-      axios.get(`${API_BASE_URL}/financial/history?email=${encodeURIComponent(userEmail)}`)
+      axios.get(`${API_ENDPOINTS.RISK.FINANCIAL_HISTORY}?email=${encodeURIComponent(userEmail)}`)
         .then(res => setHistory(res.data.history || []))
         .catch(console.error);
     }
@@ -34,7 +34,7 @@ function FinancialRisk() {
   const predict = async () => {
     try {
       const res = await axios.post(
-        `${API_BASE_URL}/financial/predict`,
+        API_ENDPOINTS.RISK.FINANCIAL,
         { ...form, email: userEmail }
       );
       setResult(res.data);

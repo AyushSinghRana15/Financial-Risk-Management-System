@@ -29,7 +29,7 @@ function MarketRisk() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        axios.get(`${API_BASE_URL}/market_features`)
+        axios.get(API_ENDPOINTS.RISK.MARKET_FEATURES)
             .then(res => {
                 setFeatures(res.data.features);
 
@@ -99,7 +99,7 @@ function MarketRisk() {
 
         try {
             const res = await axios.post(
-                `${API_BASE_URL}/predict/market`,
+                API_ENDPOINTS.RISK.MARKET,
                 { ...inputs, email: userEmail }
             );
 

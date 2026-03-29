@@ -82,7 +82,7 @@ export default function PortfolioAnalytics() {
         }
 
         try {
-            const res = await fetch(`${API_BASE_URL}/portfolio/get/${encodeURIComponent(userEmail)}`);
+            const res = await fetch(API_ENDPOINTS.PORTFOLIO.GET(userEmail));
             const data = await res.json();
 
             if (data.portfolio) {

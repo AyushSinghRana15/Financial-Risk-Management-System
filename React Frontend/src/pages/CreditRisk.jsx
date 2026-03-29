@@ -60,7 +60,7 @@ export default function CreditRisk() {
             setLoading(true);
 
             const response = await axios.post(
-                `${API_BASE_URL}/predict/credit`,
+                API_ENDPOINTS.RISK.CREDIT,
                 formData
             );
 
