@@ -3,8 +3,6 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localho
 export const API_ENDPOINTS = {
     AUTH: {
         GOOGLE: `${API_BASE_URL}/auth/google`,
-        SIGNUP: `${API_BASE_URL}/auth/signup`,
-        LOGIN: `${API_BASE_URL}/auth/login`,
     },
     DASHBOARD: {
         STATS: `${API_BASE_URL}/dashboard/stats`,

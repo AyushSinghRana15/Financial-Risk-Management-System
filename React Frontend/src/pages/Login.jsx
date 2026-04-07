@@ -1,11 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
-import { FaChartLine, FaQuestionCircle, FaTimes, FaExclamationTriangle, FaExternalLinkAlt, FaEnvelope, FaLock, FaUser, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaQuestionCircle, FaTimes, FaExclamationTriangle, FaExternalLinkAlt } from "react-icons/fa";
 import FinRiskLogo from "../assets/FinRisk.png";
-// Ensure this path matches your file structure exactly
-import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import { API_ENDPOINTS } from "../config/api";
 
 function OriginHelpModal({ onClose }) {
   return (
@@ -61,54 +60,12 @@ function OriginHelpModal({ onClose }) {
   );
 }
 
-// InputField component stays the same as your original...
-function InputField({ icon: Icon, type, name, placeholder, value, onChange, required, error }) {
-  const [showPassword, setShowPassword] = useState(false);
-  const isPassword = type === "password";
-
-  return (
-    <div className="relative">
-      <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-        <Icon size={18} />
-      </div>
-      <input
-        type={isPassword && showPassword ? "text" : type}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        required={required}
-        className={`w-full pl-10 pr-10 py-3 bg-slate-800/50 border rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${error ? "border-red-500" : "border-slate-600 hover:border-slate-500"
-          }`}
-      />
-      {isPassword && (
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-        >
-          {showPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
-        </button>
-      )}
-    </div>
-  );
-}
-
 export default function Login() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState("login");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("error");
   const [showHelp, setShowHelp] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(true);
-  const [loading, setLoading] = useState(false);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: ""
-  });
 
   useEffect(() => {
     const checkGoogleScript = () => {
@@ -125,14 +82,8 @@ export default function Login() {
     }
   }, []);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setMessage("");
-  };
-
   const handleGoogleSuccess = async (res) => {
     try {
-      // Use API_ENDPOINTS for consistency
       const response = await axios.post(
         API_ENDPOINTS.AUTH.GOOGLE,
         { credential: res.credential }
@@ -145,86 +96,56 @@ export default function Login() {
     }
   };
 
-  const handleEmailSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
-
-    if (mode === "signup") {
-      if (formData.password !== formData.confirmPassword) {
-        setMessage("Passwords do not match");
-        return;
-      }
-      if (formData.password.length < 6) {
-        setMessage("Password must be at least 6 characters");
-        return;
-      }
-    }
-
-    setLoading(true);
-
-    try {
-      // Determine the correct endpoint object
-      const endpoint = mode === "login" ? API_ENDPOINTS.AUTH.LOGIN : API_ENDPOINTS.AUTH.SIGNUP;
-
-      const payload = mode === "login"
-        ? { email: formData.email, password: formData.password }
-        : { name: formData.name, email: formData.email, password: formData.password };
-
-      const response = await axios.post(endpoint, payload);
-
-      if (response.data.error) {
-        setMessage(response.data.error);
-        setMessageType("error");
-      } else {
-        localStorage.setItem("user", JSON.stringify(response.data));
-        navigate("/");
-      }
-    } catch (err) {
-      setMessage(err.response?.data?.error || "Connection to server failed.");
-      setMessageType("error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    /* Keeping your existing Tailwind JSX structure exactly as it was... */
     <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-slate-950">
       <div className="absolute inset-0 animate-gradient bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950"></div>
       <div className="relative z-10 glass-panel rounded-2xl shadow-[0_0_80px_rgba(59,130,246,0.15)] p-8 w-full max-w-md mx-4">
-        <div className="text-center space-y-4 mb-6">
+        <div className="text-center space-y-6">
           <div className="inline-flex items-center justify-center w-20 h-20 group hover:scale-105 transition-transform duration-300">
             <img src={FinRiskLogo} alt="FinRisk Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-400">FinRisk</h1>
+          <div>
+            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-400">FinRisk</h1>
+            <p className="text-slate-400 mt-2 text-sm">Financial Risk Management System</p>
+          </div>
         </div>
 
-        <div className="flex bg-slate-800/50 rounded-xl p-1 mb-6">
-          <button onClick={() => setMode("login")} className={`flex-1 py-2 text-sm rounded-lg ${mode === "login" ? "bg-blue-600 text-white" : "text-slate-400"}`}>Login</button>
-          <button onClick={() => setMode("signup")} className={`flex-1 py-2 text-sm rounded-lg ${mode === "signup" ? "bg-blue-600 text-white" : "text-slate-400"}`}>Sign Up</button>
-        </div>
-
-        <form onSubmit={handleEmailSubmit} className="space-y-4">
-          {mode === "signup" && <InputField icon={FaUser} type="text" name="name" placeholder="Full Name" value={formData.name} onChange={handleChange} required />}
-          <InputField icon={FaEnvelope} type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-          <InputField icon={FaLock} type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
-          {mode === "signup" && <InputField icon={FaLock} type="password" name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} required />}
-
-          {message && <div className={`p-3 rounded-lg text-sm text-center ${messageType === "error" ? "text-red-400 bg-red-500/10" : "text-green-400 bg-green-500/10"}`}>{message}</div>}
-
-          <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 text-white rounded-xl font-medium disabled:opacity-50">
-            {loading ? "Processing..." : (mode === "login" ? "Sign In" : "Create Account")}
-          </button>
-        </form>
-
-        <div className="relative my-6"><div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-700"></div></div><div className="relative flex justify-center text-xs"><span className="px-4 bg-slate-900 text-slate-500">or continue with</span></div></div>
-
-        <div className="flex justify-center">
-          {scriptLoaded ? (
-            <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => setMessage("Google login failed")} theme="filled_black" size="large" width="280" />
-          ) : (
-            <button onClick={() => setShowHelp(true)} className="text-xs text-amber-400 underline">Fix Google Login Error</button>
+        <div className="mt-8 space-y-4">
+          {message && (
+            <div className={`p-3 rounded-lg text-sm text-center ${messageType === "error" ? "text-red-400 bg-red-500/10" : "text-green-400 bg-green-500/10"}`}>
+              {message}
+            </div>
           )}
+
+          <div className="flex justify-center">
+            {scriptLoaded ? (
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setMessage("Google login failed")}
+                theme="filled_black"
+                size="large"
+                width="320"
+              />
+            ) : (
+              <button
+                onClick={() => setShowHelp(true)}
+                className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl border border-slate-700 transition"
+              >
+                <FaExclamationTriangle className="text-amber-400" />
+                <span className="text-sm">Fix Google Login Error</span>
+              </button>
+            )}
+          </div>
+
+          <div className="text-center pt-4">
+            <button
+              onClick={() => setShowHelp(true)}
+              className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-300 text-xs transition"
+            >
+              <FaQuestionCircle />
+              Having trouble signing in?
+            </button>
+          </div>
         </div>
       </div>
       {showHelp && <OriginHelpModal onClose={() => setShowHelp(false)} />}
