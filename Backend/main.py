@@ -240,12 +240,20 @@ def ai_risk_alerts(data: dict = None):
 
     prompt = data.get("prompt", "")
 
-    # Call your AI service
+    # Call AI service with timeout handling
     result = get_ai_insights(prompt)
 
     if isinstance(result, dict):
         insights = result.get("insights", [])
         suggestions = result.get("suggestions", [])
+        
+        # Handle error or timeout
+        if "error" in result or "timed out" in str(insights).lower():
+            return {
+                "overview": "AI analysis is taking longer than expected. Please refresh or try again.",
+                "recommendations": [],
+                "response": "Service temporarily unavailable."
+            }
         
         overview = ". ".join(insights[:2]) if insights else "Analyzing portfolio..."
         recommendations = suggestions[:3] if suggestions else []

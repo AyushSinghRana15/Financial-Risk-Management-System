@@ -1,10 +1,37 @@
 import requests
 import os
 import json
+import hashlib
+import time
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
+# Simple in-memory cache (5 min TTL)
+_ai_cache = {}
+_CACHE_TTL = 300  # 5 minutes
+
+def _get_cache_key(data):
+    return hashlib.md5(json.dumps(data, sort_keys=True).encode()).hexdigest()
+
+def _get_cached(key):
+    if key in _ai_cache:
+        entry = _ai_cache[key]
+        if time.time() - entry["time"] < _CACHE_TTL:
+            return entry["data"]
+        else:
+            del _ai_cache[key]
+    return None
+
+def _set_cache(key, data):
+    _ai_cache[key] = {"data": data, "time": time.time()}
+
 def get_ai_insights(portfolio):
+
+    # Check cache first
+    cache_key = _get_cache_key(portfolio)
+    cached = _get_cached(cache_key)
+    if cached:
+        return cached
 
     prompt = f"""
 You are a financial risk advisor.
@@ -33,13 +60,13 @@ Format:
                 "Content-Type": "application/json"
             },
             json={
-                "model": "openrouter/auto",
+                "model": "google/gemini-2.0-flash-thinking-exp-01-21",
                 "messages": [
                     {"role": "user", "content": prompt}
                 ],
-                "route": "fallback"
+                "max_tokens": 500
             },
-            timeout=10
+            timeout=15
         )
 
         if response.status_code != 200:
@@ -48,7 +75,7 @@ Format:
         data = response.json()
         content = data["choices"][0]["message"]["content"]
 
-        # 🔥 CLEAN RESPONSE
+        # CLEAN RESPONSE
         content = content.strip()
 
         # Remove markdown if exists
@@ -61,13 +88,21 @@ Format:
         content = content[start:end]
 
         try:
-            return json.loads(content)
+            result = json.loads(content)
+            _set_cache(cache_key, result)  # Cache successful response
+            return result
         except:
             return {
                 "risk": "Unknown",
-                "insights": [content],
+                "insights": [content[:200]],
                 "suggestions": []
             }
 
+    except requests.Timeout:
+        return {
+            "risk": "Unknown",
+            "insights": ["AI analysis timed out. Please try again."],
+            "suggestions": []
+        }
     except Exception as e:
         return {"error": str(e)}
