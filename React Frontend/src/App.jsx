@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import ECommerceFraudRisk from "./pages/ECommerceFraudRisk";
@@ -26,15 +26,6 @@ import Settings from "./pages/Settings";
 import Market from "./pages/Market";
 import About from "./pages/About";
 
-// Protected route wrapper
-function ProtectedRoute({ children }) {
-    const user = localStorage.getItem("user");
-    if (!user) {
-        return <Navigate to="/login" />;
-    }
-    return children;
-}
-
 function PageTransition({ children }) {
     return (
         <motion.div
@@ -58,10 +49,7 @@ function AuroraBackground() {
     );
 }
 
-// Public routes - accessible without login
-function PublicRoutes() {
-    const location = useLocation();
-
+function AppLayout({ children }) {
     return (
         <div className="relative flex h-screen bg-slate-100 dark:bg-slate-900 transition-colors duration-300">
             <AuroraBackground />
@@ -70,14 +58,7 @@ function PublicRoutes() {
                 <Navbar />
                 <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 lg:px-6 lg:py-6">
                     <AnimatePresence mode="wait">
-                        <PageTransition key={location.pathname}>
-                            <Routes location={location}>
-                                <Route path="/" element={<Dashboard />} />
-                                <Route path="/dashboard" element={<Dashboard />} />
-                                <Route path="/market" element={<Market />} />
-                                <Route path="/about" element={<About />} />
-                            </Routes>
-                        </PageTransition>
+                        {children}
                     </AnimatePresence>
                 </div>
             </main>
@@ -85,45 +66,16 @@ function PublicRoutes() {
     );
 }
 
-// Protected routes - require login
-function ProtectedRoutes() {
-    const location = useLocation();
+function ProtectedPage({ children }) {
+    const user = localStorage.getItem("user");
+    if (!user) {
+        return <Navigate to="/login" />;
+    }
+    return <PageTransition>{children}</PageTransition>;
+}
 
-    return (
-        <div className="relative flex h-screen bg-slate-100 dark:bg-slate-900 transition-colors duration-300">
-            <AuroraBackground />
-            <Sidebar />
-            <main className="relative z-10 flex-1 flex flex-col min-w-0 min-h-screen transition-all duration-300 ease-in-out">
-                <Navbar />
-                <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 lg:px-6 lg:py-6">
-                    <AnimatePresence mode="wait">
-                        <PageTransition key={location.pathname}>
-                            <Routes location={location}>
-                                <Route path="/dashboard" element={<Dashboard />} />
-                                <Route path="/" element={<Dashboard />} />
-
-                                <Route path="/credit-risk" element={<CreditRisk />} />
-                                <Route path="/market-risk" element={<MarketRisk />} />
-                                <Route path="/risk-analytics" element={<RiskAnalytics />} />
-                                <Route path="/ecommerce-fraud" element={<ECommerceFraudRisk />} />
-
-                                <Route path="/portfolio" element={<Portfolio />} />
-                                <Route path="/portfolio-analytics" element={<PortfolioAnalytics />} />
-                                <Route path="/liquidity-risk" element={<LiquidityRisk />} />
-
-                                <Route path="/business-risk" element={<BusinessRisk />} />
-                                <Route path="/financial-risk" element={<FinancialRisk />} />
-                                <Route path="/operational-risk" element={<OperationalRisk />} />
-
-                                <Route path="/profile" element={<ProfileSection />} />
-                                <Route path="/settings" element={<Settings />} />
-                            </Routes>
-                        </PageTransition>
-                    </AnimatePresence>
-                </div>
-            </main>
-        </div>
-    );
+function PublicPage({ children }) {
+    return <PageTransition>{children}</PageTransition>;
 }
 
 function App() {
@@ -139,62 +91,75 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
+                {/* Login page */}
                 <Route path="/login" element={<Login />} />
-                
-                {/* Public routes - accessible without login */}
-                <Route path="/" element={<PublicRoutes />} />
-                <Route path="/dashboard" element={<PublicRoutes />} />
-                <Route path="/market" element={<PublicRoutes />} />
-                <Route path="/about" element={<PublicRoutes />} />
 
-                {/* Protected routes - require login */}
+                {/* Public pages with dashboard layout */}
+                <Route
+                    path="/"
+                    element={<AppLayout><PublicPage><Dashboard /></PublicPage></AppLayout>}
+                />
+                <Route
+                    path="/dashboard"
+                    element={<AppLayout><PublicPage><Dashboard /></PublicPage></AppLayout>}
+                />
+                <Route
+                    path="/market"
+                    element={<AppLayout><PublicPage><Market /></PublicPage></AppLayout>}
+                />
+                <Route
+                    path="/about"
+                    element={<AppLayout><PublicPage><About /></PublicPage></AppLayout>}
+                />
+
+                {/* Protected pages */}
                 <Route
                     path="/credit-risk"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><CreditRisk /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/market-risk"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><MarketRisk /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/risk-analytics"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><RiskAnalytics /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/ecommerce-fraud"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><ECommerceFraudRisk /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/portfolio"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><Portfolio /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/portfolio-analytics"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><PortfolioAnalytics /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/liquidity-risk"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><LiquidityRisk /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/business-risk"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><BusinessRisk /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/financial-risk"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><FinancialRisk /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/operational-risk"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><OperationalRisk /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/profile"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><ProfileSection /></AppLayout></ProtectedPage>}
                 />
                 <Route
                     path="/settings"
-                    element={<ProtectedRoute><ProtectedRoutes /></ProtectedRoute>}
+                    element={<ProtectedPage><AppLayout><Settings /></AppLayout></ProtectedPage>}
                 />
 
                 {/* Catch all - redirect to dashboard */}
