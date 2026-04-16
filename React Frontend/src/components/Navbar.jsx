@@ -23,11 +23,18 @@ function Navbar() {
             }
             try {
                 const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?email=${userEmail}`);
+                if (!res.ok) {
+                    setUnreadCount(0);
+                    return;
+                }
                 const data = await res.json();
-                const unread = data.filter(n => !n.read).length;
-                setUnreadCount(unread);
-            } catch (err) {
-                console.error("Error fetching unread count:", err);
+                if (Array.isArray(data)) {
+                    const unread = data.filter(n => !n.read).length;
+                    setUnreadCount(unread);
+                }
+            } catch {
+                // Silently handle errors - notifications are non-critical
+                setUnreadCount(0);
             }
         };
 
