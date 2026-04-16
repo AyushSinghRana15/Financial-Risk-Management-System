@@ -17,10 +17,15 @@ Datasets/
 data/
 *.csv
 
-# Models
-*.pkl
+# Model artifacts
 *.joblib
 *.h5
 
+# Keep Models directory tracked (important for deployment)
+# Models/*.pkl files are NOT ignored so they can be deployed to Render
+
 # Logs
 *.log
+
+# CatBoost training artifacts
+**/catboost_info/
