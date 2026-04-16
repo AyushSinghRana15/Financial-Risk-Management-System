@@ -60,7 +60,7 @@ Format:
                 "Content-Type": "application/json"
             },
             json={
-                "model": "google/gemini-2.0-flash-thinking-exp-01-21",
+                "model": "openai/gpt-4o-mini",
                 "messages": [
                     {"role": "user", "content": prompt}
                 ],
