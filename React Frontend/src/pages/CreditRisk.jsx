@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap, FaInfoCircle, FaChevronDown, FaShieldAlt, FaCreditCard, FaChartLine, FaCheckCircle, FaExclamationTriangle, FaThumbsUp } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 
 export default function CreditRisk() {
@@ -35,6 +36,7 @@ export default function CreditRisk() {
     const [result, setResult] = useState(null);
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [showInfo, setShowInfo] = useState(false);
 
     useEffect(() => {
         if (userEmail) {
@@ -80,7 +82,282 @@ export default function CreditRisk() {
     return (
         <div className="p-6 bg-gray-100 dark:bg-slate-900 min-h-screen">
 
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Credit Risk Prediction</h1>
+            <h1 className="text-3xl font-bold mb-4 text-gray-800 dark:text-white">Credit Risk Prediction</h1>
+
+            {/* INFO TOGGLE BUTTON */}
+            <motion.button
+                onClick={() => setShowInfo(!showInfo)}
+                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-6 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg hover:from-emerald-700 hover:to-teal-700 transition-all"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+            >
+                <FaInfoCircle className="text-lg" />
+                <span>Know about Credit Risk & Our Model</span>
+                <motion.div
+                    animate={{ rotate: showInfo ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                >
+                    <FaChevronDown className="text-lg" />
+                </motion.div>
+            </motion.button>
+
+            {/* COLLAPSIBLE INFO SECTION */}
+            <AnimatePresence>
+                {showInfo && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                    >
+                        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-6 space-y-6">
+
+                            {/* What is Credit Risk */}
+                            <div className="relative">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                                        <FaCreditCard className="text-emerald-600 dark:text-emerald-400 text-xl" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">What is Credit Risk?</h3>
+                                </div>
+                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">
+                                    Credit Risk is the possibility that a borrower may fail to repay a loan or meet their financial obligations. 
+                                    Lenders assess this risk to determine whether to approve a loan and at what interest rate.
+                                </p>
+                                <div className="mt-4 ml-11 grid grid-cols-1 md:grid-cols-3 gap-3">
+                                    <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <p className="font-medium text-sm text-gray-700 dark:text-gray-200">Default Risk</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Borrower fails to repay</p>
+                                    </div>
+                                    <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <p className="font-medium text-sm text-gray-700 dark:text-gray-200">Late Payment Risk</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Delays in repayment</p>
+                                    </div>
+                                    <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <p className="font-medium text-sm text-gray-700 dark:text-gray-200">Recovery Risk</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Difficulty in recovering funds</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="border-t border-gray-100 dark:border-slate-700" />
+
+                            {/* How Our Model Works */}
+                            <div className="relative">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                        <FaChartLine className="text-blue-600 dark:text-blue-400 text-xl" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">How Our Model Works</h3>
+                                </div>
+                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">
+                                    We use a sophisticated <span className="font-semibold text-blue-600 dark:text-blue-400">CatBoost Machine Learning model</span> trained on 
+                                    over 300,000 loan applications to predict the likelihood of default.
+                                </p>
+                                <div className="mt-4 ml-11 space-y-3">
+                                    <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-300 flex-shrink-0">1</div>
+                                        <div>
+                                            <p className="font-medium text-gray-800 dark:text-gray-200">Financial Profile Analysis</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Income, loan amount, annuity, and financial ratios are evaluated</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-300 flex-shrink-0">2</div>
+                                        <div>
+                                            <p className="font-medium text-gray-800 dark:text-gray-200">External Credit Scores</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">Payment behavior, savings habits, and past loan performance</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-300 flex-shrink-0">3</div>
+                                        <div>
+                                            <p className="font-medium text-gray-800 dark:text-gray-200">Risk Probability Calculation</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">ML model combines all factors to predict default probability</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="border-t border-gray-100 dark:border-slate-700" />
+
+                            {/* Understanding the Probability Score */}
+                            <div className="relative">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                                        <FaShieldAlt className="text-purple-600 dark:text-purple-400 text-xl" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Understanding the Probability Score</h3>
+                                </div>
+                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">
+                                    The probability score (0-100%) represents the likelihood that the applicant will default on their loan. 
+                                    <span className="font-semibold text-purple-600 dark:text-purple-400"> Lower scores indicate better creditworthiness.</span>
+                                </p>
+
+                                {/* Example Box */}
+                                <div className="mt-4 ml-11 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-4 rounded-xl border border-purple-100 dark:border-purple-800">
+                                    <div className="flex items-start gap-3">
+                                        <FaExclamationTriangle className="text-purple-500 dark:text-purple-400 mt-1 flex-shrink-0" />
+                                        <div>
+                                            <p className="font-semibold text-purple-700 dark:text-purple-300 text-sm">
+                                                Example: 15% Default Probability
+                                            </p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                                This means there is a <span className="font-bold text-purple-600 dark:text-purple-400">15% chance</span> that 
+                                                the borrower may default on their loan obligations. Higher education or better external scores would lower this probability.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Risk Tiers */}
+                                <div className="mt-4 ml-11">
+                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-3">Risk Classification:</p>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800">
+                                            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
+                                                <FaCheckCircle className="text-green-600 dark:text-green-400" />
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-green-700 dark:text-green-300">Low Risk (Probability &lt; 35%)</p>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400">Auto Approved - Excellent creditworthiness</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-100 dark:border-yellow-800">
+                                            <div className="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center">
+                                                <FaExclamationTriangle className="text-yellow-600 dark:text-yellow-400" />
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-yellow-700 dark:text-yellow-300">Medium Risk (Probability 35-65%)</p>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400">Manual Review - Additional verification may be needed</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-100 dark:border-red-800">
+                                            <div className="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center">
+                                                <FaExclamationTriangle className="text-red-600 dark:text-red-400" />
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-red-700 dark:text-red-300">High Risk (Probability &gt; 65%)</p>
+                                                <p className="text-sm text-gray-500 dark:text-gray-400">Reject / Verify Further - High default probability</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="border-t border-gray-100 dark:border-slate-700" />
+
+                            {/* Key Factors That Affect Your Score */}
+                            <div className="relative">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                                        <FaCreditCard className="text-amber-600 dark:text-amber-400 text-xl" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Key Factors That Affect Your Score</h3>
+                                </div>
+                                <div className="ml-11 space-y-3">
+                                    <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <p className="font-medium text-sm text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                            External Credit Score (EXT1)
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Your payment regularity and bill-paying behavior from credit bureaus. Always paying on time = Higher score.</p>
+                                    </div>
+                                    <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <p className="font-medium text-sm text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                            Savings Behavior (EXT2)
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Your savings habits and financial discipline. Regular savings = Better creditworthiness.</p>
+                                    </div>
+                                    <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <p className="font-medium text-sm text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                            Past Loan Experience (EXT3)
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Your history with previous loans. Well-managed loans = Lower risk.</p>
+                                    </div>
+                                    <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <p className="font-medium text-sm text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                                            Income to Loan Ratio
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Lower loan-to-income ratio = More manageable debt burden = Lower risk.</p>
+                                    </div>
+                                    <div className="p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
+                                        <p className="font-medium text-sm text-gray-800 dark:text-gray-200 flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                                            Employment Duration
+                                        </p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Longer employment history indicates stable income, reducing default risk.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="border-t border-gray-100 dark:border-slate-700" />
+
+                            {/* Tips to Improve Your Score */}
+                            <div className="relative">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                                        <FaThumbsUp className="text-green-600 dark:text-green-400 text-xl" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Tips to Improve Your Credit Score</h3>
+                                </div>
+                                <div className="ml-11 grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+                                        <FaCheckCircle className="text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                                        <p className="text-sm text-gray-600 dark:text-gray-300">Pay all bills on time, every time</p>
+                                    </div>
+                                    <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+                                        <FaCheckCircle className="text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                                        <p className="text-sm text-gray-600 dark:text-gray-300">Maintain a low loan-to-income ratio</p>
+                                    </div>
+                                    <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+                                        <FaCheckCircle className="text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                                        <p className="text-sm text-gray-300">Build a consistent savings habit</p>
+                                    </div>
+                                    <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+                                        <FaCheckCircle className="text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                                        <p className="text-sm text-gray-600 dark:text-gray-300">Avoid multiple loan applications</p>
+                                    </div>
+                                    <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+                                        <FaCheckCircle className="text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                                        <p className="text-sm text-gray-600 dark:text-gray-300">Keep credit utilization below 30%</p>
+                                    </div>
+                                    <div className="flex items-start gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800">
+                                        <FaCheckCircle className="text-green-500 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                                        <p className="text-sm text-gray-600 dark:text-gray-300">Maintain stable employment</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Loan Amount Safeguard Notice */}
+                            <div className="mt-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                                <div className="flex items-start gap-3">
+                                    <FaExclamationTriangle className="text-amber-500 dark:text-amber-400 mt-1 flex-shrink-0" />
+                                    <div>
+                                        <p className="font-semibold text-amber-700 dark:text-amber-300 text-sm">
+                                            Important: Loan Amount Safeguard
+                                        </p>
+                                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                            Loans exceeding <span className="font-bold text-amber-600 dark:text-amber-400">₹1,000,000 (10 Lakhs)</span> receive an additional 
+                                            <span className="font-bold text-amber-600 dark:text-amber-400"> +5% risk penalty</span> to account for elevated default exposure. 
+                                            Consider this when planning your loan amount.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <div className="bg-white dark:bg-slate-800 shadow-md rounded-xl p-6 space-y-6">
 
