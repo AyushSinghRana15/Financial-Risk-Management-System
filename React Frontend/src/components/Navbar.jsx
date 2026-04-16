@@ -36,7 +36,7 @@ function Navbar() {
 
     const logout = () => {
         localStorage.removeItem("user");
-        navigate("/login");
+        navigate("/");
     };
 
     const getInitials = (name) => {

@@ -67,6 +67,14 @@ export default function Login() {
   const [showHelp, setShowHelp] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(true);
 
+  // Redirect if already logged in
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) {
+      navigate("/");
+    }
+  }, [navigate]);
+
   useEffect(() => {
     const checkGoogleScript = () => {
       const timeout = setTimeout(() => {
