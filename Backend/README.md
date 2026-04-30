@@ -1,185 +1,180 @@
-# FinRisk Backend: AI Assessment Engine
+# Backend - FastAPI REST API
 
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-
-The **FinRisk Backend** is a modular risk calculation engine built with **FastAPI**. It handles complex financial data processing, integrates real-time market feeds, and manages AI-driven narrative assessments for diversified investment portfolios.
+The backend serves as the core API layer for FinRisk, handling risk predictions, portfolio management, user authentication, and AI-powered insights.
 
 ---
 
-## 🏗️ Architecture
+## Tech Stack
 
-The backend is structured into specialized risk-assessment handlers, each focusing on a unique dimension of financial exposure.
-
-### **📂 Directory Overview**
-
-| File | Purpose |
-|------|---------|
-| `main.py` | Entry point with Auth, Profile, Notifications, and Dashboard routers |
-| `ai_service.py` | OpenRouter (Gemini) integration for portfolio analysis |
-| `database.py` | SQLAlchemy engine with PostgreSQL (Neon Serverless) |
-| `models.py` | Database schemas: User, Portfolio, CreditPrediction, MarketRiskData, BusinessRisk, etc. |
-| `portfolio.py` | Asset tracking, yfinance integration for live prices |
-| `migrate.py` | Database migration and seed data population |
-
-### **🔧 Risk Module Handlers**
-
-| Module | File | Description |
-|--------|------|-------------|
-| **Credit Risk** | `credit_risk_api.py` | Probability-of-Default (PD) using ML models |
-| **Market Risk** | `market_risk_api.py` | Volatility and Value-at-Risk (VaR) |
-| **E-Commerce Fraud** | `E_commerce_fraud_risk_api.py` | Transaction-level fraud scoring |
-| **Business Risk** | `business_risk_api.py` | Revenue stability assessment |
-| **Financial Risk** | `final_financial_api.py` | Capital structure analysis |
-| **Liquidity Risk** | `liquidity_risk_api.py` | Cash-flow coverage analysis |
-| **Operational Risk** | `operational_risk_api.py` | System/process failure risk |
+- **Framework**: FastAPI 0.135.1
+- **Database**: PostgreSQL (Neon serverless) via SQLAlchemy 2.0
+- **ML Libraries**: XGBoost, CatBoost, scikit-learn, pandas, numpy
+- **Authentication**: Google OAuth 2.0, bcrypt
+- **AI Integration**: OpenRouter API (Gemini models)
+- **Market Data**: yfinance for real-time prices
+- **Server**: Uvicorn (dev), Gunicorn (production)
 
 ---
 
-## 🔐 Authentication
+## Project Structure
 
-### **Google OAuth**
-- Seamless identity via `google-auth-library`
-- Endpoint: `POST /auth/google`
-
-### **Email/Password**
-- Secure signup/login with **Bcrypt** hashing
-- Passwords stored as hashed strings in PostgreSQL
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/auth/signup` | POST | Create account with name, email, password |
-| `/auth/login` | POST | Authenticate and receive user profile |
-
----
-
-## 🤖 AI Analytics Service
-
-The `ai_service.py` component uses **OpenRouter** (Gemini) to generate narrative portfolio insights.
-
-### **Endpoint**: `POST /ai-risk-alerts`
-
-**Request:**
-```json
-{
-  "prompt": "Analyze this portfolio: [...]"
-}
 ```
-
-**Response:**
-```json
-{
-  "overview": "Your portfolio shows moderate diversification with...",
-  "recommendations": ["Diversify into bonds", "Monitor crypto exposure"],
-  "response": "Full text response..."
-}
+Backend/
+├── main.py                      # FastAPI app entry, CORS, routers, auth, notifications
+├── database.py                  # SQLAlchemy engine & session setup
+├── models.py                    # DB schemas (User, Portfolio, CreditPrediction, etc.)
+├── ai_service.py                # OpenRouter API wrapper for AI insights
+├── portfolio.py                 # Portfolio CRUD with yfinance price updates
+├── migrate.py                   # Database migration & seed data
+├── test_db.py                   # Test database utilities
+│
+├── credit_risk_api.py           # Credit risk prediction endpoint
+├── market_risk_api.py           # Market risk / VaR endpoint
+├── business_risk_api.py         # Business risk analysis endpoint
+├── liquidity_risk_api.py        # Liquidity risk assessment endpoint
+├── final_financial_api.py       # Financial status / bankruptcy prediction
+├── operational_risk_api.py      # Operational risk scoring endpoint
+├── E_commerce_fraud_risk_api.py # E-commerce fraud detection endpoint
+│
+├── routes/
+│   └── market.py               # Market data endpoints
+│
+├── requirements.txt             # Python dependencies
+├── render-build.sh             # Production build script
+├── .env.example                # Environment variable template
+└── venv/                       # Virtual environment (gitignored)
 ```
 
 ---
 
-## 📡 API Endpoints Catalog
+## API Endpoints
 
-### **Authentication**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/auth/google` | POST | Google OAuth authentication |
-| `/auth/signup` | POST | Email/password registration |
-| `/auth/login` | POST | Email/password login |
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/auth/google` | Google OAuth login/registration |
 
-### **Dashboard**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/dashboard/stats` | GET | Portfolio value, risk scores overview |
+### User Profile
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/profile?email=` | Get user profile |
+| PUT | `/profile` | Update user profile (name, age, risk_profile) |
 
-### **Portfolio Management**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/portfolio/get/{email}` | GET | Fetch user's portfolio assets |
-| `/portfolio/add` | POST | Add new asset to portfolio |
+### Dashboard
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/dashboard/stats?email=` | Aggregated risk scores & portfolio value |
+| GET | `/notifications?email=` | Risk alerts & AI insights notifications |
 
-### **Risk Assessments**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/predict/credit` | POST | Credit risk prediction |
-| `/predict/market` | POST | Market risk/VaR calculation |
-| `/predict/fraud` | POST | E-commerce fraud detection |
+### AI Insights
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST | `/ai-insights` | Portfolio-based AI analysis |
+| GET/POST | `/ai-risk-alerts` | Prompt-based risk alerts with recommendations |
 
-### **AI & Notifications**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/ai-risk-alerts` | POST | AI portfolio analysis |
-| `/notifications` | GET | Get user notifications |
+### Risk Modules
 
-### **Market Data**
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/market/stock/{symbol}` | GET | Live stock price |
-| `/market/search` | GET | Search market symbols |
+#### Credit Risk
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/predict-credit` | Predict credit default risk from applicant data |
 
-> **Full API Documentation**: Visit `/docs` (Swagger UI) or `/redoc` when server is running.
+#### Market Risk
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/predict-market` | Calculate VaR and market risk level |
+
+#### Business Risk
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/predict-business` | Assess business risk from financial metrics |
+
+#### Liquidity Risk
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/liquidity/predict` | Classify liquidity risk level |
+
+#### Financial Risk
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/financial/predict` | Predict bankruptcy/financial distress |
+
+#### Operational Risk
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/predict-operational` | Score operational risk for transactions |
+
+#### E-Commerce Fraud
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/predict-fraud` | Detect fraudulent e-commerce transactions |
+
+### Portfolio
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| CRUD | `/portfolio/*` | Manage portfolio assets with live prices |
+
+### Market Data
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/market/*` | Real-time market data via yfinance |
 
 ---
 
-## 🗄️ Database Schema
+## Database Models
 
-### **User**
-| Field | Type | Description |
-|-------|------|-------------|
-| id | INTEGER | Primary key |
-| name | VARCHAR | Full name |
-| email | VARCHAR | Unique email |
-| password_hash | VARCHAR | Bcrypt hash or "google_oauth" |
-| is_verified | BOOLEAN | Email verification status |
-| age | INTEGER | User age |
-| risk_profile | VARCHAR | Risk tolerance level |
-
-### **Portfolio**
-| Field | Type | Description |
-|-------|------|-------------|
-| id | INTEGER | Primary key |
-| user_id | INTEGER | Foreign key to User |
-| asset_name | VARCHAR | Asset symbol/name |
-| asset_type | VARCHAR | Stock, Crypto, Bond, ETF, etc. |
-| quantity | FLOAT | Number of units |
-| buy_price | FLOAT | Purchase price |
-| current_price | FLOAT | Live market price |
+- **User**: name, email, password_hash, age, risk_profile, picture, is_verified
+- **Portfolio**: user_id, asset_name, asset_type, quantity, current_price, total_value
+- **CreditPrediction**: user_id, risk_score, risk_label, predicted_at
+- **MarketRiskData**: user_id, risk_level, risk_score, recorded_at
+- **BusinessRisk**: user_id, risk_score, risk_level, analyzed_at
 
 ---
 
-## 🛠️ Installation & Setup
+## Environment Variables
 
-### **1. Environment Variables**
-Create a `.env` file in the Backend directory:
-```bash
-DATABASE_URL=postgresql://user:password@host/dbname
+Create a `.env` file from `.env.example`:
+
+```
+DATABASE_URL=postgresql://...
 OPENROUTER_API_KEY=sk-or-v1-...
-GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
+GOOGLE_CLIENT_ID=...
+FRONTEND_URL=http://localhost:5173
 ```
 
-### **2. Install Dependencies**
+---
+
+## Quick Start
+
 ```bash
 cd Backend
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your credentials
+
+# Run development server
+uvicorn main:app --reload --port 8000
 ```
 
-### **3. Run Server**
-```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
-
-The API will be available at:
-- **API Base**: `http://localhost:8000`
-- **Swagger Docs**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
+API available at:
+- API: `http://localhost:8000`
+- Swagger Docs: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
 
 ---
 
-## 👥 Contributors
+## Deployment
 
-Developed by the **FinRisk Team**:
-- **Ayush Singh**
-- **Aditya Singh**
-- **Abhishek Kumar**
-- **Bipin Singh**
+Production deployment via Render using `render-build.sh`:
 
-**Mentor**: Mr. Alen Alexander
+```bash
+gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
+```

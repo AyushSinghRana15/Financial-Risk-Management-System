@@ -6,7 +6,7 @@
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-**FinRisk** is a state-of-the-art Financial Risk Management Dashboard that leverages machine learning and AI to provide real-time risk assessment, portfolio intelligence, and actionable recommendations. Designed with a premium glassmorphic UI, it helps investors and institutions monitor market volatility, credit risk, and liquidity exposures in a single unified interface.
+**FinRisk** is a state-of-the-art Financial Risk Management Dashboard that leverages machine learning and AI to provide real-time risk assessment, portfolio intelligence, and actionable recommendations. Designed with a premium glassmorphic UI, it helps investors and institutions monitor market volatility, business risk, liquidity exposures, and more in a single unified interface.
 
 ---
 
@@ -29,7 +29,7 @@ FinRisk transforms complex financial data into actionable insights through:
 
 | Module | Description |
 |--------|-------------|
-| **Credit Risk** | ML-driven prediction using CatBoost with probability-based thresholds (Low/Medium/High risk tiers) |
+| **Credit Risk** | ML-driven default prediction using XGBoost/CatBoost with probability-based thresholds (Low/Medium/High risk tiers) |
 | **Market Risk** | Value-at-Risk (VaR) estimation and volatility tracking |
 | **Business Risk** | Revenue stability and competitive landscape assessment |
 | **Operational Risk** | Monitoring of system-wide failures and process risks |
@@ -49,38 +49,6 @@ FinRisk transforms complex financial data into actionable insights through:
 - Asset allocation visualization (Pie charts)
 - Performance tracking with P/L calculations
 - Correlation matrix for diversification analysis
-
----
-
-## 🔐 Credit Risk Model Details
-
-### **Model Architecture**
-- **Algorithm**: CatBoost Classifier
-- **Features**: 150+ engineered features including financial ratios, external scores, demographics
-- **Training Data**: Home Credit Default Risk dataset (307,511 applications)
-
-### **Risk Classification Thresholds**
-| Probability Range | Risk Level | Decision |
-|-------------------|------------|----------|
-| < 0.35 | Low Risk | Auto Approve |
-| 0.35 - 0.65 | Medium Risk | Manual Review |
-| > 0.65 | High Risk | Reject / Verify Further |
-
-### **Key Features Impact**
-- **External Scores (EXT_SOURCE_1/2/3)**: Strongest predictors of default risk
-- **ANNUITY_CREDIT_RATIO**: Loan term affects repayment likelihood
-- **Financial Ratios**: Credit-to-income and annuity-to-income ratios
-- **Demographics**: Age, employment duration, gender, asset ownership
-
-### **Loan Amount Safeguard**
-- Loans exceeding **$1,000,000** receive a **+5% risk penalty** to account for elevated default exposure
-
-### **Model Performance**
-| Metric | Value |
-|--------|-------|
-| ROC-AUC | 0.771 |
-| Precision | 0.25 |
-| Recall | 0.45 |
 
 ---
 
