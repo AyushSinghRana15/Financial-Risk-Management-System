@@ -13,7 +13,7 @@ import {
     ResponsiveContainer
 } from "recharts";
 
-import { FaChartLine, FaSync, FaChevronDown, FaChevronUp, FaInfoCircle, FaShieldAlt, FaExclamationTriangle, FaChartArea } from "react-icons/fa";
+import { FaChartLine, FaSync, FaChevronDown, FaChevronUp, FaInfoCircle, FaShieldAlt, FaExclamationTriangle, FaChartArea, FaArrowUp, FaArrowDown, FaSearch, FaBolt, FaGlobeAsia, FaChartBar, FaChartPie, FaExchangeAlt, FaRegLightbulb, FaRedoAlt } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 
 function MarketRisk() {
@@ -94,7 +94,53 @@ function MarketRisk() {
         setInputs(prev => ({ ...prev, [feature]: num }));
     };
 
+    const fetchLiveData = async () => {
+        try {
+            const res = await axios.get(API_ENDPOINTS.RISK.MARKET_LIVE);
+            if (res.data) {
+                const updated = { ...inputs };
+                Object.keys(res.data).forEach(key => {
+                    if (key in updated) {
+                        updated[key] = res.data[key];
+                    }
+                });
+                setInputs(updated);
+            }
+        } catch (err) {
+            console.error("Failed to fetch live data:", err);
+        }
+    };
 
+    const NIFTY_RETURN_FEATURES = ["^NSEI_Return", "^NSEI_Return_lag1", "^NSEI_Return_lag2", "^NSEI_Return_lag5"];
+    const NIFTY_VOL_FEATURES = ["^NSEI_Return_vol20", "^NSEI_Return_vol60", "^NSEI_Return_skew20", "^NSEI_Return_kurt20"];
+    const VIX_FEATURES = ["^INDIAVIX_Close", "^INDIAVIX_Return"];
+    const STOCK_FEATURES = ["RELIANCE.NS_Return", "TCS.NS_Return", "RELIANCE.NS_Volume"];
+
+    const featureGroups = [
+        { name: "NIFTY Returns", icon: FaArrowUp, features: NIFTY_RETURN_FEATURES, color: "blue", desc: "Current and historical daily returns of NIFTY 50 index" },
+        { name: "NIFTY Volatility", icon: FaChartBar, features: NIFTY_VOL_FEATURES, color: "amber", desc: "Market volatility, skewness, and tail-risk indicators" },
+        { name: "India VIX", icon: FaExclamationTriangle, features: VIX_FEATURES, color: "rose", desc: "India's fear index — measures expected market volatility" },
+        { name: "Individual Stocks", icon: FaChartLine, features: STOCK_FEATURES, color: "violet", desc: "Major stock returns and volume data" },
+    ];
+
+    const getFeatureGroup = (feature) => {
+        for (const group of featureGroups) {
+            if (group.features.includes(feature)) return group;
+        }
+        return null;
+    };
+
+    const getRecommendedRange = (feature) => {
+        if (feature.includes("_Return") && !feature.includes("vol") && !feature.includes("skew") && !feature.includes("kurt")) {
+            return "Range: -0.05 to 0.05";
+        }
+        if (feature.includes("vol")) return "Range: 0.0 to 3.0";
+        if (feature.includes("skew")) return "Range: -2.0 to 2.0";
+        if (feature.includes("kurt")) return "Range: 0.0 to 10.0";
+        if (feature.includes("VIX_Close")) return "Range: 10 to 35";
+        if (feature.includes("VIX_Return")) return "Range: -0.15 to 0.15";
+        return "Decimal: 0.01 = 1%";
+    };
 
     const predictRisk = async () => {
         setLoading(true);
@@ -486,42 +532,108 @@ function MarketRisk() {
             </AnimatePresence>
 
             {/* Market Indicators */}
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-semibold text-lg text-gray-800 dark:text-white">Market Indicators</h2>
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                    <div>
+                        <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                            <FaChartLine className="text-blue-500" />
+                            Market Indicators
+                        </h2>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Enter current market data to calculate Value at Risk
+                        </p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={fetchLiveData}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                        >
+                            <FaRedoAlt className="text-[10px]" />
+                            Fetch Live
+                        </button>
+                        <button
+                            onClick={() => {
+                                const init = {};
+                                features.forEach(f => init[f] = 0);
+                                setInputs(init);
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+                        >
+                            <FaSync className="text-[10px]" />
+                            Reset
+                        </button>
+                    </div>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {features.map((feature) => (
-                        <div key={feature} className="bg-gray-50 dark:bg-slate-700 p-3 rounded-lg border border-gray-100 dark:border-slate-600 hover:border-blue-200 dark:hover:border-blue-600 transition-colors">
-                            <label className="text-xs font-medium text-gray-600 dark:text-gray-300 block mb-1">
-                                {cleanFeatureName(feature)}
-                            </label>
 
-                            <input
-                                type="number"
-                                step="0.01"
-                                value={inputs[feature] || ""}
-                                placeholder="0.00"
-                                onChange={(e) =>
-                                    handleChange(feature, e.target.value)
-                                }
-                                className="w-full px-2 py-1.5 border border-gray-200 dark:border-slate-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-800 dark:text-white"
-                            />
+                {/* Grouped Features */}
+                {featureGroups.map((group) => {
+                    const groupFeatures = features.filter(f => group.features.includes(f));
+                    if (groupFeatures.length === 0) return null;
+                    const GroupIcon = group.icon;
+                    const colorClasses = {
+                        blue: { border: "border-blue-200 dark:border-blue-800", bg: "bg-blue-50 dark:bg-blue-900/10", icon: "text-blue-600 dark:text-blue-400", badge: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300", input: "focus:ring-blue-500 focus:border-blue-400" },
+                        amber: { border: "border-amber-200 dark:border-amber-800", bg: "bg-amber-50 dark:bg-amber-900/10", icon: "text-amber-600 dark:text-amber-400", badge: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300", input: "focus:ring-amber-500 focus:border-amber-400" },
+                        rose: { border: "border-rose-200 dark:border-rose-800", bg: "bg-rose-50 dark:bg-rose-900/10", icon: "text-rose-600 dark:text-rose-400", badge: "bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300", input: "focus:ring-rose-500 focus:border-rose-400" },
+                        violet: { border: "border-violet-200 dark:border-violet-800", bg: "bg-violet-50 dark:bg-violet-900/10", icon: "text-violet-600 dark:text-violet-400", badge: "bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300", input: "focus:ring-violet-500 focus:border-violet-400" },
+                    };
+                    const cc = colorClasses[group.color];
 
-                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                                ±1% = 0.01
-                            </p>
+                    return (
+                        <div key={group.name} className={`mb-4 p-4 rounded-xl border ${cc.border} ${cc.bg}`}>
+                            <div className="flex items-center gap-2 mb-3">
+                                <GroupIcon className={`${cc.icon} text-sm`} />
+                                <h3 className="font-semibold text-sm text-gray-800 dark:text-white">{group.name}</h3>
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${cc.badge}`}>
+                                    {groupFeatures.length}
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{group.desc}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                                {groupFeatures.map((feature) => (
+                                    <div key={feature} className="bg-white dark:bg-slate-800/80 p-2.5 rounded-lg border border-gray-100 dark:border-slate-700 hover:shadow-sm transition-shadow">
+                                        <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 block mb-1 truncate" title={feature}>
+                                            {cleanFeatureName(feature)}
+                                        </label>
+                                        <div className="flex items-center gap-1.5">
+                                            <input
+                                                type="number"
+                                                step="any"
+                                                value={inputs[feature] ?? ""}
+                                                placeholder="0"
+                                                onChange={(e) => handleChange(feature, e.target.value)}
+                                                className={`w-full px-2 py-1 text-sm border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white outline-none ring-0 focus:ring-2 ${cc.input} transition-shadow`}
+                                            />
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1.5 font-mono">
+                                            {getRecommendedRange(feature)}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    ))}
-                </div>
+                    );
+                })}
 
                 <button
                     onClick={predictRisk}
                     disabled={loading}
-                    className="w-full mt-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-700 hover:to-indigo-700 transform hover:scale-[1.01] transition-all shadow-md"
+                    className="w-full mt-2 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transform hover:scale-[1.01] active:scale-[0.99] transition-all shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                    {loading ? "Analyzing Market Risk..." : "Predict Market Risk"}
+                    {loading ? (
+                        <>
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                            Analyzing Market Risk...
+                        </>
+                    ) : (
+                        <>
+                            <FaBolt className="text-lg" />
+                            Predict Market Risk
+                        </>
+                    )}
                 </button>
             </div>
 

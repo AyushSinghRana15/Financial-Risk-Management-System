@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
         CREDIT_HISTORY: `${API_BASE_URL}/credit_predictions`,
         MARKET: `${API_BASE_URL}/predict_market_risk`,
         MARKET_FEATURES: `${API_BASE_URL}/market_features`,
+        MARKET_LIVE: `${API_BASE_URL}/market_live_data`,
         FRAUD: `${API_BASE_URL}/predict_fraud`,
         FRAUD_HISTORY: `${API_BASE_URL}/fraud_history`,
         OPERATIONAL: `${API_BASE_URL}/predict_operational_risk`,
