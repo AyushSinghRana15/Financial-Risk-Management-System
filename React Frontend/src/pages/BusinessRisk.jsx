@@ -85,10 +85,10 @@ export default function BusinessRisk() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className={`grid grid-cols-1 gap-6 ${result ? "lg:grid-cols-5" : ""}`}>
 
-        {/* INPUTS - 3 cols */}
-        <div className="lg:col-span-3 space-y-6">
+        {/* INPUTS - 3 cols (full width when no result) */}
+        <div className={`${result ? "lg:col-span-3" : "lg:col-span-5 lg:max-w-4xl lg:mx-auto"} space-y-6`}>
           {groups.map((group) => {
             const cc = colorMap[group.color];
             const groupFeatures = FEATURES.filter(f => group.features.includes(f.key));
@@ -124,13 +124,9 @@ export default function BusinessRisk() {
           </button>
         </div>
 
-        {/* RESULTS - 2 cols */}
+        {/* RESULTS - 2 cols (only shown when result exists) */}
+        {result && (
         <div className="lg:col-span-2 space-y-6">
-          {!result ? (
-            <div className="bg-white dark:bg-slate-800 p-12 rounded-xl shadow text-center text-gray-400 dark:text-gray-500 h-full flex items-center justify-center">
-              <div><FaBuilding className="text-4xl mx-auto mb-3 opacity-50" /><p>Run prediction to see results</p></div>
-            </div>
-          ) : (
             <>
               {/* KPI Cards */}
               <div className="grid grid-cols-2 gap-4">

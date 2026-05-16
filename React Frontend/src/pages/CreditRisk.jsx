@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell, LabelList, ReferenceLine
 } from "recharts";
-import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap, FaInfoCircle, FaChevronDown, FaShieldAlt, FaCreditCard, FaChartLine, FaCheckCircle, FaExclamationTriangle, FaThumbsUp, FaMoneyBillWave, FaUserTie, FaChartBar, FaHistory, FaSync, FaBolt, FaUsers, FaChild, FaCalendarAlt, FaExclamationCircle } from "react-icons/fa";
+import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap, FaInfoCircle, FaChevronDown, FaShieldAlt, FaCreditCard, FaChartLine, FaCheckCircle, FaExclamationTriangle, FaMoneyBillWave, FaUserTie, FaChartBar, FaHistory, FaBolt } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 
 export default function CreditRisk() {
@@ -17,20 +17,11 @@ export default function CreditRisk() {
     email: userEmail,
     income: 150000,
     credit: 300000,
-    annuity: 20000,
-    goods_price: 250000,
-    children: 0,
     age: 35,
     employment_years: 5,
     ext1: 0.5,
     ext2: 0.5,
     ext3: 0.5,
-    family_members: 2,
-    bureau_year: 0,
-    bureau_week: 0,
-    bureau_month: 0,
-    def30: 0,
-    def60: 0,
     gender: "Male",
     owns_car: "Yes",
     owns_house: "Yes",
@@ -198,9 +189,9 @@ export default function CreditRisk() {
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* FORM - 3 columns */}
-        <div className="lg:col-span-3 space-y-6">
+      <div className={`grid grid-cols-1 gap-6 ${result ? "lg:grid-cols-5" : ""}`}>
+        {/* FORM - 3 columns (full width when no result) */}
+        <div className={`${result ? "lg:col-span-3" : "lg:col-span-5 lg:max-w-4xl lg:mx-auto"} space-y-6`}>
 
           {/* BASIC FINANCIAL */}
           <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700">
@@ -222,32 +213,12 @@ export default function CreditRisk() {
                 <p className={`text-xs mt-1 font-medium ${ratio > 5 ? "text-red-500" : ratio > 2 ? "text-yellow-500" : "text-green-500"}`}>Loan/Income: {ratio.toFixed(1)}x</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Loan Annuity (₹)</label>
-                <input name="annuity" type="number" value={formData.annuity} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Goods Price (₹)</label>
-                <input name="goods_price" type="number" value={formData.goods_price} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
-              </div>
-              <div>
                 <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Age: {formData.age}</label>
                 <input type="range" name="age" min="18" max="70" value={formData.age} onChange={handleChange} className="w-full mt-2 accent-blue-600" />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Employment Years</label>
                 <input name="employment_years" type="number" value={formData.employment_years} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1">
-                  <FaChild className="text-xs" /> Children: {formData.children}
-                </label>
-                <input type="range" name="children" min="0" max="10" value={formData.children} onChange={handleChange} className="w-full mt-2 accent-blue-600" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1">
-                  <FaUsers className="text-xs" /> Family Members: {formData.family_members}
-                </label>
-                <input type="range" name="family_members" min="1" max="10" value={formData.family_members} onChange={handleChange} className="w-full mt-2 accent-blue-600" />
               </div>
             </div>
           </div>
@@ -300,37 +271,7 @@ export default function CreditRisk() {
             </div>
           </div>
 
-          {/* BUREAU & CREDIT HISTORY */}
-          <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="p-1.5 bg-red-100 dark:bg-red-900/30 rounded-lg">
-                <FaExclamationCircle className="text-red-600 dark:text-red-400" />
-              </div>
-              <h2 className="font-semibold text-gray-800 dark:text-white">Bureau & Credit History</h2>
-            </div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Days Since Last Bureau Inquiry</label>
-                <input name="bureau_year" type="number" value={formData.bureau_year} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Week Since Last Inquiry</label>
-                <input name="bureau_week" type="number" value={formData.bureau_week} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Month Since Last Inquiry</label>
-                <input name="bureau_month" type="number" value={formData.bureau_month} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Days Overdue &lt; 30</label>
-                <input name="def30" type="number" value={formData.def30} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Days Overdue &gt; 60</label>
-                <input name="def60" type="number" value={formData.def60} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
-              </div>
-            </div>
-          </div>
+
 
           {/* PERSONAL INFO */}
           <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700">
@@ -379,14 +320,9 @@ export default function CreditRisk() {
           </button>
         </div>
 
-        {/* RESULTS - 2 columns */}
+        {/* RESULTS - 2 columns (only shown when result exists) */}
+        {result && (
         <div className="lg:col-span-2 space-y-6">
-          {!result ? (
-            <div className="bg-white dark:bg-slate-800 p-12 rounded-xl shadow text-center text-gray-400 dark:text-gray-500 h-full flex items-center justify-center">
-              <div><FaChartLine className="text-4xl mx-auto mb-3 opacity-50" /><p>Run prediction to see results</p></div>
-            </div>
-          ) : (
-            <>
               {/* KPI Cards */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow flex justify-between items-center">
@@ -459,8 +395,6 @@ export default function CreditRisk() {
                   </ResponsiveContainer>
                 </div>
               )}
-            </>
-          )}
 
           {/* HISTORY */}
           {history.length > 0 && (
@@ -485,6 +419,7 @@ export default function CreditRisk() {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );
