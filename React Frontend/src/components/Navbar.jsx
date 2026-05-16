@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FaBell, FaChartLine } from "react-icons/fa";
+import { FaBell, FaChartLine, FaBars, FaTimes } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPanel from "./NotificationPanel";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import { NAVBAR_ITEMS } from "../config/navigation";
 
 function Navbar() {
     const navigate = useNavigate();
@@ -58,27 +59,30 @@ function Navbar() {
         return name.split(" ").map(w => w[0]).join("").toUpperCase();
     };
 
+    const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
     const linkClass = (path) =>
         `cursor-pointer text-sm font-medium transition-colors duration-200 ${location.pathname === path
             ? "text-blue-500 dark:text-blue-400"
             : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white"
         }`;
 
-    const navItems = [
-        { path: "/dashboard", label: "Home" },
-        { path: "/portfolio", label: "Portfolio" },
-        { path: "/market", label: "Market" },
-        { path: "/about", label: "About" },
-    ];
-
     return (
         <div className="glass-panel border-t-0 border-x-0 border-b border-slate-200/20 dark:border-slate-700/30 relative z-50">
             <div className="flex items-center px-6 py-3">
                 <div className="flex-1" />
 
+                {/* Mobile hamburger */}
+                <button
+                    onClick={() => setMobileNavOpen(!mobileNavOpen)}
+                    className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
+                >
+                    {mobileNavOpen ? <FaTimes size={18} /> : <FaBars size={18} />}
+                </button>
+
                 <div className="flex items-center gap-5">
                     <nav className="hidden md:flex items-center gap-5">
-                        {navItems.map(item => (
+                        {NAVBAR_ITEMS.map(item => (
                             <span 
                                 key={item.path} 
                                 onClick={() => navigate(item.path)} 
@@ -174,6 +178,27 @@ function Navbar() {
                     )}
                 </div>
             </div>
+
+            {/* Mobile nav dropdown */}
+            {mobileNavOpen && (
+                <div className="md:hidden border-t border-slate-200/20 dark:border-slate-700/30">
+                    <div className="px-4 py-3 space-y-1">
+                        {NAVBAR_ITEMS.map(item => (
+                            <div
+                                key={item.path}
+                                onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
+                                className={`px-4 py-2.5 rounded-xl cursor-pointer text-sm font-medium transition-colors ${
+                                    location.pathname === item.path
+                                        ? "bg-blue-500/10 text-blue-500 dark:text-blue-400"
+                                        : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50"
+                                }`}
+                            >
+                                {item.label}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

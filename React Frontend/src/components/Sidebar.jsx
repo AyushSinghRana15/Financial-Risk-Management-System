@@ -1,41 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  Globe,
-  TrendingUp,
-  Landmark,
-  Droplets,
-  Briefcase,
-  Wallet,
-  Activity,
-  PieChart,
-  BarChart2,
-  Menu
-} from "lucide-react";
+import { Menu } from "lucide-react";
 import FinRiskLogo from "../assets/FinRisk.png";
-
-const NAV_ITEMS = {
-  main: [
-    { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/market", label: "Market", icon: Globe },
-  ],
-  systematic: [
-    { path: "/market-risk", label: "Market Risk", icon: TrendingUp, color: "blue" },
-    { path: "/credit-risk", label: "Credit Risk", icon: Landmark, color: "purple" },
-    { path: "/liquidity-risk", label: "Liquidity Risk", icon: Droplets, color: "cyan" },
-  ],
-  unsystematic: [
-    { path: "/business-risk", label: "Business Risk", icon: Briefcase, color: "green" },
-    { path: "/financial-risk", label: "Financial Risk", icon: Wallet, color: "orange" },
-    { path: "/operational-risk", label: "Operational Risk", icon: Activity, color: "yellow" },
-    { path: "/ecommerce-fraud", label: "E-Commerce Fraud", icon: BarChart2, color: "pink" },
-  ],
-  portfolio: [
-    { path: "/portfolio", label: "Portfolio", icon: PieChart, color: "indigo" },
-    { path: "/portfolio-analytics", label: "Analytics", icon: BarChart2, color: "violet" },
-  ]
-};
+import { SIDEBAR_SECTIONS } from "../config/navigation";
 
 const COLOR_MAP = {
   blue: { bg: "bg-blue-500/20", border: "border-blue-500/50", glow: "shadow-blue-500/30", text: "text-blue-400", active: "from-blue-600 to-blue-700" },
@@ -164,39 +131,15 @@ export default function Sidebar() {
           </div>
 
           <nav className="flex-1 overflow-y-auto px-3 space-y-5 pb-4">
-            <div>
-              <SectionLabel label="Main" />
-              <div className="space-y-1">
-                {NAV_ITEMS.main.map(item => <NavLink key={item.path} item={item} />)}
+            {SIDEBAR_SECTIONS.map((section, i) => (
+              <div key={section.label}>
+                {i > 0 && <div className="h-px bg-slate-700/50 mb-5" />}
+                <SectionLabel label={section.label} />
+                <div className="space-y-1">
+                  {section.items.map(item => <NavLink key={item.path} item={item} />)}
+                </div>
               </div>
-            </div>
-
-            <div className="h-px bg-slate-700/50" />
-
-            <div>
-              <SectionLabel label="Systematic Risk" />
-              <div className="space-y-1">
-                {NAV_ITEMS.systematic.map(item => <NavLink key={item.path} item={item} />)}
-              </div>
-            </div>
-
-            <div className="h-px bg-slate-700/50" />
-
-            <div>
-              <SectionLabel label="Unsystematic Risk" />
-              <div className="space-y-1">
-                {NAV_ITEMS.unsystematic.map(item => <NavLink key={item.path} item={item} />)}
-              </div>
-            </div>
-
-            <div className="h-px bg-slate-700/50" />
-
-            <div>
-              <SectionLabel label="Portfolio" />
-              <div className="space-y-1">
-                {NAV_ITEMS.portfolio.map(item => <NavLink key={item.path} item={item} />)}
-              </div>
-            </div>
+            ))}
           </nav>
         </div>
       </aside>
