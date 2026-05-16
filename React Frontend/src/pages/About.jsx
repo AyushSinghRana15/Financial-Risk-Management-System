@@ -1,286 +1,248 @@
-import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { FaGithub, FaLinkedin, FaTwitter, FaExternalLinkAlt } from "react-icons/fa";
 
-const features = [
+const team = [
     {
-        icon: "📊",
-        title: "Risk Analytics Dashboard",
-        desc: "Comprehensive portfolio visualization with credit risk, market volatility, and liquidity exposure metrics.",
-        color: "blue"
+        name: "Ayush Singh",
+        role: "Project Lead & Full-Stack Developer",
+        gradient: "from-blue-600 to-indigo-600",
+        contributions: [
+            "Credit Risk ML Model (CatBoost, XGBoost)",
+            "Market Risk / VaR Prediction Model",
+            "Frontend Architecture & Dashboard",
+            "Backend API Development (FastAPI)",
+            "AI Insights Engine Integration",
+        ],
     },
     {
-        icon: "🤖",
-        title: "AI Insights Engine",
-        desc: "ML-powered analysis uncovering hidden risks, pattern detection, and actionable recommendations.",
-        color: "purple"
+        name: "Aditya Singh",
+        role: "ML Engineer & Database Architect",
+        gradient: "from-emerald-500 to-teal-600",
+        contributions: [
+            "Liquidity Risk Prediction Model",
+            "Business Risk Classification Model",
+            "Database Schema & Migration Design",
+            "PostgreSQL (Neon) Optimization",
+            "Data Pipeline & Preprocessing",
+        ],
     },
     {
-        icon: "📈",
-        title: "Market Monitoring",
-        desc: "Real-time tracking of stocks, indices, crypto, and commodities via live data feeds.",
-        color: "green"
+        name: "Bipin Singh",
+        role: "Risk Modeling Specialist",
+        gradient: "from-purple-500 to-pink-600",
+        contributions: [
+            "Financial Risk / Bankruptcy Model",
+            "Operational Risk Classification",
+            "Feature Engineering & Selection",
+            "Model Threshold Tuning (Optuna)",
+            "Backtesting & Validation Framework",
+        ],
     },
     {
-        icon: "💼",
-        title: "Portfolio Management",
-        desc: "Dynamic allocation insights, performance tracking, and risk-adjusted analysis.",
-        color: "yellow"
-    }
+        name: "Abhishek Kumar",
+        role: "Fraud Detection & Data Analyst",
+        gradient: "from-orange-500 to-red-600",
+        contributions: [
+            "E-Commerce Fraud Detection (XGBoost)",
+            "Transaction Pattern Analysis",
+            "Fraud Feature Engineering",
+            "Model Interpretability & Reporting",
+            "Test Dataset Curation",
+        ],
+    },
 ];
 
-const techStack = [
-    { name: "React", color: "blue", glow: "#3b82f6" },
-    { name: "Vite", color: "purple", glow: "#8b5cf6" },
-    { name: "Tailwind", color: "cyan", glow: "#06b6d4" },
-    { name: "FastAPI", color: "green", glow: "#22c55e" },
-    { name: "Python", color: "yellow", glow: "#eab308" },
-    { name: "PostgreSQL", color: "blue", glow: "#3b82f6" },
-    { name: "XGBoost", color: "orange", glow: "#f97316" },
-    { name: "OpenRouter", color: "pink", glow: "#ec4899" },
-    { name: "Google OAuth", color: "red", glow: "#ef4444" },
-    { name: "yfinance", color: "yellow", glow: "#eab308" }
-];
-
-const flowSteps = [
-    { icon: "👤", label: "User", color: "bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-600" },
-    { icon: "⚛️", label: "React UI", color: "bg-cyan-100 dark:bg-cyan-900/50 border-cyan-300 dark:border-cyan-600" },
-    { icon: "🔌", label: "API Layer", color: "bg-green-100 dark:bg-green-900/50 border-green-300 dark:border-green-600" },
-    { icon: "⚡", label: "FastAPI", color: "bg-emerald-100 dark:bg-emerald-900/50 border-emerald-300 dark:border-emerald-600" },
-    { icon: "🧠", label: "AI Engine", color: "bg-purple-100 dark:bg-purple-900/50 border-purple-300 dark:border-purple-600" },
-    { icon: "📊", label: "Market Data", color: "bg-yellow-100 dark:bg-yellow-900/50 border-yellow-300 dark:border-yellow-600" },
-    { icon: "🗄️", label: "Database", color: "bg-indigo-100 dark:bg-indigo-900/50 border-indigo-300 dark:border-indigo-600" },
-    { icon: "📈", label: "Dashboard", color: "bg-pink-100 dark:bg-pink-900/50 border-pink-300 dark:border-pink-600" }
+const stats = [
+    { label: "ML Models", value: "7" },
+    { label: "Risk Types", value: "6" },
+    { label: "Tech Stack", value: "10+" },
+    { label: "Accuracy", value: "97%" },
 ];
 
 function About() {
-    const [activeFeature, setActiveFeature] = useState(null);
-    const [flowStep, setFlowStep] = useState(-1);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [hoveredTech, setHoveredTech] = useState(null);
-
-    const playFlow = () => {
-        if (isPlaying) return;
-        setIsPlaying(true);
-        setFlowStep(0);
-    };
-
-    useEffect(() => {
-        if (!isPlaying || flowStep >= flowSteps.length) {
-            if (flowStep >= flowSteps.length) {
-                setTimeout(() => {
-                    setFlowStep(-1);
-                    setIsPlaying(false);
-                }, 1500);
-            }
-            return;
-        }
-
-        const timer = setTimeout(() => {
-            setFlowStep(prev => prev + 1);
-        }, 600);
-
-        return () => clearTimeout(timer);
-    }, [flowStep, isPlaying]);
-
     return (
-        <div className="min-h-screen bg-slate-100 dark:bg-slate-900">
-
-            {/* Hero Section - Glass Panel Card */}
-            <div className="relative overflow-hidden glass-panel rounded-2xl shadow-xl mb-8">
-                
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 opacity-90"></div>
-
-                {/* Floating decorative orbs */}
-                <div className="absolute top-10 left-10 w-32 h-32 bg-white/10 rounded-full blur-2xl animate-float"></div>
-                <div className="absolute bottom-10 right-20 w-40 h-40 bg-purple-400/20 rounded-full blur-3xl animate-float" style={{ animationDelay: "1s" }}></div>
-
-                <div className="relative max-w-5xl mx-auto px-6 py-12 text-center">
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-white mb-4">
-                        FinRisk
-                    </h1>
-                    <p className="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto">
-                        AI-Powered Financial Risk Management
-                    </p>
-                    <div className="flex justify-center gap-4 mt-8">
-                        <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm">
-                            ML-Powered
-                        </div>
-                        <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm">
-                            Real-time Data
-                        </div>
-                        <div className="px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm">
-                            Risk Analytics
-                        </div>
-                    </div>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+            {/* HERO */}
+            <section className="relative overflow-hidden px-6 pt-20 pb-16 md:pt-28 md:pb-20">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-indigo-600/5 to-purple-700/5 dark:from-blue-600/10 dark:via-indigo-600/10 dark:to-purple-700/10" />
+                <div className="absolute top-20 left-1/4 w-72 h-72 bg-blue-400/20 dark:bg-blue-500/10 rounded-full blur-[100px]" />
+                <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-purple-400/20 dark:bg-purple-500/10 rounded-full blur-[120px]" />
+                <div className="relative max-w-4xl mx-auto text-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                    >
+                        <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">
+                            FinRisk
+                        </h1>
+                        <p className="text-xl md:text-2xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                            We build AI-powered risk tools <br className="hidden sm:block" />
+                            <span className="text-slate-700 dark:text-slate-300 font-medium">that actually work.</span>
+                        </p>
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className="flex flex-wrap justify-center gap-3 mt-8"
+                    >
+                        {["ML-Powered", "Real-time Data", "7 Risk Models", "Open Source"].map((tag) => (
+                            <span key={tag} className="px-4 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-sm text-slate-600 dark:text-slate-300 shadow-sm">
+                                {tag}
+                            </span>
+                        ))}
+                    </motion.div>
                 </div>
-            </div>
+            </section>
 
-            <div className="max-w-5xl mx-auto px-6 mt-8 pb-12 space-y-16">
+            <div className="max-w-5xl mx-auto px-6 pb-24 space-y-20">
 
-                {/* Mission */}
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-slate-700">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-3">
-                        <span className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center text-xl">🎯</span>
-                        Our Mission
-                    </h2>
-                    <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg">
-                        Making financial risk analysis accessible, intelligent, and actionable through 
+                {/* STATS */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="grid grid-cols-2 md:grid-cols-4 gap-4"
+                >
+                    {stats.map((s) => (
+                        <div key={s.label} className="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 text-center shadow-sm">
+                            <p className="text-3xl font-bold text-slate-900 dark:text-white">{s.value}</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{s.label}</p>
+                        </div>
+                    ))}
+                </motion.div>
+
+                {/* MISSION */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="max-w-3xl mx-auto text-center"
+                >
+                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Our Mission</h2>
+                    <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Making financial risk analysis accessible, intelligent, and actionable through
                         machine learning, real-time market data, and intuitive visualizations.
                     </p>
-                </div>
+                </motion.div>
 
-                {/* Key Features - Interactive Grid */}
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-3">
-                        <span className="w-10 h-10 bg-purple-100 dark:bg-purple-900/50 rounded-xl flex items-center justify-center text-xl">✨</span>
-                        Key Features
-                    </h2>
-                    
-                    <div className="grid md:grid-cols-2 gap-6">
-                        {features.map((feature, idx) => (
-                            <div
-                                key={idx}
-                                onClick={() => setActiveFeature(activeFeature === idx ? null : idx)}
-                                onMouseEnter={() => setActiveFeature(idx)}
-                                onMouseLeave={() => setActiveFeature(null)}
-                                className={`
-                                    relative bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border-2 transition-all duration-300 cursor-pointer
-                                    ${activeFeature === idx 
-                                        ? 'border-blue-500 dark:border-blue-400 shadow-xl scale-[1.02]' 
-                                        : 'border-transparent opacity-80 hover:opacity-100 dark:opacity-90 dark:hover:opacity-100'}
-                                `}
+                {/* TEAM */}
+                <section>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-12"
+                    >
+                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">Meet the Team</h2>
+                        <p className="text-slate-500 dark:text-slate-400">The people behind FinRisk</p>
+                    </motion.div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {team.map((member, idx) => (
+                            <motion.div
+                                key={member.name}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="group bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300"
                             >
-                                <div className={`text-4xl mb-4 transition-transform duration-300 ${activeFeature === idx ? 'scale-110' : ''}`}>
-                                    {feature.icon}
+                                <div className="flex items-start gap-4">
+                                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${member.gradient} flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0`}>
+                                        {member.name.split(" ").map(w => w[0]).join("")}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h3 className="font-semibold text-lg text-slate-900 dark:text-white">{member.name}</h3>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">{member.role}</p>
+                                    </div>
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{feature.title}</h3>
-                                <p className={`text-gray-600 dark:text-gray-300 leading-relaxed transition-all duration-300 ${activeFeature === idx ? '' : 'line-clamp-2'}`}>
-                                    {feature.desc}
-                                </p>
-                                <div className={`absolute top-4 right-4 w-3 h-3 rounded-full bg-${feature.color}-500 transition-opacity ${activeFeature === idx ? 'opacity-100' : 'opacity-0'}`}></div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Tech Stack - Glowing Badges */}
-                <div className="bg-slate-900 rounded-2xl shadow-2xl p-8">
-                    <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                        <span className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl">🛠️</span>
-                        Technology Stack
-                    </h2>
-                    
-                    <div className="flex flex-wrap gap-3">
-                        {techStack.map((tech) => (
-                            <div
-                                key={tech.name}
-                                onMouseEnter={() => setHoveredTech(tech.name)}
-                                onMouseLeave={() => setHoveredTech(null)}
-                                className={`
-                                    px-5 py-2.5 rounded-full font-medium text-sm transition-all duration-300 cursor-default
-                                    ${hoveredTech === tech.name 
-                                        ? 'scale-110 shadow-lg' 
-                                        : ''}
-                                `}
-                                style={{
-                                    background: hoveredTech === tech.name 
-                                        ? `linear-gradient(135deg, ${tech.glow}40, ${tech.glow}20)` 
-                                        : 'rgba(255,255,255,0.1)',
-                                    border: `1px solid ${hoveredTech === tech.name ? tech.glow : 'transparent'}`,
-                                    boxShadow: hoveredTech === tech.name ? `0 0 20px ${tech.glow}40` : 'none'
-                                }}
-                            >
-                                <span className="text-white">{tech.name}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Animated Architecture Flow */}
-                <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-8 border border-gray-100 dark:border-slate-700">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
-                            <span className="w-10 h-10 bg-green-100 dark:bg-green-900/50 rounded-xl flex items-center justify-center text-xl">🔄</span>
-                            Architecture Flow
-                        </h2>
-                        <button
-                            onClick={playFlow}
-                            disabled={isPlaying}
-                            className={`px-5 py-2.5 rounded-xl font-medium text-sm transition-all
-                                ${isPlaying 
-                                    ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed' 
-                                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:shadow-lg hover:scale-105'}`}
-                        >
-                            {isPlaying ? 'Playing...' : '▶ Play Flow'}
-                        </button>
-                    </div>
-
-                    <div className="flex flex-wrap justify-center gap-3">
-                        {flowSteps.map((step, idx) => (
-                            <div key={idx} className="flex items-center gap-3">
-                                <div
-                                    className={`
-                                        px-4 py-3 rounded-xl border-2 font-medium text-sm transition-all duration-500
-                                        ${flowStep >= idx 
-                                            ? `${step.color} border-current shadow-lg scale-110 text-gray-800 dark:text-white` 
-                                            : 'bg-gray-100 dark:bg-slate-700 border-gray-200 dark:border-slate-600 text-gray-400 dark:text-gray-500'}
-                                    `}
-                                >
-                                    <span className="mr-2">{step.icon}</span>
-                                    {step.label}
+                                <div className="mt-4 space-y-1.5">
+                                    {member.contributions.map((c, i) => (
+                                        <div key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
+                                            <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 bg-gradient-to-r ${member.gradient}`} />
+                                            {c}
+                                        </div>
+                                    ))}
                                 </div>
-                                {idx < flowSteps.length - 1 && (
-                                    <span className={`text-gray-400 dark:text-gray-600 transition-all ${flowStep > idx ? 'opacity-100 scale-110' : 'opacity-30'}`}>→</span>
-                                )}
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
-                </div>
+                </section>
 
-                {/* Why FinRisk */}
-                <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 rounded-2xl shadow-2xl p-10 text-white relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
-                    
-                    <div className="relative">
-                        <h2 className="text-3xl font-bold mb-4 flex items-center gap-3">
-                            <span className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl">💡</span>
-                            Why FinRisk?
-                        </h2>
-                        <p className="text-blue-100 text-lg leading-relaxed max-w-3xl">
-                            Bridging the gap between complex financial analytics and intelligent decision-making. 
-                            Combine real-time market data, AI-driven insights, and intuitive visualizations 
-                            to proactively manage risk and optimize portfolio performance.
-                        </p>
-                    </div>
-                </div>
-
-                {/* GitHub CTA */}
-                <div className="bg-slate-900 rounded-2xl shadow-2xl p-8 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
-                    
-                    <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div>
-                            <h2 className="text-2xl font-bold text-white mb-2">Explore the Source</h2>
-                            <p className="text-gray-400">
-                                Full-stack application with React, FastAPI, ML models, and AI integration
-                            </p>
+                {/* WHAT WE BUILT */}
+                <motion.section
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                >
+                    <div className="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 md:p-10 shadow-sm">
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Risk Models</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {[
+                                { label: "Credit Risk", acc: "ROC-AUC 0.77", icon: "📊", color: "blue" },
+                                { label: "Market Risk (VaR)", acc: "RMSE 0.012", icon: "📈", color: "indigo" },
+                                { label: "Business Risk", acc: "96.1% Accuracy", icon: "🏢", color: "emerald" },
+                                { label: "Liquidity Risk", acc: "88.9% Accuracy", icon: "💧", color: "cyan" },
+                                { label: "Financial Risk", acc: "97.3% Accuracy", icon: "💰", color: "purple" },
+                                { label: "E-Commerce Fraud", acc: "XGBoost", icon: "🛡️", color: "rose" },
+                            ].map((m) => (
+                                <div key={m.label} className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 border border-slate-100 dark:border-slate-600">
+                                    <span className="text-xl mb-2 block">{m.icon}</span>
+                                    <p className="font-medium text-slate-900 dark:text-white text-sm">{m.label}</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{m.acc}</p>
+                                </div>
+                            ))}
                         </div>
-                        <a
-                            href="https://github.com/AyushSinghRana15/Financial-Risk-Management-System"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group/btn px-8 py-4 bg-white text-gray-900 rounded-xl font-bold hover:bg-gray-100 transition-all hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25 flex items-center gap-3"
-                        >
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                            </svg>
-                            View on GitHub
-                            <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
-                        </a>
                     </div>
-                </div>
+                </motion.section>
+
+                {/* TECH STACK */}
+                <motion.section
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center"
+                >
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8">Technology</h2>
+                    <div className="flex flex-wrap justify-center gap-3">
+                        {[
+                            "React", "Vite", "Tailwind", "FastAPI", "Python",
+                            "PostgreSQL", "XGBoost", "CatBoost", "scikit-learn",
+                            "OpenRouter", "Google OAuth", "yfinance",
+                        ].map((tech) => (
+                            <span
+                                key={tech}
+                                className="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-medium text-slate-700 dark:text-slate-300 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-600 transition-all cursor-default"
+                            >
+                                {tech}
+                            </span>
+                        ))}
+                    </div>
+                </motion.section>
+
+                {/* GITHUB CTA */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="text-center bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-10 shadow-xl"
+                >
+                    <FaGithub className="text-4xl text-white mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold text-white mb-2">Open Source</h2>
+                    <p className="text-slate-300 mb-6 max-w-md mx-auto">
+                        FinRisk is open source. Contribute, fork, or just explore the code.
+                    </p>
+                    <a
+                        href="https://github.com/AyushSinghRana15/Financial-Risk-Management-System"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-all border border-white/20"
+                    >
+                        View on GitHub <FaExternalLinkAlt className="text-xs" />
+                    </a>
+                </motion.div>
 
             </div>
         </div>
