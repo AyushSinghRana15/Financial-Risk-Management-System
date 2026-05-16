@@ -83,10 +83,10 @@ function FinancialRisk() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className={`grid grid-cols-1 gap-6 ${result ? "lg:grid-cols-5" : ""}`}>
 
-        {/* FORM - 3 cols */}
-        <div className="lg:col-span-3 space-y-6">
+        {/* FORM - 3 cols (full width when no result) */}
+        <div className={`${result ? "lg:col-span-3" : "lg:col-span-5 lg:max-w-4xl lg:mx-auto"} space-y-6`}>
           <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-4">
               <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
@@ -132,13 +132,9 @@ function FinancialRisk() {
           </button>
         </div>
 
-        {/* RESULTS - 2 cols */}
+        {/* RESULTS - 2 cols (only shown when result exists) */}
+        {result && (
         <div className="lg:col-span-2 space-y-6">
-          {!result ? (
-            <div className="bg-white dark:bg-slate-800 p-12 rounded-xl shadow text-center text-gray-400 dark:text-gray-500 h-full flex items-center justify-center">
-              <div><FaBalanceScale className="text-4xl mx-auto mb-3 opacity-50" /><p>Run prediction to see results</p></div>
-            </div>
-          ) : (
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow">
@@ -215,8 +211,6 @@ function FinancialRisk() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </>
-          )}
 
           {/* HISTORY */}
           {history.length > 0 && (
@@ -239,6 +233,7 @@ function FinancialRisk() {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );
