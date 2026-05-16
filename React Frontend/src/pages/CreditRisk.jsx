@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell, LabelList, ReferenceLine
 } from "recharts";
-import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap, FaInfoCircle, FaChevronDown, FaShieldAlt, FaCreditCard, FaChartLine, FaCheckCircle, FaExclamationTriangle, FaThumbsUp, FaMoneyBillWave, FaUserTie, FaChartBar, FaHistory, FaSync, FaBolt } from "react-icons/fa";
+import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap, FaInfoCircle, FaChevronDown, FaShieldAlt, FaCreditCard, FaChartLine, FaCheckCircle, FaExclamationTriangle, FaThumbsUp, FaMoneyBillWave, FaUserTie, FaChartBar, FaHistory, FaSync, FaBolt, FaUsers, FaChild, FaCalendarAlt, FaExclamationCircle } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 
 export default function CreditRisk() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userEmail = user?.email || "";
+  const infoRef = useRef(null);
+  const [infoHeight, setInfoHeight] = useState(0);
 
   const [formData, setFormData] = useState({
     email: userEmail,
@@ -48,6 +50,12 @@ export default function CreditRisk() {
     }
   }, [userEmail, result]);
 
+  useEffect(() => {
+    if (infoRef.current) {
+      setInfoHeight(infoRef.current.scrollHeight);
+    }
+  }, [showInfo]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -74,7 +82,6 @@ export default function CreditRisk() {
   const riskColor = prob > 65 ? "#ef4444" : prob > 35 ? "#eab308" : "#22c55e";
   const riskLabel = prob > 65 ? "High Risk" : prob > 35 ? "Medium Risk" : "Low Risk";
 
-  const extLabels = { 0.8: "Good", 0.5: "Fair", 0.2: "Poor" };
   const chartData = result ? [
     { name: "Default Probability", value: +prob.toFixed(1), fill: riskColor }
   ] : [];
@@ -110,17 +117,18 @@ export default function CreditRisk() {
         </motion.div>
       </motion.button>
 
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {showInfo && (
           <motion.div
+            key="credit-info"
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
+            animate={{ opacity: 1, height: infoHeight }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-6 space-y-6">
-              <div className="relative">
+            <div ref={infoRef} className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-6 space-y-6">
+              <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
                     <FaCreditCard className="text-emerald-600 dark:text-emerald-400 text-xl" />
@@ -146,7 +154,7 @@ export default function CreditRisk() {
                 </div>
               </div>
               <div className="border-t border-gray-100 dark:border-slate-700" />
-              <div className="relative">
+              <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                     <FaChartLine className="text-blue-600 dark:text-blue-400 text-xl" />
@@ -157,22 +165,20 @@ export default function CreditRisk() {
                   We use a sophisticated <span className="font-semibold text-blue-600 dark:text-blue-400">CatBoost Machine Learning model</span> trained on over 300,000 loan applications to predict the likelihood of default.
                 </p>
                 <div className="mt-4 ml-11 space-y-3">
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-300 flex-shrink-0">1</div>
-                    <div><p className="font-medium text-gray-800 dark:text-gray-200">Financial Profile Analysis</p><p className="text-sm text-gray-500 dark:text-gray-400">Income, loan amount, annuity, and financial ratios are evaluated</p></div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-300 flex-shrink-0">2</div>
-                    <div><p className="font-medium text-gray-800 dark:text-gray-200">External Credit Scores</p><p className="text-sm text-gray-500 dark:text-gray-400">Payment behavior, savings habits, and past loan performance</p></div>
-                  </div>
-                  <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-300 flex-shrink-0">3</div>
-                    <div><p className="font-medium text-gray-800 dark:text-gray-200">Risk Probability Calculation</p><p className="text-sm text-gray-500 dark:text-gray-400">ML model combines all factors to predict default probability</p></div>
-                  </div>
+                  {[
+                    ["Financial Profile Analysis", "Income, loan amount, annuity, and financial ratios are evaluated"],
+                    ["External Credit Scores", "Payment behavior, savings habits, and past loan performance"],
+                    ["Risk Probability Calculation", "ML model combines all factors to predict default probability"]
+                  ].map(([title, desc], i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
+                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-300 flex-shrink-0">{i + 1}</div>
+                      <div><p className="font-medium text-gray-800 dark:text-gray-200">{title}</p><p className="text-sm text-gray-500 dark:text-gray-400">{desc}</p></div>
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="border-t border-gray-100 dark:border-slate-700" />
-              <div className="relative">
+              <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                     <FaShieldAlt className="text-purple-600 dark:text-purple-400 text-xl" />
@@ -204,7 +210,7 @@ export default function CreditRisk() {
               </div>
               <h2 className="font-semibold text-gray-800 dark:text-white">Financial Profile</h2>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-5">
               <div>
                 <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Monthly Income (₹): {formData.income.toLocaleString()}</label>
                 <input type="range" name="income" min="50000" max="1000000" step="10000" value={formData.income} onChange={handleChange} className="w-full mt-2 accent-blue-600" />
@@ -216,12 +222,32 @@ export default function CreditRisk() {
                 <p className={`text-xs mt-1 font-medium ${ratio > 5 ? "text-red-500" : ratio > 2 ? "text-yellow-500" : "text-green-500"}`}>Loan/Income: {ratio.toFixed(1)}x</p>
               </div>
               <div>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Loan Annuity (₹)</label>
+                <input name="annuity" type="number" value={formData.annuity} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Goods Price (₹)</label>
+                <input name="goods_price" type="number" value={formData.goods_price} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
+              </div>
+              <div>
                 <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Age: {formData.age}</label>
                 <input type="range" name="age" min="18" max="70" value={formData.age} onChange={handleChange} className="w-full mt-2 accent-blue-600" />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Employment Years</label>
                 <input name="employment_years" type="number" value={formData.employment_years} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1">
+                  <FaChild className="text-xs" /> Children: {formData.children}
+                </label>
+                <input type="range" name="children" min="0" max="10" value={formData.children} onChange={handleChange} className="w-full mt-2 accent-blue-600" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300 flex items-center gap-1">
+                  <FaUsers className="text-xs" /> Family Members: {formData.family_members}
+                </label>
+                <input type="range" name="family_members" min="1" max="10" value={formData.family_members} onChange={handleChange} className="w-full mt-2 accent-blue-600" />
               </div>
             </div>
           </div>
@@ -270,6 +296,38 @@ export default function CreditRisk() {
                     );
                   })}
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* BUREAU & CREDIT HISTORY */}
+          <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-1.5 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <FaExclamationCircle className="text-red-600 dark:text-red-400" />
+              </div>
+              <h2 className="font-semibold text-gray-800 dark:text-white">Bureau & Credit History</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Days Since Last Bureau Inquiry</label>
+                <input name="bureau_year" type="number" value={formData.bureau_year} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Week Since Last Inquiry</label>
+                <input name="bureau_week" type="number" value={formData.bureau_week} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Month Since Last Inquiry</label>
+                <input name="bureau_month" type="number" value={formData.bureau_month} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Days Overdue &lt; 30</label>
+                <input name="def30" type="number" value={formData.def30} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600 dark:text-gray-300">Days Overdue &gt; 60</label>
+                <input name="def60" type="number" value={formData.def60} onChange={handleChange} className="w-full px-3 py-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mt-1" />
               </div>
             </div>
           </div>
