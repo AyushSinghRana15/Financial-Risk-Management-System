@@ -4,8 +4,26 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Cell, LabelList, ReferenceLine
 } from "recharts";
-import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap, FaInfoCircle, FaChevronDown, FaShieldAlt, FaCreditCard, FaChartLine, FaCheckCircle, FaExclamationTriangle, FaMoneyBillWave, FaUserTie, FaChartBar, FaHistory, FaBolt } from "react-icons/fa";
+import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap, FaInfoCircle, FaChevronDown, FaShieldAlt, FaCreditCard, FaChartLine, FaCheckCircle, FaExclamationTriangle, FaMoneyBillWave, FaUserTie, FaChartBar, FaHistory, FaBolt, FaCreditCard as FaCard, FaPiggyBank, FaBriefcase, FaClock, FaPercent } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+
+const behaviorOptions = {
+  ext1: [
+    { label: "Always on time", score: 0.8, icon: FaCheckCircle, color: "green" },
+    { label: "Sometimes late", score: 0.5, icon: FaClock, color: "yellow" },
+    { label: "Often late", score: 0.2, icon: FaExclamationTriangle, color: "red" },
+  ],
+  ext2: [
+    { label: "Regular savings", score: 0.8, icon: FaPiggyBank, color: "green" },
+    { label: "Occasional", score: 0.5, icon: FaChartLine, color: "yellow" },
+    { label: "No savings", score: 0.2, icon: FaMoneyBillWave, color: "red" },
+  ],
+  ext3: [
+    { label: "Managed well", score: 0.8, icon: FaCheckCircle, color: "green" },
+    { label: "No loans", score: 0.5, icon: FaBriefcase, color: "yellow" },
+    { label: "Defaulted before", score: 0.2, icon: FaExclamationTriangle, color: "red" },
+  ],
+};
 
 export default function CreditRisk() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -77,6 +95,36 @@ export default function CreditRisk() {
     { name: "Default Probability", value: +prob.toFixed(1), fill: riskColor }
   ] : [];
 
+  const BehaviorToggle = ({ field, label }) => {
+    const options = behaviorOptions[field];
+    return (
+      <div>
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2.5">{label}</p>
+        <div className="flex flex-col gap-1.5">
+          {options.map(({ label: optLabel, score, icon: Icon, color }) => {
+            const isActive = formData[field] === score;
+            const colorClasses = {
+              green: { active: "bg-emerald-500 text-white border-emerald-500", inactive: "border-gray-200 dark:border-slate-600 hover:border-emerald-300 dark:hover:border-emerald-700 text-gray-600 dark:text-gray-300" },
+              yellow: { active: "bg-amber-500 text-white border-amber-500", inactive: "border-gray-200 dark:border-slate-600 hover:border-amber-300 dark:hover:border-amber-700 text-gray-600 dark:text-gray-300" },
+              red: { active: "bg-red-500 text-white border-red-500", inactive: "border-gray-200 dark:border-slate-600 hover:border-red-300 dark:hover:border-red-700 text-gray-600 dark:text-gray-300" },
+            };
+            return (
+              <button key={optLabel} onClick={() => setFormData(prev => ({ ...prev, [field]: score }))}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                  isActive ? colorClasses[color].active : `bg-white dark:bg-slate-700 ${colorClasses[color].inactive}`
+                }`}
+              >
+                <Icon className={`text-sm ${isActive ? "text-white" : `text-${color}-500`}`} />
+                {optLabel}
+                {isActive && <FaCheckCircle className="ml-auto text-xs" />}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-6 bg-gray-50 dark:bg-slate-900 min-h-screen space-y-6">
 
@@ -126,62 +174,11 @@ export default function CreditRisk() {
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 dark:text-white">What is Credit Risk?</h3>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">
-                  Credit Risk is the possibility that a borrower may fail to repay a loan or meet their financial obligations. Lenders assess this risk to determine whether to approve a loan and at what interest rate.
-                </p>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">Credit Risk is the possibility that a borrower may fail to repay a loan or meet their financial obligations.</p>
                 <div className="mt-4 ml-11 grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-100 dark:border-slate-600">
-                    <p className="font-medium text-sm text-gray-700 dark:text-gray-200">Default Risk</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Borrower fails to repay</p>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-100 dark:border-slate-600">
-                    <p className="font-medium text-sm text-gray-700 dark:text-gray-200">Late Payment Risk</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Delays in repayment</p>
-                  </div>
-                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-100 dark:border-slate-600">
-                    <p className="font-medium text-sm text-gray-700 dark:text-gray-200">Recovery Risk</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">Difficulty in recovering funds</p>
-                  </div>
-                </div>
-              </div>
-              <div className="border-t border-gray-100 dark:border-slate-700" />
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <FaChartLine className="text-blue-600 dark:text-blue-400 text-xl" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-800 dark:text-white">How Our Model Works</h3>
-                </div>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">
-                  We use a sophisticated <span className="font-semibold text-blue-600 dark:text-blue-400">CatBoost Machine Learning model</span> trained on over 300,000 loan applications to predict the likelihood of default.
-                </p>
-                <div className="mt-4 ml-11 space-y-3">
-                  {[
-                    ["Financial Profile Analysis", "Income, loan amount, annuity, and financial ratios are evaluated"],
-                    ["External Credit Scores", "Payment behavior, savings habits, and past loan performance"],
-                    ["Risk Probability Calculation", "ML model combines all factors to predict default probability"]
-                  ].map(([title, desc], i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
-                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-300 flex-shrink-0">{i + 1}</div>
-                      <div><p className="font-medium text-gray-800 dark:text-gray-200">{title}</p><p className="text-sm text-gray-500 dark:text-gray-400">{desc}</p></div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="border-t border-gray-100 dark:border-slate-700" />
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                    <FaShieldAlt className="text-purple-600 dark:text-purple-400 text-xl" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-800 dark:text-white">Understanding the Probability Score</h3>
-                </div>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">The probability score (0-100%) represents the likelihood that the applicant will default on their loan. <span className="font-semibold text-purple-600 dark:text-purple-400">Lower scores indicate better creditworthiness.</span></p>
-                <div className="mt-4 ml-11 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-4 rounded-xl border border-purple-100 dark:border-purple-800">
-                  <div className="flex items-start gap-3">
-                    <FaExclamationTriangle className="text-purple-500 dark:text-purple-400 mt-1 flex-shrink-0" />
-                    <div><p className="font-semibold text-purple-700 dark:text-purple-300 text-sm">Example: 15% Default Probability</p><p className="text-sm text-gray-600 dark:text-gray-300 mt-1">This means there is a <span className="font-bold text-purple-600 dark:text-purple-400">15% chance</span> that the borrower may default on their loan obligations.</p></div>
-                  </div>
+                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border"><p className="font-medium text-sm text-gray-700 dark:text-gray-200">Default Risk</p><p className="text-xs text-gray-500 dark:text-gray-400">Borrower fails to repay</p></div>
+                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border"><p className="font-medium text-sm text-gray-700 dark:text-gray-200">Late Payment Risk</p><p className="text-xs text-gray-500 dark:text-gray-400">Delays in repayment</p></div>
+                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border"><p className="font-medium text-sm text-gray-700 dark:text-gray-200">Recovery Risk</p><p className="text-xs text-gray-500 dark:text-gray-400">Difficulty in recovering funds</p></div>
                 </div>
               </div>
             </div>
@@ -189,9 +186,9 @@ export default function CreditRisk() {
         )}
       </AnimatePresence>
 
-      <div className={`grid grid-cols-1 gap-6 ${result ? "lg:grid-cols-5" : ""}`}>
-        {/* FORM - 3 columns (full width when no result) */}
-        <div className={`${result ? "lg:col-span-3" : "lg:col-span-5 lg:max-w-4xl lg:mx-auto"} space-y-6`}>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* FORM - 3 cols */}
+        <div className="lg:col-span-3 space-y-6">
 
           {/* BASIC FINANCIAL */}
           <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700">
@@ -232,46 +229,11 @@ export default function CreditRisk() {
               <h2 className="font-semibold text-gray-800 dark:text-white">Financial Behavior</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm mb-2 text-gray-700 dark:text-gray-200">Bill Payment</p>
-                <div className="flex bg-gray-200 dark:bg-slate-600 rounded-lg overflow-hidden">
-                  {["Always on time", "Sometimes late", "Often late"].map((val) => {
-                    const score = val === "Always on time" ? 0.8 : val === "Sometimes late" ? 0.5 : 0.2;
-                    return (
-                      <button key={val} onClick={() => setFormData(prev => ({ ...prev, ext1: score }))}
-                        className={`flex-1 py-2 text-sm transition ${formData.ext1 === score ? "bg-blue-600 text-white" : "text-gray-600 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500"}`}>{val}</button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div>
-                <p className="text-sm mb-2 text-gray-700 dark:text-gray-200">Savings Habit</p>
-                <div className="flex bg-gray-200 dark:bg-slate-600 rounded-lg overflow-hidden">
-                  {["Regular savings", "Occasional", "No savings"].map((val) => {
-                    const score = val === "Regular savings" ? 0.8 : val === "Occasional" ? 0.5 : 0.2;
-                    return (
-                      <button key={val} onClick={() => setFormData(prev => ({ ...prev, ext2: score }))}
-                        className={`flex-1 py-2 text-sm transition ${formData.ext2 === score ? "bg-blue-600 text-white" : "text-gray-600 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500"}`}>{val}</button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div>
-                <p className="text-sm mb-2 text-gray-700 dark:text-gray-200">Loan Experience</p>
-                <div className="flex bg-gray-200 dark:bg-slate-600 rounded-lg overflow-hidden">
-                  {["Managed loans well", "No loans", "Defaulted before"].map((val) => {
-                    const score = val === "Managed loans well" ? 0.8 : val === "No loans" ? 0.5 : 0.2;
-                    return (
-                      <button key={val} onClick={() => setFormData(prev => ({ ...prev, ext3: score }))}
-                        className={`flex-1 py-2 text-sm transition ${formData.ext3 === score ? "bg-blue-600 text-white" : "text-gray-600 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-slate-500"}`}>{val}</button>
-                    );
-                  })}
-                </div>
-              </div>
+              <BehaviorToggle field="ext1" label="Bill Payment" />
+              <BehaviorToggle field="ext2" label="Savings Habit" />
+              <BehaviorToggle field="ext3" label="Loan Experience" />
             </div>
           </div>
-
-
 
           {/* PERSONAL INFO */}
           <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700">
@@ -320,10 +282,10 @@ export default function CreditRisk() {
           </button>
         </div>
 
-        {/* RESULTS - 2 columns (only shown when result exists) */}
-        {result && (
+        {/* RIGHT PANEL - 2 cols (results + history always visible) */}
         <div className="lg:col-span-2 space-y-6">
-              {/* KPI Cards */}
+          {result ? (
+            <>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow flex justify-between items-center">
                   <div>
@@ -338,7 +300,6 @@ export default function CreditRisk() {
                 </div>
               </div>
 
-              {/* RISK GAUGE */}
               <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow">
                 <h3 className="font-semibold mb-4 text-gray-800 dark:text-white">Risk Assessment</h3>
                 <div className="relative h-6 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -354,32 +315,25 @@ export default function CreditRisk() {
                   </motion.div>
                 </div>
                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  <span>0% Low</span>
-                  <span>35%</span>
-                  <span>65%</span>
-                  <span>100% High</span>
+                  <span>0% Low</span><span>35%</span><span>65%</span><span>100% High</span>
                 </div>
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
                   <div className={`p-2 rounded-lg ${prob <= 35 ? "bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800" : "bg-gray-50 dark:bg-slate-700/50"}`}>
-                    <span className="font-semibold text-green-600 dark:text-green-400">Low Risk</span>
-                    <p className="text-gray-400">&lt; 35%</p>
+                    <span className="font-semibold text-green-600 dark:text-green-400">Low Risk</span><p className="text-gray-400">&lt; 35%</p>
                   </div>
                   <div className={`p-2 rounded-lg ${prob > 35 && prob <= 65 ? "bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800" : "bg-gray-50 dark:bg-slate-700/50"}`}>
-                    <span className="font-semibold text-yellow-600 dark:text-yellow-400">Medium</span>
-                    <p className="text-gray-400">35-65%</p>
+                    <span className="font-semibold text-yellow-600 dark:text-yellow-400">Medium</span><p className="text-gray-400">35-65%</p>
                   </div>
                   <div className={`p-2 rounded-lg ${prob > 65 ? "bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800" : "bg-gray-50 dark:bg-slate-700/50"}`}>
-                    <span className="font-semibold text-red-600 dark:text-red-400">High Risk</span>
-                    <p className="text-gray-400">&gt; 65%</p>
+                    <span className="font-semibold text-red-600 dark:text-red-400">High Risk</span><p className="text-gray-400">&gt; 65%</p>
                   </div>
                 </div>
               </div>
 
-              {/* BAR CHART */}
               {chartData.length > 0 && (
                 <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow">
                   <h3 className="font-semibold mb-4 text-gray-800 dark:text-white">Probability Breakdown</h3>
-                  <ResponsiveContainer width="100%" height={180}>
+                  <ResponsiveContainer width="100%" height={160}>
                     <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:opacity-20" />
                       <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10 }} stroke="#9ca3af" />
@@ -395,8 +349,17 @@ export default function CreditRisk() {
                   </ResponsiveContainer>
                 </div>
               )}
+            </>
+          ) : (
+            <div className="bg-white dark:bg-slate-800 p-10 rounded-xl shadow text-center text-gray-400 dark:text-gray-500 h-full flex items-center justify-center">
+              <div>
+                <FaChartLine className="text-4xl mx-auto mb-3 opacity-40" />
+                <p className="text-sm">Run prediction to see results</p>
+              </div>
+            </div>
+          )}
 
-          {/* HISTORY */}
+          {/* HISTORY - always visible when exists */}
           {history.length > 0 && (
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-5">
               <div className="flex items-center gap-2 mb-4">
@@ -419,7 +382,6 @@ export default function CreditRisk() {
             </div>
           )}
         </div>
-        )}
       </div>
     </div>
   );
