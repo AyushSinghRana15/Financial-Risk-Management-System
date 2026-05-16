@@ -4,7 +4,7 @@ import { FaGithub, FaLinkedin, FaTwitter, FaExternalLinkAlt, FaQuoteLeft } from 
 const team = [
     {
         name: "Ayush Singh",
-        role: "Project Lead & Full-Stack Developer",
+        role: "Project Lead & AI/ML Engineer",
         gradient: "from-blue-600 to-indigo-600",
         image: "Ayush_Singh.jpg",
         contributions: [
