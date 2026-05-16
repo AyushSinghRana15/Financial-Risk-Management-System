@@ -19,7 +19,7 @@ const team = [
         name: "Aditya Singh",
         role: "ML Engineer & Database Architect",
         gradient: "from-emerald-500 to-teal-600",
-        image: null,
+        image: "Aditya_Singh.jpg",
         contributions: [
             "Liquidity Risk Prediction Model",
             "Business Risk Classification Model",
@@ -158,7 +158,7 @@ function About() {
                                     <div className="relative h-full min-h-[340px]">
                                         <div
                                             className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 group-hover:scale-105"
-                                            style={{ backgroundImage: `url(${new URL(`../assets/${member.image}`, import.meta.url).href})` }}
+                                            style={{ backgroundImage: `url(${new URL(`../assets/dev/${member.image}`, import.meta.url).href})` }}
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/30 transition-opacity duration-500" />
                                         <div className="relative h-full min-h-[340px] flex flex-col justify-end p-6">
