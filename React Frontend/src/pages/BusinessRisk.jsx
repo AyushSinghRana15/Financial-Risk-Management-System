@@ -203,6 +203,7 @@ export default function BusinessRisk() {
                   </p>
                 </div>
               </div>
+            </>
         </div>
         )}
       </div>

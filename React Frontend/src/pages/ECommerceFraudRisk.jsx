@@ -274,6 +274,7 @@ export default function ECommerceFraudRisk() {
               </div>
             </div>
           )}
+            </>
         </div>
         )}
       </div>
