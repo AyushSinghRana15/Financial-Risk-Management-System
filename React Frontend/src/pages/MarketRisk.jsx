@@ -2,15 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    BarChart,
-    Bar,
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    Tooltip,
-    CartesianGrid,
-    ResponsiveContainer
+    BarChart, Bar, LineChart, Line, AreaChart, Area,
+    XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer,
+    ReferenceLine, ReferenceArea, Cell, LabelList
 } from "recharts";
 
 import { FaChartLine, FaSync, FaChevronDown, FaChevronUp, FaInfoCircle, FaShieldAlt, FaExclamationTriangle, FaChartArea, FaArrowUp, FaArrowDown, FaSearch, FaBolt, FaGlobeAsia, FaChartBar, FaChartPie, FaExchangeAlt, FaRegLightbulb, FaRedoAlt } from "react-icons/fa";
@@ -24,6 +18,7 @@ function MarketRisk() {
     const [features, setFeatures] = useState([]);
     const [inputs, setInputs] = useState({});
     const [prediction, setPrediction] = useState(null);
+    const [residualVar, setResidualVar] = useState(0);
     const [riskLevel, setRiskLevel] = useState("");
     const [confidence, setConfidence] = useState("95%");
     const [rollingData, setRollingData] = useState([]);
@@ -152,7 +147,9 @@ function MarketRisk() {
             );
 
             const varValue = res.data.predicted_var;
+            const resid = res.data.residual_variance || 0;
             setPrediction(varValue);
+            setResidualVar(resid);
 
             const absVar = Math.abs(varValue);
 
@@ -161,10 +158,17 @@ function MarketRisk() {
             else setRiskLevel("Low Risk");
 
             const series = [];
+            const baseVar = Math.max(absVar, 0.005);
             for (let i = 0; i < 30; i++) {
+                const trend = 1 + 0.3 * Math.sin(i / 5);
+                const jitter = (Math.random() - 0.5) * 0.008;
+                const val = Math.max(0.001, baseVar * trend + jitter);
                 series.push({
                     day: i + 1,
-                    value: absVar + (Math.random() * 0.01 - 0.005)
+                    value: +val.toFixed(5),
+                    upper: +(val * 1.15).toFixed(5),
+                    lower: +(val * 0.85).toFixed(5),
+                    alert: val > 0.05 ? "High" : val > 0.02 ? "Moderate" : "Low"
                 });
             }
 
@@ -178,11 +182,50 @@ function MarketRisk() {
         }
     };
 
-    const chartData = prediction
-        ? [{ name: "VaR", value: Math.abs(prediction) }]
-        : [];
-
     const absVar = prediction ? Math.abs(prediction) : 0;
+    const varPct = +(absVar * 100).toFixed(2);
+
+    const chartData = prediction ? [
+        { name: "VaR", value: varPct, fill: "#3b82f6" },
+        { name: "Residual", value: +(Math.abs(residualVar) * 100).toFixed(2), fill: "#8b5cf6" },
+    ] : [];
+
+    const thresholdData = [
+        { name: "Low Risk\n(< 2%)", limit: 2, color: "#22c55e" },
+        { name: "Moderate\n(2-5%)", limit: 5, color: "#eab308" },
+        { name: "High Risk\n(> 5%)", limit: 8, color: "#ef4444" },
+    ];
+
+    const CustomTooltip = ({ active, payload, label }) => {
+        if (!active || !payload?.length) return null;
+        return (
+            <div className="bg-white dark:bg-slate-800 px-3 py-2 rounded-lg shadow-lg border border-gray-200 dark:border-slate-600 text-xs">
+                <p className="font-medium text-gray-800 dark:text-white mb-1">{label}</p>
+                {payload.map((p, i) => (
+                    <p key={i} style={{ color: p.color }} className="font-mono">
+                        {p.name}: {typeof p.value === "number" ? p.value.toFixed(4) : p.value}%
+                    </p>
+                ))}
+            </div>
+        );
+    };
+
+    const LineTooltip = ({ active, payload, label }) => {
+        if (!active || !payload?.length) return null;
+        return (
+            <div className="bg-white dark:bg-slate-800 px-3 py-2 rounded-lg shadow-lg border border-gray-200 dark:border-slate-600 text-xs">
+                <p className="font-medium text-gray-800 dark:text-white mb-1">Day {label}</p>
+                {payload.map((p, i) => {
+                    const val = typeof p.value === "number" ? (p.value * 100).toFixed(2) : p.value;
+                    return (
+                        <p key={i} style={{ color: p.color }} className="font-mono">
+                            {p.name}: {val}%
+                        </p>
+                    );
+                })}
+            </div>
+        );
+    };
 
     const getColor = () => {
         if (absVar > 0.05) return "bg-red-500";
@@ -696,36 +739,155 @@ function MarketRisk() {
                         </p>
                     </div>
 
-                    {/* Charts - 2 Column Layout */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* BAR */}
-                        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow">
-                            <ResponsiveContainer width="100%" height={250}>
-                                <BarChart data={chartData}>
-                                    <XAxis dataKey="name" stroke="#6b7280" />
-                                    <YAxis stroke="#6b7280" />
-                                    <Tooltip />
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <Bar dataKey="value" fill="#3b82f6" />
+                    {/* Charts - 3 Distinct Visualizations */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                        {/* 1. VaR Breakdown Bar */}
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg lg:col-span-1">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 className="font-semibold text-gray-800 dark:text-white text-sm">VaR Breakdown</h3>
+                                    <p className="text-[10px] text-gray-400 dark:text-gray-500">Predicted vs Residual</p>
+                                </div>
+                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                                    riskLevel === "High Risk" ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400" :
+                                    riskLevel === "Moderate Risk" ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400" :
+                                    "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
+                                }`}>{riskLevel}</span>
+                            </div>
+                            <ResponsiveContainer width="100%" height={220}>
+                                <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:opacity-20" />
+                                    <XAxis type="number" domain={[0, 'auto']} tick={{ fontSize: 10 }} stroke="#9ca3af" />
+                                    <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} stroke="#9ca3af" width={70} />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={40}>
+                                        {chartData.map((entry, idx) => (
+                                            <Cell key={idx} fill={entry.fill} />
+                                        ))}
+                                        <LabelList dataKey="value" position="right" fontSize={11} fontWeight={600}
+                                            fill="#6b7280" formatter={(v) => `${v}%`} />
+                                    </Bar>
+                                    <ReferenceLine x={2} stroke="#22c55e" strokeDasharray="4 4" strokeWidth={1.5} />
+                                    <ReferenceLine x={5} stroke="#eab308" strokeDasharray="4 4" strokeWidth={1.5} />
                                 </BarChart>
                             </ResponsiveContainer>
+                            <div className="flex justify-between mt-2 text-[10px] text-gray-400 dark:text-gray-500">
+                                <span>Low</span>
+                                <span>Moderate</span>
+                                <span>High</span>
+                            </div>
                         </div>
 
-                        {/* LINE */}
-                        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow">
-                            <h3 className="font-semibold mb-4 text-gray-800 dark:text-white">Rolling VaR</h3>
-
-                            <ResponsiveContainer width="100%" height={250}>
-                                <LineChart data={rollingData}>
-                                    <XAxis dataKey="day" stroke="#6b7280" />
-                                    <YAxis stroke="#6b7280" />
-                                    <Tooltip />
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <Line type="monotone" dataKey="value" stroke="#ef4444" />
-                                </LineChart>
+                        {/* 2. Rolling VaR Line + Area */}
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg lg:col-span-2">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 className="font-semibold text-gray-800 dark:text-white text-sm">30-Day Rolling VaR Simulation</h3>
+                                    <p className="text-[10px] text-gray-400 dark:text-gray-500">Projected Value at Risk with confidence bands</p>
+                                </div>
+                                <div className="flex items-center gap-2 text-[10px]">
+                                    <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-500 rounded"></span> VaR</span>
+                                    <span className="flex items-center gap-1"><span className="w-3 h-0.5 bg-red-300 rounded dashed"></span> ±15% band</span>
+                                    <span className={`w-2 h-2 rounded-full ${
+                                        riskLevel === "High Risk" ? "bg-red-500" :
+                                        riskLevel === "Moderate Risk" ? "bg-yellow-500" : "bg-green-500"
+                                    }`} />
+                                </div>
+                            </div>
+                            <ResponsiveContainer width="100%" height={260}>
+                                <AreaChart data={rollingData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                                    <defs>
+                                        <linearGradient id="varGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0.05} />
+                                        </linearGradient>
+                                        <linearGradient id="bandGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#fca5a5" stopOpacity={0.15} />
+                                            <stop offset="95%" stopColor="#fca5a5" stopOpacity={0.02} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:opacity-20" />
+                                    <XAxis dataKey="day" tick={{ fontSize: 10 }} stroke="#9ca3af" label={{ value: "Day", position: "insideBottomRight", offset: -5, fontSize: 10, fill: "#9ca3af" }} />
+                                    <YAxis tick={{ fontSize: 10 }} stroke="#9ca3af" tickFormatter={(v) => `${(v * 100).toFixed(1)}%`} />
+                                    <Tooltip content={<LineTooltip />} />
+                                    <ReferenceLine y={0.02} stroke="#eab308" strokeDasharray="4 4" strokeWidth={1} label={{ value: "Moderate", position: "right", fontSize: 9, fill: "#eab308" }} />
+                                    <ReferenceLine y={0.05} stroke="#ef4444" strokeDasharray="4 4" strokeWidth={1} label={{ value: "High", position: "right", fontSize: 9, fill: "#ef4444" }} />
+                                    <Area type="monotone" dataKey="upper" stroke="none" fill="url(#bandGradient)" />
+                                    <Area type="monotone" dataKey="lower" stroke="none" fill="url(#bandGradient)" />
+                                    <Area type="monotone" dataKey="value" stroke="#ef4444" strokeWidth={2} fill="url(#varGradient)" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+                                </AreaChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
+
+                    {/* 3. Risk Threshold Comparison */}
+                    {chartData.length > 0 && (
+                        <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 className="font-semibold text-gray-800 dark:text-white text-sm">Risk Level Assessment</h3>
+                                    <p className="text-[10px] text-gray-400 dark:text-gray-500">Where your VaR stands relative to risk thresholds</p>
+                                </div>
+                            </div>
+                            <div className="relative pt-6 pb-2">
+                                {/* Threshold zones */}
+                                <div className="relative h-8 rounded-full overflow-hidden flex">
+                                    <div className="h-full bg-green-500/20 border-r border-green-400" style={{ width: "25%" }} />
+                                    <div className="h-full bg-yellow-500/20 border-r border-yellow-400" style={{ width: "37.5%" }} />
+                                    <div className="h-full bg-red-500/20" style={{ width: "37.5%" }} />
+                                </div>
+                                {/* Threshold labels */}
+                                <div className="flex justify-between text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+                                    <span>0%</span>
+                                    <span>2% (Low)</span>
+                                    <span>5% (Moderate)</span>
+                                    <span>10%+</span>
+                                </div>
+                                {/* VaR marker */}
+                                <motion.div
+                                    initial={{ left: "0%" }}
+                                    animate={{ left: `${Math.min(varPct / 10 * 100, 95)}%` }}
+                                    transition={{ type: "spring", stiffness: 100, damping: 20 }}
+                                    className="absolute top-0 -translate-x-1/2"
+                                    style={{ left: `${Math.min(varPct / 10 * 100, 95)}%` }}
+                                >
+                                    <div className="flex flex-col items-center">
+                                        <svg className="w-4 h-4" viewBox="0 0 16 10">
+                                            <polygon points="8,10 0,0 16,0" fill={
+                                                varPct > 5 ? "#ef4444" : varPct > 2 ? "#eab308" : "#22c55e"
+                                            } />
+                                        </svg>
+                                        <span className={`text-xs font-bold whitespace-nowrap mt-0.5 ${
+                                            varPct > 5 ? "text-red-500" : varPct > 2 ? "text-yellow-500" : "text-green-500"
+                                        }`}>
+                                            {varPct}% VaR
+                                        </span>
+                                    </div>
+                                </motion.div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3 mt-4">
+                                {[
+                                    { label: "Low Risk", range: "< 2%", color: "green", desc: "Stable market conditions" },
+                                    { label: "Moderate", range: "2% - 5%", color: "yellow", desc: "Normal market fluctuations" },
+                                    { label: "High Risk", range: "> 5%", color: "red", desc: "Elevated market stress" },
+                                ].map((tier) => (
+                                    <div key={tier.label} className={`rounded-lg p-3 border ${
+                                        (tier.color === "green" && varPct <= 2) ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800" :
+                                        (tier.color === "yellow" && varPct > 2 && varPct <= 5) ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800" :
+                                        (tier.color === "red" && varPct > 5) ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800" :
+                                        "bg-gray-50 dark:bg-slate-700/50 border-gray-100 dark:border-slate-600"
+                                    }`}>
+                                        <p className={`text-sm font-bold ${
+                                            tier.color === "green" ? "text-green-600" : tier.color === "yellow" ? "text-yellow-600" : "text-red-600"
+                                        }`}>{tier.label}</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{tier.range}</p>
+                                        <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">{tier.desc}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </>
             )}
         </div>
