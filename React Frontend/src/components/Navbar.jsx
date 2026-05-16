@@ -3,7 +3,7 @@ import { FaBell, FaChartLine, FaBars, FaTimes } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPanel from "./NotificationPanel";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
-import { NAVBAR_ITEMS } from "../config/navigation";
+import { NAVBAR_ITEMS, SIDEBAR_SECTIONS } from "../config/navigation";
 
 function Navbar() {
     const navigate = useNavigate();
@@ -179,21 +179,37 @@ function Navbar() {
                 </div>
             </div>
 
-            {/* Mobile nav dropdown */}
+            {/* Mobile full-screen nav overlay */}
             {mobileNavOpen && (
-                <div className="md:hidden border-t border-slate-200/20 dark:border-slate-700/30">
-                    <div className="px-4 py-3 space-y-1">
-                        {NAVBAR_ITEMS.map(item => (
-                            <div
-                                key={item.path}
-                                onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
-                                className={`px-4 py-2.5 rounded-xl cursor-pointer text-sm font-medium transition-colors ${
-                                    location.pathname === item.path
-                                        ? "bg-blue-500/10 text-blue-500 dark:text-blue-400"
-                                        : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50"
-                                }`}
-                            >
-                                {item.label}
+                <div className="md:hidden fixed inset-x-0 top-0 z-50 h-screen bg-slate-900/98 backdrop-blur-2xl overflow-y-auto pt-20">
+                    <div className="px-4 py-4 space-y-5">
+                        {SIDEBAR_SECTIONS.map((section, i) => (
+                            <div key={section.label}>
+                                {i > 0 && <div className="h-px bg-slate-700/30 mb-5" />}
+                                <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2 px-3">
+                                    {section.label}
+                                </p>
+                                <div className="space-y-0.5">
+                                    {section.items.map(item => {
+                                        const Icon = item.icon;
+                                        const active = location.pathname === item.path;
+                                        return (
+                                            <div
+                                                key={item.path}
+                                                onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
+                                                className={`flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-colors ${
+                                                    active
+                                                        ? "bg-blue-500/10 text-blue-400"
+                                                        : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                                                }`}
+                                            >
+                                                {Icon && <Icon size={18} strokeWidth={active ? 2.5 : 2} />}
+                                                <span className="text-sm font-medium">{item.label}</span>
+                                                {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400" />}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         ))}
                     </div>
