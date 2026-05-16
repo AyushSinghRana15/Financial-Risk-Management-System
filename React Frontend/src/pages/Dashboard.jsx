@@ -186,7 +186,7 @@ export default function Dashboard() {
             <div className="relative mb-8 overflow-hidden">
                 <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
                 <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
-                <div className="overflow-x-auto scrollbar-hide pb-2">
+                <div className="overflow-hidden pb-2">
                     <div className="flex gap-4 animate-scroll w-max px-6">
                         {[...kpiCards, ...kpiCards].map((card, index) => (
                             <Link to={card.link} key={index}>
@@ -204,7 +204,7 @@ export default function Dashboard() {
             <div className="relative mb-6 overflow-hidden">
                 <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
                 <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
-                <div className="overflow-x-auto scrollbar-hide">
+                <div className="overflow-hidden">
                     <div className="flex gap-4 animate-scroll w-max px-6">
                         {[1, 2].map((_, repeatIdx) => (
                             <div key={repeatIdx} className="flex gap-4">
