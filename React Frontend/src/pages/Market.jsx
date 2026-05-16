@@ -89,13 +89,13 @@ function Market() {
     };
 
     if (loading) return (
-        <div className="p-6 text-gray-500 dark:text-gray-400 flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-500 dark:text-gray-400 flex items-center justify-center min-h-[400px]">
             <div className="animate-pulse">Loading market data...</div>
         </div>
     );
 
     return (
-        <div className="p-6 space-y-6 bg-gray-50 dark:bg-slate-900 min-h-screen">
+        <div className="space-y-6">
 
             {/* Header */}
             <div className="flex justify-between items-center">

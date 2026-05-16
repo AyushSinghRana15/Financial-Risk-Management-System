@@ -180,7 +180,7 @@ export default function PortfolioAnalytics() {
 
     if (!userEmail) {
         return (
-            <div className="p-6 bg-gray-50 dark:bg-slate-900 min-h-screen flex items-center justify-center">
+            <div className="flex items-center justify-center">
                 <div className="text-center bg-white dark:bg-slate-800 p-10 rounded-2xl shadow-lg">
                     <FaWallet className="text-5xl text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                     <p className="text-gray-500 dark:text-gray-400 text-lg">Please login to view portfolio analytics</p>
@@ -190,7 +190,7 @@ export default function PortfolioAnalytics() {
     }
 
     return (
-        <div className="p-6 bg-gray-50 dark:bg-slate-900 min-h-screen space-y-6">
+        <div className="space-y-6">
             {/* HEADER */}
             <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex justify-between items-center">
                 <div>

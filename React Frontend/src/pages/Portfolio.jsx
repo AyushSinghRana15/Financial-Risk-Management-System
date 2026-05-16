@@ -179,7 +179,7 @@ function Portfolio() {
             : 0;
 
     return (
-        <div className="p-10 bg-gray-100 dark:bg-slate-900 min-h-screen space-y-8">
+        <div className="space-y-8">
 
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Portfolio Risk</h1>
 

@@ -29,7 +29,7 @@ const volatilityData = [
 
 function RiskAnalytics() {
     return (
-        <div className="p-10 bg-gray-100 dark:bg-slate-900 min-h-screen">
+        <div>
 
             <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">
                 Risk Analytics

@@ -69,7 +69,7 @@ function FinancialRisk() {
   const prob = result ? parseFloat(result.probability) : 0;
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-slate-900 min-h-screen space-y-6">
+    <div className="space-y-6">
 
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex justify-between items-center">
         <div>

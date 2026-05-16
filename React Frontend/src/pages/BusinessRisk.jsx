@@ -65,7 +65,7 @@ export default function BusinessRisk() {
   const colorMap = { blue: { border: "border-blue-200 dark:border-blue-800", bg: "bg-blue-50 dark:bg-blue-900/10", icon: "text-blue-600 dark:text-blue-400", input: "focus:ring-blue-500" }, green: { border: "border-green-200 dark:border-green-800", bg: "bg-green-50 dark:bg-green-900/10", icon: "text-green-600 dark:text-green-400", input: "focus:ring-green-500" }, violet: { border: "border-violet-200 dark:border-violet-800", bg: "bg-violet-50 dark:bg-violet-900/10", icon: "text-violet-600 dark:text-violet-400", input: "focus:ring-violet-500" } };
 
   return (
-    <div className="p-6 bg-gray-50 dark:bg-slate-900 min-h-screen space-y-6">
+    <div className="space-y-6">
 
       {/* HEADER */}
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex justify-between items-center">

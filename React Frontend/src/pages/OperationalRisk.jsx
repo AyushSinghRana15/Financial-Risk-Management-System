@@ -42,7 +42,7 @@ export default function OperationalRisk() {
   };
 
   return (
-    <div className="p-6 bg-gray-100 dark:bg-slate-900 min-h-screen">
+    <div>
 
       <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
         Operational Risk Analytics
