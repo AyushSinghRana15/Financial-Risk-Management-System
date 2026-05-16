@@ -32,7 +32,7 @@ const team = [
         name: "Bipin Singh",
         role: "Risk Modeling Specialist",
         gradient: "from-purple-500 to-pink-600",
-        image: null,
+        image: "Bipin_Singh.jpeg",
         contributions: [
             "Financial Risk / Bankruptcy Model",
             "Operational Risk Classification",
@@ -45,7 +45,7 @@ const team = [
         name: "Abhishek Kumar",
         role: "Fraud Detection & Data Analyst",
         gradient: "from-orange-500 to-red-600",
-        image: null,
+        image: "Abhishek_Singh.jpeg",
         contributions: [
             "E-Commerce Fraud Detection (XGBoost)",
             "Transaction Pattern Analysis",
@@ -155,13 +155,14 @@ function About() {
                             >
                                 {member.image ? (
                                     /* IMAGE BACKGROUND CARD */
-                                    <div className="relative h-full min-h-[340px]">
-                                        <div
-                                            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 group-hover:scale-105"
-                                            style={{ backgroundImage: `url(${new URL(`../assets/dev/${member.image}`, import.meta.url).href})` }}
+                                    <div className="relative overflow-hidden min-h-[360px]">
+                                        <img
+                                            src={new URL(`../assets/dev/${member.image}`, import.meta.url).href}
+                                            alt={member.name}
+                                            className="absolute inset-0 w-full h-full object-cover object-[center_30%] transition-transform duration-700 group-hover:scale-105"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/30 transition-opacity duration-500" />
-                                        <div className="relative h-full min-h-[340px] flex flex-col justify-end p-6">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/20 transition-opacity duration-500" />
+                                        <div className="relative min-h-[360px] flex flex-col justify-end p-6">
                                             <motion.div
                                                 initial={{ opacity: 0, y: 20 }}
                                                 whileInView={{ opacity: 1, y: 0 }}
