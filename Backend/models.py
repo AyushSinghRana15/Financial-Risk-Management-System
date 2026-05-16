@@ -118,7 +118,7 @@ class LiquidityRisk(Base):
     cash_flow = Column(Float)
     liquidity_ratio = Column(Float)
     risk_score = Column(Float)
-    risk_label = Column(String(20))
+    risk_label = Column(String(50))
     recorded_at = Column("created_at", DateTime(timezone=True), server_default=func.now())
 
 
@@ -162,7 +162,7 @@ class FinancialRisk(Base):
     assets = Column(Float)
     financial_ratio = Column(Float)
     risk_score = Column(Float)
-    risk_label = Column(String(20))
+    risk_label = Column(String(50))
     recorded_at = Column("created_at", DateTime(timezone=True), server_default=func.now())
 
 

@@ -12,6 +12,15 @@ def migrate():
             ("ALTER TABLE liquidity_risk ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id);", "liquidity_risk user_id"),
             ("ALTER TABLE business_risk ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id);", "business_risk user_id"),
             ("ALTER TABLE financial_risk ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id);", "financial_risk user_id"),
+
+            # risk_label columns added after model updates
+            ("ALTER TABLE liquidity_risk ADD COLUMN IF NOT EXISTS risk_label VARCHAR(20);", "liquidity_risk risk_label"),
+            ("ALTER TABLE financial_risk ADD COLUMN IF NOT EXISTS risk_label VARCHAR(20);", "financial_risk risk_label"),
+            ("ALTER TABLE business_risk ADD COLUMN IF NOT EXISTS risk_level VARCHAR(20);", "business_risk risk_level"),
+
+            # Widen risk_label columns (labels exceed 20 chars)
+            ("ALTER TABLE financial_risk ALTER COLUMN risk_label TYPE VARCHAR(50);", "financial_risk risk_label -> VARCHAR(50)"),
+            ("ALTER TABLE liquidity_risk ALTER COLUMN risk_label TYPE VARCHAR(50);", "liquidity_risk risk_label -> VARCHAR(50)"),
         ]
         
         for sql, desc in migrations:

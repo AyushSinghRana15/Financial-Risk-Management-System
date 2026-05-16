@@ -29,3 +29,10 @@ data/
 
 # CatBoost training artifacts
 **/catboost_info/
+
+# SQLite test databases
+*.db
+
+# Test results
+Tests/results/*.csv
+Tests/results/*.log
