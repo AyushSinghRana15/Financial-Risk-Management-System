@@ -81,10 +81,10 @@ export default function LiquidityRisk() {
         )}
       </div>
 
-      <div className={`grid grid-cols-1 gap-6 ${result ? "lg:grid-cols-5" : ""}`}>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-        {/* FORM - 3 cols (full width when no result) */}
-        <div className={`${result ? "lg:col-span-3" : "lg:col-span-5 lg:max-w-4xl lg:mx-auto"} space-y-6`}>
+        {/* FORM - 3 cols */}
+        <div className="lg:col-span-3 space-y-6">
           <div className="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-lg border border-gray-100 dark:border-slate-700">
             <div className="flex items-center gap-2 mb-4">
               <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 rounded-lg">

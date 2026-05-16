@@ -85,10 +85,10 @@ export default function BusinessRisk() {
         </div>
       </div>
 
-      <div className={`grid grid-cols-1 gap-6 ${result ? "lg:grid-cols-5" : ""}`}>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
-        {/* INPUTS - 3 cols (full width when no result) */}
-        <div className={`${result ? "lg:col-span-3" : "lg:col-span-5 lg:max-w-4xl lg:mx-auto"} space-y-6`}>
+        {/* INPUTS - 3 cols */}
+        <div className="lg:col-span-3 space-y-6">
           {groups.map((group) => {
             const cc = colorMap[group.color];
             const groupFeatures = FEATURES.filter(f => group.features.includes(f.key));
