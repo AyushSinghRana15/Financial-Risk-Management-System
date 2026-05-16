@@ -174,6 +174,7 @@ function MarketRisk() {
 
             setRollingData(series);
             window.dispatchEvent(new Event("refreshDashboard"));
+            window.dispatchEvent(new Event("refreshNotifications"));
 
         } catch (err) {
             console.error(err);

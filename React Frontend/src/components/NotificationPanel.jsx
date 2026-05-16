@@ -39,31 +39,42 @@ export default function NotificationPanel({ onClose }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [onClose]);
 
-    useEffect(() => {
-        const fetchNotifications = async () => {
-            if (!userEmail) {
-                setNotifications([
-                    { id: 1, text: "Welcome to FinRisk! Start by adding assets to your portfolio.", type: "info", timestamp: new Date().toISOString(), read: false }
-                ]);
-                setLoading(false);
-                return;
-            }
+    const fetchNotifications = React.useCallback(async () => {
+        if (!userEmail) {
+            setNotifications([
+                { id: 1, text: "Welcome to FinRisk! Start by adding assets to your portfolio.", type: "info", timestamp: new Date().toISOString(), read: false }
+            ]);
+            setLoading(false);
+            return;
+        }
 
-            try {
-                const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?email=${userEmail}`);
-                if (!res.ok) throw new Error("Failed to fetch");
-                const data = await res.json();
-                setNotifications(data);
-            } catch (err) {
-                console.error("Notifications error:", err);
-                setError("Unable to load notifications");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchNotifications();
+        try {
+            const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?email=${userEmail}`);
+            if (!res.ok) throw new Error("Failed to fetch");
+            const data = await res.json();
+            setNotifications(data);
+            setError(null);
+        } catch (err) {
+            console.error("Notifications error:", err);
+            setError("Unable to load notifications");
+        } finally {
+            setLoading(false);
+        }
     }, [userEmail]);
+
+    useEffect(() => {
+        setLoading(true);
+        fetchNotifications();
+    }, [fetchNotifications]);
+
+    useEffect(() => {
+        const handleRefresh = () => {
+            setLoading(true);
+            fetchNotifications();
+        };
+        window.addEventListener("refreshNotifications", handleRefresh);
+        return () => window.removeEventListener("refreshNotifications", handleRefresh);
+    }, [fetchNotifications]);
 
     const markAsRead = (id) => {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FaBell, FaChartLine } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPanel from "./NotificationPanel";
@@ -12,34 +12,41 @@ function Navbar() {
     const [notifOpen, setNotifOpen] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
 
+    const closeNotifPanel = useCallback(() => setNotifOpen(false), []);
+
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const userEmail = user?.email || "";
 
-    useEffect(() => {
-        const fetchUnreadCount = async () => {
-            if (!userEmail) {
+    const fetchUnreadCount = useCallback(async () => {
+        if (!userEmail) {
+            setUnreadCount(0);
+            return;
+        }
+        try {
+            const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?email=${userEmail}`);
+            if (!res.ok) {
                 setUnreadCount(0);
                 return;
             }
-            try {
-                const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?email=${userEmail}`);
-                if (!res.ok) {
-                    setUnreadCount(0);
-                    return;
-                }
-                const data = await res.json();
-                if (Array.isArray(data)) {
-                    const unread = data.filter(n => !n.read).length;
-                    setUnreadCount(unread);
-                }
-            } catch {
-                // Silently handle errors - notifications are non-critical
-                setUnreadCount(0);
+            const data = await res.json();
+            if (Array.isArray(data)) {
+                const unread = data.filter(n => !n.read).length;
+                setUnreadCount(unread);
             }
-        };
+        } catch {
+            setUnreadCount(0);
+        }
+    }, [userEmail]);
 
+    useEffect(() => {
         fetchUnreadCount();
-    }, [userEmail, notifOpen]);
+    }, [fetchUnreadCount, notifOpen]);
+
+    useEffect(() => {
+        const handleRefresh = () => fetchUnreadCount();
+        window.addEventListener("refreshNotifications", handleRefresh);
+        return () => window.removeEventListener("refreshNotifications", handleRefresh);
+    }, [fetchUnreadCount]);
 
     const logout = () => {
         localStorage.removeItem("user");
@@ -93,7 +100,7 @@ function Navbar() {
                             )}
                         </div>
 
-                        {notifOpen && <NotificationPanel onClose={() => setNotifOpen(false)} />}
+                        {notifOpen && <NotificationPanel onClose={closeNotifPanel} />}
                     </div>
 
                     {!user || !user.name ? (
