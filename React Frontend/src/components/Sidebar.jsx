@@ -75,29 +75,30 @@ export default function Sidebar() {
     <>
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed top-4 left-4 z-50 p-2.5 rounded-xl bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 text-white shadow-xl lg:hidden"
+        className="fixed top-4 left-4 z-[200] p-2.5 rounded-xl bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 text-white shadow-xl lg:hidden"
       >
         <Menu size={20} />
       </button>
 
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/70 z-[250] lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       <aside
         className={`
-          fixed lg:relative inset-y-0 left-0 z-50
+          fixed lg:relative inset-y-0 left-0 z-[260]
           ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           h-screen
           flex flex-col
-          bg-slate-900/95 backdrop-blur-2xl 
+          bg-slate-900 lg:bg-slate-900/95 lg:backdrop-blur-2xl
           border-r border-slate-700/50
           transition-all duration-300 ease-in-out
           ${collapsed ? "w-[72px]" : "w-64"}
           shadow-2xl lg:shadow-none
+          overflow-y-auto
         `}
       >
         <div className="flex-1 flex flex-col min-h-0">

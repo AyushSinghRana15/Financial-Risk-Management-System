@@ -54,7 +54,7 @@ function AppLayout({ children }) {
         <div className="relative flex h-screen bg-slate-100 dark:bg-slate-900 transition-colors duration-300">
             <AuroraBackground />
             <Sidebar />
-            <main className="relative z-10 flex-1 flex flex-col min-w-0 min-h-screen transition-all duration-300 ease-in-out">
+            <main className="relative flex-1 flex flex-col min-w-0 min-h-screen transition-all duration-300 ease-in-out">
                 <Navbar />
                 <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 lg:px-6 lg:py-6">
                     <AnimatePresence mode="wait">
