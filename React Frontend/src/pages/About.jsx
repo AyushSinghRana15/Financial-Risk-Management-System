@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
-import { FaGithub, FaLinkedin, FaTwitter, FaExternalLinkAlt } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaTwitter, FaExternalLinkAlt, FaQuoteLeft } from "react-icons/fa";
 
 const team = [
     {
         name: "Ayush Singh",
         role: "Project Lead & Full-Stack Developer",
         gradient: "from-blue-600 to-indigo-600",
+        image: "Ayush_Singh.jpg",
         contributions: [
             "Credit Risk ML Model (CatBoost, XGBoost)",
             "Market Risk / VaR Prediction Model",
@@ -18,6 +19,7 @@ const team = [
         name: "Aditya Singh",
         role: "ML Engineer & Database Architect",
         gradient: "from-emerald-500 to-teal-600",
+        image: null,
         contributions: [
             "Liquidity Risk Prediction Model",
             "Business Risk Classification Model",
@@ -30,6 +32,7 @@ const team = [
         name: "Bipin Singh",
         role: "Risk Modeling Specialist",
         gradient: "from-purple-500 to-pink-600",
+        image: null,
         contributions: [
             "Financial Risk / Bankruptcy Model",
             "Operational Risk Classification",
@@ -42,6 +45,7 @@ const team = [
         name: "Abhishek Kumar",
         role: "Fraud Detection & Data Analyst",
         gradient: "from-orange-500 to-red-600",
+        image: null,
         contributions: [
             "E-Commerce Fraud Detection (XGBoost)",
             "Transaction Pattern Analysis",
@@ -147,25 +151,87 @@ function About() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.1 }}
-                                className="group bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300"
+                                className="group relative overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-500"
                             >
-                                <div className="flex items-start gap-4">
-                                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${member.gradient} flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0`}>
-                                        {member.name.split(" ").map(w => w[0]).join("")}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <h3 className="font-semibold text-lg text-slate-900 dark:text-white">{member.name}</h3>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">{member.role}</p>
-                                    </div>
-                                </div>
-                                <div className="mt-4 space-y-1.5">
-                                    {member.contributions.map((c, i) => (
-                                        <div key={i} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
-                                            <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 bg-gradient-to-r ${member.gradient}`} />
-                                            {c}
+                                {member.image ? (
+                                    /* IMAGE BACKGROUND CARD */
+                                    <div className="relative h-full min-h-[340px]">
+                                        <div
+                                            className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-700 group-hover:scale-105"
+                                            style={{ backgroundImage: `url(${new URL(`../assets/${member.image}`, import.meta.url).href})` }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/50 to-black/30 transition-opacity duration-500" />
+                                        <div className="relative h-full min-h-[340px] flex flex-col justify-end p-6">
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 20 }}
+                                                whileInView={{ opacity: 1, y: 0 }}
+                                                viewport={{ once: true }}
+                                                transition={{ delay: idx * 0.1 + 0.2 }}
+                                            >
+                                                <div className="flex items-start gap-3 mb-3">
+                                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${member.gradient} flex items-center justify-center text-white font-bold text-base shadow-lg shrink-0`}>
+                                                        {member.name.split(" ").map(w => w[0]).join("")}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <h3 className="font-semibold text-lg text-white">{member.name}</h3>
+                                                        <p className="text-sm text-slate-300">{member.role}</p>
+                                                    </div>
+                                                </div>
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    whileInView={{ height: "auto", opacity: 1 }}
+                                                    viewport={{ once: true }}
+                                                    transition={{ delay: idx * 0.1 + 0.4, duration: 0.4 }}
+                                                    className="overflow-hidden"
+                                                >
+                                                    <div className="space-y-1.5 pt-2 border-t border-white/20">
+                                                        {member.contributions.map((c, i) => (
+                                                            <motion.div
+                                                                key={i}
+                                                                initial={{ opacity: 0, x: -10 }}
+                                                                whileInView={{ opacity: 1, x: 0 }}
+                                                                viewport={{ once: true }}
+                                                                transition={{ delay: idx * 0.1 + 0.5 + i * 0.08, duration: 0.3 }}
+                                                                className="flex items-start gap-2 text-sm text-slate-200"
+                                                            >
+                                                                <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 bg-gradient-to-r ${member.gradient}`} />
+                                                                {c}
+                                                            </motion.div>
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            </motion.div>
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ) : (
+                                    /* DEFAULT GRADIENT CARD (for other members) */
+                                    <div className="relative h-full min-h-[340px] bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-6 hover:shadow-lg transition-all duration-300">
+                                        <div className="flex items-start gap-4">
+                                            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${member.gradient} flex items-center justify-center text-white font-bold text-lg shadow-lg shrink-0`}>
+                                                {member.name.split(" ").map(w => w[0]).join("")}
+                                            </div>
+                                            <div className="min-w-0">
+                                                <h3 className="font-semibold text-lg text-slate-900 dark:text-white">{member.name}</h3>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400">{member.role}</p>
+                                            </div>
+                                        </div>
+                                        <div className="mt-4 space-y-1.5">
+                                            {member.contributions.map((c, i) => (
+                                                <motion.div
+                                                    key={i}
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    whileInView={{ opacity: 1, x: 0 }}
+                                                    viewport={{ once: true }}
+                                                    transition={{ delay: i * 0.08, duration: 0.3 }}
+                                                    className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300"
+                                                >
+                                                    <span className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 bg-gradient-to-r ${member.gradient}`} />
+                                                    {c}
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </motion.div>
                         ))}
                     </div>
