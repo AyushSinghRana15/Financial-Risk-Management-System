@@ -1,0 +1,63 @@
+name: Deploy to AWS App Runner
+
+on:
+  push:
+    branches: [deploy/aws]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: finrisk-backend
+  APP_RUNNER_SERVICE: finrisk-api
+  MODEL_BUCKET: finrisk-models
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push Docker image
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f Backend/Dockerfile .
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Sync ML models to S3
+        run: |
+          aws s3 sync Models/ s3://${{ env.MODEL_BUCKET }}/models/ --no-progress
+
+      - name: Deploy to App Runner
+        id: deploy-apprunner
+        uses: awslabs-ec2/amazon-app-runner-deploy@main
+        with:
+          service-name: ${{ env.APP_RUNNER_SERVICE }}
+          image: ${{ steps.build-image.outputs.image }}
+          port: 8000
+          instance-cpu: 1
+          instance-memory: 2
+          health-check-path: /
+          wait-for-service-stability-seconds: 300
+
+      - name: Output App Runner URL
+        run: |
+          echo "Deployed to: ${{ steps.deploy-apprunner.outputs.service-url }}"

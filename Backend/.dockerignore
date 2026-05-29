@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.DS_Store
+*.db
+test_*.py
+test_finrisk.db
+README.md
+aws/
+.git
