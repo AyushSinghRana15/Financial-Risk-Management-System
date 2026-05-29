@@ -96,7 +96,7 @@ export default function Sidebar() {
           bg-slate-900 lg:bg-slate-900/95 lg:backdrop-blur-2xl
           border-r border-slate-700/50
           transition-all duration-300 ease-in-out
-          ${collapsed ? "w-[72px]" : "w-64"}
+          ${collapsed ? "w-64 lg:w-[72px]" : "w-[min(82vw,16rem)] lg:w-64"}
           shadow-2xl lg:shadow-none
           overflow-y-auto
         `}

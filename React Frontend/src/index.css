@@ -84,6 +84,13 @@ body {
   animation-play-state: paused;
 }
 
+@media (max-width: 639px) {
+  .animate-scroll {
+    animation: none;
+    transform: none;
+  }
+}
+
 @keyframes float {
 
   0%,

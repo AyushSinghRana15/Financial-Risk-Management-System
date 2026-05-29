@@ -171,10 +171,10 @@ export default function Dashboard() {
     const totalPortfolioValue = portfolio.reduce((sum, a) => sum + (a.current_price * a.quantity), 0);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white">
+                <div className="min-w-0">
+                    <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-slate-800 dark:text-white">
                         Financial Risk Dashboard
                     </h1>
                     <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -183,16 +183,16 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <div className="relative mb-8 overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
-                <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
-                <div className="overflow-hidden pb-2">
-                    <div className="flex gap-4 animate-scroll w-max px-6">
+            <div className="relative mb-6 sm:mb-8 overflow-visible sm:overflow-hidden">
+                <div className="hidden sm:block absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="hidden sm:block absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="overflow-x-auto sm:overflow-hidden pb-2">
+                    <div className="flex gap-3 sm:gap-4 animate-scroll w-max px-0 sm:px-6">
                         {[...kpiCards, ...kpiCards].map((card, index) => (
                             <Link to={card.link} key={index}>
-                                <div className={`glass-panel rounded-xl p-5 cursor-pointer transition-all duration-300 hover:shadow-xl w-[220px] lg:w-[240px] flex-shrink-0`}>
+                                <div className={`glass-panel rounded-xl p-4 sm:p-5 cursor-pointer transition-all duration-300 hover:shadow-xl w-[min(78vw,260px)] sm:w-[220px] lg:w-[240px] flex-shrink-0`}>
                                     <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">{card.title}</p>
-                                    <h2 className="text-2xl font-bold mt-2 text-slate-800 dark:text-white">{card.value}</h2>
+                                    <h2 className="text-xl sm:text-2xl font-bold mt-2 text-slate-800 dark:text-white">{card.value}</h2>
                                     <p className="text-xs mt-1 text-slate-400">{card.change}</p>
                                 </div>
                             </Link>
@@ -201,13 +201,13 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <div className="relative mb-6 overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
-                <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
-                <div className="overflow-hidden">
-                    <div className="flex gap-4 animate-scroll w-max px-6">
+            <div className="relative mb-6 overflow-visible sm:overflow-hidden">
+                <div className="hidden sm:block absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="hidden sm:block absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-slate-100 dark:from-slate-900 to-transparent z-10 pointer-events-none"></div>
+                <div className="overflow-x-auto sm:overflow-hidden">
+                    <div className="flex gap-3 sm:gap-4 animate-scroll w-max px-0 sm:px-6">
                         {[1, 2].map((_, repeatIdx) => (
-                            <div key={repeatIdx} className="flex gap-4">
+                            <div key={repeatIdx} className="flex gap-3 sm:gap-4">
                                 {[
                                     { name: "Credit Risk", link: "/credit-risk", desc: "Default probability analysis" },
                                     { name: "Market Risk", link: "/market-risk", desc: "Value at Risk estimation" },
@@ -217,7 +217,7 @@ export default function Dashboard() {
                                     { name: "Liquidity Risk", link: "/liquidity-risk", desc: "Cash flow & funding risks" }
                                 ].map((mod, idx) => (
                                     <Link to={mod.link} key={`${repeatIdx}-${idx}`}>
-                                        <div className={`glass-panel rounded-xl p-4 transition-all duration-300 hover:shadow-xl cursor-pointer w-[180px] lg:w-[200px] flex-shrink-0`}>
+                                        <div className={`glass-panel rounded-xl p-4 transition-all duration-300 hover:shadow-xl cursor-pointer w-[min(72vw,220px)] sm:w-[180px] lg:w-[200px] flex-shrink-0`}>
                                             <h2 className="text-sm font-semibold text-slate-800 dark:text-white">{mod.name}</h2>
                                             <p className="text-xs text-slate-400 mt-1">{mod.desc}</p>
                                         </div>
@@ -229,8 +229,8 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="glass-panel rounded-2xl p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="glass-panel rounded-xl sm:rounded-2xl p-4 sm:p-6">
                     <div className="mb-4">
                         <h2 className="text-base font-semibold text-slate-800 dark:text-white">Portfolio Allocation</h2>
                         <p className="text-xs text-slate-400">Asset distribution</p>
@@ -277,7 +277,7 @@ export default function Dashboard() {
                     )}
                 </div>
 
-                <div className="glass-panel rounded-2xl p-6">
+                <div className="glass-panel rounded-xl sm:rounded-2xl p-4 sm:p-6">
                     <div className="mb-4">
                         <h2 className="text-base font-semibold text-slate-800 dark:text-white">Risk Trend</h2>
                         <p className="text-xs text-slate-400">7-day analysis</p>
@@ -320,7 +320,7 @@ export default function Dashboard() {
                     </ResponsiveContainer>
                 </div>
 
-                <div className="glass-panel rounded-2xl p-6 md:col-span-2">
+                <div className="glass-panel rounded-xl sm:rounded-2xl p-4 sm:p-6 md:col-span-2">
                     <div className="mb-4">
                         <h2 className="text-base font-semibold text-slate-800 dark:text-white">Portfolio Intelligence</h2>
                         <p className="text-xs text-slate-400">AI-powered analysis and recommendations</p>

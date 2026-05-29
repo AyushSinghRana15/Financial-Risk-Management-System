@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FaBell, FaChartLine, FaBars, FaTimes } from "react-icons/fa";
+import { FaBell } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import NotificationPanel from "./NotificationPanel";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
-import { NAVBAR_ITEMS, SIDEBAR_SECTIONS } from "../config/navigation";
+import { NAVBAR_ITEMS } from "../config/navigation";
 
 function Navbar() {
     const navigate = useNavigate();
@@ -59,8 +59,6 @@ function Navbar() {
         return name.split(" ").map(w => w[0]).join("").toUpperCase();
     };
 
-    const [mobileNavOpen, setMobileNavOpen] = useState(false);
-
     const linkClass = (path) =>
         `cursor-pointer text-sm font-medium transition-colors duration-200 ${location.pathname === path
             ? "text-blue-500 dark:text-blue-400"
@@ -69,16 +67,8 @@ function Navbar() {
 
     return (
         <div className="glass-panel border-t-0 border-x-0 border-b border-slate-200/20 dark:border-slate-700/30 relative z-50">
-            <div className="flex items-center px-6 py-3">
+            <div className="flex items-center px-4 py-3 sm:px-6">
                 <div className="flex-1" />
-
-                {/* Mobile hamburger */}
-                <button
-                    onClick={() => setMobileNavOpen(!mobileNavOpen)}
-                    className="md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
-                >
-                    {mobileNavOpen ? <FaTimes size={18} /> : <FaBars size={18} />}
-                </button>
 
                 <div className="flex items-center gap-5">
                     <nav className="hidden md:flex items-center gap-5">
@@ -178,43 +168,6 @@ function Navbar() {
                     )}
                 </div>
             </div>
-
-            {/* Mobile full-screen nav overlay */}
-            {mobileNavOpen && (
-                <div className="md:hidden fixed inset-x-0 top-0 z-50 h-screen bg-slate-900/98 backdrop-blur-2xl overflow-y-auto pt-20">
-                    <div className="px-4 py-4 space-y-5">
-                        {SIDEBAR_SECTIONS.map((section, i) => (
-                            <div key={section.label}>
-                                {i > 0 && <div className="h-px bg-slate-700/30 mb-5" />}
-                                <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2 px-3">
-                                    {section.label}
-                                </p>
-                                <div className="space-y-0.5">
-                                    {section.items.map(item => {
-                                        const Icon = item.icon;
-                                        const active = location.pathname === item.path;
-                                        return (
-                                            <div
-                                                key={item.path}
-                                                onClick={() => { navigate(item.path); setMobileNavOpen(false); }}
-                                                className={`flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer transition-colors ${
-                                                    active
-                                                        ? "bg-blue-500/10 text-blue-400"
-                                                        : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-                                                }`}
-                                            >
-                                                {Icon && <Icon size={18} strokeWidth={active ? 2.5 : 2} />}
-                                                <span className="text-sm font-medium">{item.label}</span>
-                                                {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400" />}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
