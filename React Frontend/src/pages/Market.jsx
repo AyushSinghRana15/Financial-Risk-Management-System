@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { FaChevronDown, FaChevronUp, FaSync } from "react-icons/fa";
-import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import { FaArrowDown, FaArrowUp, FaChevronDown, FaChevronUp, FaSync } from "react-icons/fa";
+import { API_ENDPOINTS } from "../config/api";
 
 function Market() {
 
@@ -186,13 +186,9 @@ function Market() {
                                                         : "text-red-600 dark:text-red-400"
                                                 }`}>
                                                     {isUp ? (
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 17l5-5 5 5M7 7l5 5 5-5" />
-                                                        </svg>
+                                                        <FaArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
                                                     ) : (
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 7l-5 5-5-5m10 10l-5-5-5 5" />
-                                                        </svg>
+                                                        <FaArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
                                                     )}
                                                     <span>{isUp ? "Market up" : "Market down"}</span>
                                                 </div>
