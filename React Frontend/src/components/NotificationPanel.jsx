@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { ShieldAlert, TrendingUp, CheckCircle, Info, X, Trash2 } from "lucide-react";
+import { AlertTriangle, CheckCircle, Info, ShieldAlert, Trash2, X } from "lucide-react";
 import { API_ENDPOINTS } from "../config/api";
 
 function getRelativeTime(timestamp) {
@@ -28,6 +28,43 @@ export default function NotificationPanel({ onClose }) {
 
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const userEmail = user?.email || "";
+    const firstName = user?.name?.split(" ")[0] || "there";
+
+    const getFallbackNotifications = React.useCallback(() => {
+        const storageKey = `finrisk_notification_seed:${userEmail || "guest"}`;
+        const storedSeed = Number(localStorage.getItem(storageKey));
+        const seed = Number.isFinite(storedSeed)
+            ? storedSeed
+            : Array.from(userEmail || "guest").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+
+        if (!Number.isFinite(storedSeed)) {
+            localStorage.setItem(storageKey, String(seed));
+        }
+
+        const profileMessages = [
+            `${firstName}, add portfolio assets to unlock concentration and diversification alerts.`,
+            `${firstName}, run a market risk prediction to start receiving VaR movement alerts.`,
+            `${firstName}, complete your profile so FinRisk can tune alerts to your risk appetite.`
+        ];
+
+        const rotation = seed % profileMessages.length;
+        return [
+            {
+                id: "fallback-profile",
+                text: profileMessages[rotation],
+                type: "info",
+                timestamp: new Date().toISOString(),
+                read: false
+            },
+            {
+                id: "fallback-review",
+                text: "No urgent risk alerts right now. Review portfolio weights after adding fresh market data.",
+                type: "success",
+                timestamp: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+                read: false
+            }
+        ];
+    }, [firstName, userEmail]);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -41,9 +78,7 @@ export default function NotificationPanel({ onClose }) {
 
     const fetchNotifications = React.useCallback(async () => {
         if (!userEmail) {
-            setNotifications([
-                { id: 1, text: "Welcome to FinRisk! Start by adding assets to your portfolio.", type: "info", timestamp: new Date().toISOString(), read: false }
-            ]);
+            setNotifications(getFallbackNotifications());
             setLoading(false);
             return;
         }
@@ -52,15 +87,16 @@ export default function NotificationPanel({ onClose }) {
             const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?email=${userEmail}`);
             if (!res.ok) throw new Error("Failed to fetch");
             const data = await res.json();
-            setNotifications(data);
+            setNotifications(Array.isArray(data) && data.length > 0 ? data : getFallbackNotifications());
             setError(null);
         } catch (err) {
             console.error("Notifications error:", err);
-            setError("Unable to load notifications");
+            setNotifications(getFallbackNotifications());
+            setError(null);
         } finally {
             setLoading(false);
         }
-    }, [userEmail]);
+    }, [getFallbackNotifications, userEmail]);
 
     useEffect(() => {
         setLoading(true);
@@ -91,26 +127,42 @@ export default function NotificationPanel({ onClose }) {
     const getStyles = (type) => {
         switch (type) {
             case "warning":
-                return "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800";
+                return {
+                    iconWrap: "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400",
+                    unread: "bg-yellow-50/70 dark:bg-yellow-900/10",
+                    dot: "bg-yellow-500"
+                };
             case "alert":
-                return "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800";
+                return {
+                    iconWrap: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400",
+                    unread: "bg-red-50/70 dark:bg-red-900/10",
+                    dot: "bg-red-500"
+                };
             case "success":
-                return "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800";
+                return {
+                    iconWrap: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
+                    unread: "bg-green-50/70 dark:bg-green-900/10",
+                    dot: "bg-green-500"
+                };
             default:
-                return "text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800";
+                return {
+                    iconWrap: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+                    unread: "bg-blue-50/70 dark:bg-blue-900/10",
+                    dot: "bg-blue-500"
+                };
         }
     };
 
     const getIcon = (type) => {
         switch (type) {
             case "warning":
-                return <ShieldAlert className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />;
+                return <ShieldAlert className="w-4 h-4" />;
             case "alert":
-                return <TrendingUp className="w-5 h-5 text-red-600 dark:text-red-400" />;
+                return <AlertTriangle className="w-4 h-4" />;
             case "success":
-                return <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />;
+                return <CheckCircle className="w-4 h-4" />;
             default:
-                return <Info className="w-5 h-5 text-blue-600 dark:text-blue-400" />;
+                return <Info className="w-4 h-4" />;
         }
     };
 
@@ -119,7 +171,7 @@ export default function NotificationPanel({ onClose }) {
     return (
         <div
             ref={panelRef}
-            className="absolute right-0 top-12 w-[360px] sm:w-96 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 z-[100] animate-scaleIn"
+            className="fixed left-3 right-3 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-96 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 z-[300] animate-scaleIn"
         >
             <style>{`
                 @keyframes scaleIn {
@@ -171,15 +223,17 @@ export default function NotificationPanel({ onClose }) {
                         No notifications
                     </div>
                 ) : (
-                    notifications.map((n) => (
+                    notifications.map((n) => {
+                        const styles = getStyles(n.type);
+                        return (
                         <div
                             key={n.id}
                             onClick={() => markAsRead(n.id)}
                             className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-all duration-200 border-b dark:border-slate-700/50
-                                ${n.read ? "bg-white dark:bg-slate-800" : "bg-blue-50/50 dark:bg-slate-700/30"}
+                                ${n.read ? "bg-white dark:bg-slate-800" : styles.unread}
                                 hover:bg-gray-100 dark:hover:bg-slate-700`}
                         >
-                            <div className="mt-0.5">{getIcon(n.type)}</div>
+                            <div className={`mt-0.5 rounded-full p-2 ${styles.iconWrap}`}>{getIcon(n.type)}</div>
 
                             <div className="flex-1 min-w-0">
                                 <p className={`text-sm leading-relaxed ${n.read ? "text-gray-500 dark:text-gray-400" : "text-gray-800 dark:text-gray-200 font-medium"}`}>
@@ -191,10 +245,10 @@ export default function NotificationPanel({ onClose }) {
                             </div>
 
                             {!n.read && (
-                                <span className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></span>
+                                <span className={`w-2 h-2 ${styles.dot} rounded-full mt-2 flex-shrink-0`}></span>
                             )}
                         </div>
-                    ))
+                    )})
                 )}
             </div>
 

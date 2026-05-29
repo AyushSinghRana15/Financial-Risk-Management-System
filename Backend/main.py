@@ -5,7 +5,16 @@ from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
 from database import SessionLocal, engine, Base
-from models import User, Portfolio, CreditPrediction, MarketRiskData, BusinessRisk
+from models import (
+    User,
+    Portfolio,
+    CreditPrediction,
+    MarketRiskData,
+    BusinessRisk,
+    LiquidityRisk,
+    FinancialRisk,
+    FraudPrediction,
+)
 
 # Routers
 from business_risk_api import router as business_router
@@ -274,10 +283,21 @@ def ai_risk_alerts(data: dict = None):
 @app.get("/notifications")
 def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email).first()
-    
+
     notifications = []
     notification_id = 1
-    
+
+    def add_notification(text, type="info", timestamp=None):
+        nonlocal notification_id
+        notifications.append({
+            "id": notification_id,
+            "text": text,
+            "type": type,
+            "timestamp": timestamp.isoformat() if hasattr(timestamp, "isoformat") else (timestamp or datetime.now().isoformat()),
+            "read": False
+        })
+        notification_id += 1
+
     if not user:
         return [
             {
@@ -288,91 +308,183 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
                 "read": False
             }
         ]
-    
+
+    first_name = (user.name or user.email.split("@")[0]).split()[0]
+
     # Fetch latest risk predictions
     latest_credit = db.query(CreditPrediction).filter(
         CreditPrediction.user_id == user.id
     ).order_by(desc(CreditPrediction.id)).first()
-    
+
     latest_market = db.query(MarketRiskData).filter(
         MarketRiskData.user_id == user.id
     ).order_by(desc(MarketRiskData.id)).first()
-    
-    # Generate risk alerts
+
+    latest_business = db.query(BusinessRisk).filter(
+        BusinessRisk.user_id == user.id
+    ).order_by(desc(BusinessRisk.id)).first()
+
+    latest_liquidity = db.query(LiquidityRisk).filter(
+        LiquidityRisk.user_id == user.id
+    ).order_by(desc(LiquidityRisk.id)).first()
+
+    latest_financial = db.query(FinancialRisk).filter(
+        FinancialRisk.user_id == user.id
+    ).order_by(desc(FinancialRisk.id)).first()
+
+    latest_fraud = db.query(FraudPrediction).filter(
+        FraudPrediction.user_id == user.id
+    ).order_by(desc(FraudPrediction.id)).first()
+
+    portfolio_assets = db.query(Portfolio).filter(Portfolio.user_id == user.id).all()
+
+    if user.risk_profile:
+        add_notification(
+            f"{first_name}, your dashboard is tuned for a {user.risk_profile.lower()} risk profile.",
+            "info",
+            user.created_at
+        )
+
+    if not portfolio_assets:
+        add_notification(
+            "Add portfolio assets to unlock concentration, diversification, and exposure alerts.",
+            "info",
+            user.created_at
+        )
+    else:
+        asset_values = []
+        value_by_type = {}
+        total_value = 0
+        invested_value = 0
+
+        for asset in portfolio_assets:
+            current_value = (asset.current_price or 0) * (asset.quantity or 0)
+            buy_value = (asset.buy_price or 0) * (asset.quantity or 0)
+            total_value += current_value
+            invested_value += buy_value
+            asset_values.append((asset.asset_name or "Asset", current_value))
+            value_by_type[asset.asset_type or "Other"] = value_by_type.get(asset.asset_type or "Other", 0) + current_value
+
+        if total_value > 0:
+            top_name, top_value = max(asset_values, key=lambda item: item[1])
+            top_weight = (top_value / total_value) * 100
+            asset_type_count = len([value for value in value_by_type.values() if value > 0])
+
+            if top_weight >= 50:
+                add_notification(
+                    f"{top_name} makes up {top_weight:.0f}% of your portfolio. Consider reducing concentration risk.",
+                    "warning"
+                )
+            elif asset_type_count >= 3:
+                add_notification(
+                    f"Your portfolio is spread across {asset_type_count} asset classes, which improves diversification.",
+                    "success"
+                )
+            else:
+                add_notification(
+                    "Your portfolio is still concentrated in a few asset classes. Add variety to reduce risk.",
+                    "info"
+                )
+
+            if invested_value > 0:
+                pnl_percent = ((total_value - invested_value) / invested_value) * 100
+                if pnl_percent >= 5:
+                    add_notification(
+                        f"Portfolio is up {pnl_percent:.1f}% from buy price. Review gains before rebalancing.",
+                        "success"
+                    )
+                elif pnl_percent <= -5:
+                    add_notification(
+                        f"Portfolio is down {abs(pnl_percent):.1f}% from buy price. Check downside exposure.",
+                        "warning"
+                    )
+
+    # Generate risk alerts from the user's latest model runs
     if latest_credit and latest_credit.risk_score:
         risk_score = latest_credit.risk_score * 100
         if risk_score > 70:
-            notifications.append({
-                "id": notification_id,
-                "text": f"High Credit Risk Alert: Your risk score is {risk_score:.1f}%",
-                "type": "warning",
-                "timestamp": latest_credit.predicted_at.isoformat() if latest_credit.predicted_at else datetime.now().isoformat(),
-                "read": False
-            })
-            notification_id += 1
+            add_notification(
+                f"High credit risk alert: your latest score is {risk_score:.1f}%.",
+                "warning",
+                latest_credit.predicted_at
+            )
         elif risk_score > 40:
-            notifications.append({
-                "id": notification_id,
-                "text": f"Moderate Credit Risk: Your risk score is {risk_score:.1f}%",
-                "type": "info",
-                "timestamp": latest_credit.predicted_at.isoformat() if latest_credit.predicted_at else datetime.now().isoformat(),
-                "read": False
-            })
-            notification_id += 1
-    
+            add_notification(
+                f"Moderate credit risk: your latest score is {risk_score:.1f}%.",
+                "info",
+                latest_credit.predicted_at
+            )
+        else:
+            add_notification(
+                f"Credit risk is currently low at {risk_score:.1f}%.",
+                "success",
+                latest_credit.predicted_at
+            )
+
     if latest_market and latest_market.risk_score:
         risk_score = latest_market.risk_score * 100
         if risk_score > 5:
-            notifications.append({
-                "id": notification_id,
-                "text": f"Market VaR Alert: Value at Risk exceeds {risk_score:.1f}%",
-                "type": "warning",
-                "timestamp": latest_market.recorded_at.isoformat() if latest_market.recorded_at else datetime.now().isoformat(),
-                "read": False
-            })
-            notification_id += 1
+            add_notification(
+                f"Market VaR alert: {latest_market.symbol or 'latest asset'} risk is {risk_score:.1f}%.",
+                "warning",
+                latest_market.recorded_at
+            )
         elif risk_score > 2:
-            notifications.append({
-                "id": notification_id,
-                "text": f"Elevated Market Risk: VaR at {risk_score:.1f}%",
-                "type": "info",
-                "timestamp": latest_market.recorded_at.isoformat() if latest_market.recorded_at else datetime.now().isoformat(),
-                "read": False
-            })
-            notification_id += 1
-    
-    # Get AI-powered advice notifications
-    portfolio_assets = db.query(Portfolio).filter(Portfolio.user_id == user.id).all()
-    if portfolio_assets:
-        portfolio_data = [
-            {"asset": a.asset_name, "type": a.asset_type, "qty": a.quantity, "price": a.current_price}
-            for a in portfolio_assets
-        ]
-        
-        try:
-            ai_result = get_ai_insights(portfolio_data)
-            if isinstance(ai_result, dict):
-                insights = ai_result.get("insights", [])[:2]
-                for insight in insights:
-                    notifications.append({
-                        "id": notification_id,
-                        "text": insight,
-                        "type": "success",
-                        "timestamp": datetime.now().isoformat(),
-                        "read": False
-                    })
-                    notification_id += 1
-        except Exception as e:
-            print(f"AI insights error: {e}")
-    
-    # If no notifications, add a default message
+            add_notification(
+                f"Elevated market risk: VaR is {risk_score:.1f}% for {latest_market.symbol or 'your latest run'}.",
+                "info",
+                latest_market.recorded_at
+            )
+        else:
+            add_notification(
+                f"Market risk is contained at {risk_score:.1f}% VaR.",
+                "success",
+                latest_market.recorded_at
+            )
+
+    if latest_business and latest_business.risk_score is not None:
+        risk_score = latest_business.risk_score * 100
+        notification_type = "warning" if risk_score >= 70 else "info" if risk_score >= 40 else "success"
+        add_notification(
+            f"Business risk is {latest_business.risk_level or f'{risk_score:.1f}%'} based on your latest revenue analysis.",
+            notification_type,
+            latest_business.recorded_at
+        )
+
+    if latest_liquidity and latest_liquidity.risk_score is not None:
+        risk_score = latest_liquidity.risk_score * 100
+        notification_type = "warning" if risk_score >= 70 else "info" if risk_score >= 40 else "success"
+        ratio_text = f" with ratio {latest_liquidity.liquidity_ratio:.2f}" if latest_liquidity.liquidity_ratio is not None else ""
+        add_notification(
+            f"Liquidity check: {latest_liquidity.risk_label or f'{risk_score:.1f}% risk'}{ratio_text}.",
+            notification_type,
+            latest_liquidity.recorded_at
+        )
+
+    if latest_financial and latest_financial.risk_score is not None:
+        risk_score = latest_financial.risk_score * 100
+        notification_type = "warning" if risk_score >= 70 else "info" if risk_score >= 40 else "success"
+        add_notification(
+            f"Financial risk is {latest_financial.risk_label or f'{risk_score:.1f}%'} from your latest debt-to-asset review.",
+            notification_type,
+            latest_financial.recorded_at
+        )
+
+    if latest_fraud and latest_fraud.fraud_probability is not None:
+        fraud_score = latest_fraud.fraud_probability * 100
+        notification_type = "alert" if fraud_score >= 50 else "success"
+        add_notification(
+            f"E-commerce fraud check: {latest_fraud.label or f'{fraud_score:.1f}% probability'} for a {latest_fraud.payment_method or 'recent'} transaction.",
+            notification_type,
+            latest_fraud.predicted_at
+        )
+
+    notifications.sort(key=lambda item: item["timestamp"], reverse=True)
+
     if len(notifications) == 0:
-        notifications.append({
-            "id": 1,
-            "text": "No risk alerts detected. Your portfolio looks stable!",
-            "type": "success",
-            "timestamp": datetime.now().isoformat(),
-            "read": False
-        })
-    
-    return notifications
+        add_notification(
+            f"Welcome back, {first_name}. Run a risk model or add portfolio assets to receive personalized alerts.",
+            "info"
+        )
+
+    return notifications[:8]
