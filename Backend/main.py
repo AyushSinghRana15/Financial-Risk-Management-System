@@ -48,25 +48,18 @@ app = FastAPI()
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "").rstrip("/")
 
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",
-    "http://localhost:8000",
-    FRONTEND_URL,
+allow_origins = [
     "https://finrisk.online",
-    "https://*.finrisk.online",
+    "https://www.finrisk.online",
+    "http://localhost:5173",
+    "http://localhost:3000",
 ]
-origins = [o for o in origins if o]
+if FRONTEND_URL:
+    allow_origins.append(FRONTEND_URL)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://finrisk.online",
-        "https://www.finrisk.online", # Add the www version just in case
-        "http://localhost:5173",
-        "http://localhost:3000",
-    ],
+    allow_origins=allow_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"], # Explicitly allow OPTIONS
     allow_headers=["*"],

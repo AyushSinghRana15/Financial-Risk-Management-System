@@ -1,0 +1,11 @@
+Backend/venv/
+Backend/__pycache__/
+Backend/*.db
+Backend/.env
+Backend/README.md
+Backend/.gitignore
+.git/
+.gitattributes
+.gitignore
+Models/.ipynb_checkpoints
+Models/README.md
