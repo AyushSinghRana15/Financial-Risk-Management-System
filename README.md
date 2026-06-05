@@ -1,5 +1,7 @@
 # FinRisk: AI-Powered Financial Risk Management System
 
+🌐 **Live:** [https://finrisk.online](https://finrisk.online)
+
 ![Project Status](https://img.shields.io/badge/status-Production-brightgreen)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
