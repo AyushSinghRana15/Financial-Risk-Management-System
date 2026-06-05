@@ -13,6 +13,50 @@
 
 ---
 
+## 🏗️ Deployment Architecture
+
+```mermaid
+graph TB
+    User(["👤 User"]) -->|"https://finrisk.online"| Vercel
+
+    subgraph Vercel ["☁️ Vercel — Frontend"]
+        React["React SPA<br/>Tailwind + Recharts"]
+    end
+
+    subgraph HF ["🤗 Hugging Face Spaces — Backend"]
+        API["FastAPI<br/>REST API"]
+        ML["ML Models<br/>XGBoost / CatBoost<br/>21 .pkl files"]
+    end
+
+    subgraph Services ["🔌 External Services"]
+        Neon[("Neon<br/>PostgreSQL")]
+        OAuth["Google OAuth<br/>Authentication"]
+        OpenRouter["OpenRouter<br/>AI Insights"]
+        Yahoo["Yahoo Finance<br/>Market Data"]
+    end
+
+    Vercel -->|"API Calls"| API
+    API --> ML
+    API --> Neon
+    API --> OAuth
+    API --> OpenRouter
+    API --> Yahoo
+
+    style User fill:#fbbf24,stroke:#f59e0b,color:#000
+    style Vercel fill:#e2e8f0,stroke:#94a3b8,color:#000
+    style HF fill:#fef3c7,stroke:#f59e0b,color:#000
+    style Services fill:#e0e7ff,stroke:#6366f1,color:#000
+    style React fill:#3b82f6,stroke:#2563eb,color:#fff
+    style API fill:#059669,stroke:#047857,color:#fff
+    style ML fill:#d97706,stroke:#b45309,color:#fff
+    style Neon fill:#6366f1,stroke:#4f46e5,color:#fff
+    style OAuth fill:#dc2626,stroke:#b91c1c,color:#fff
+    style OpenRouter fill:#7c3aed,stroke:#6d28d9,color:#fff
+    style Yahoo fill:#059669,stroke:#047857,color:#fff
+```
+
+---
+
 ## 🎯 Overview
 
 FinRisk transforms complex financial data into actionable insights through:
