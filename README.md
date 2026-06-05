@@ -5,6 +5,7 @@
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![HuggingFace Spaces](https://img.shields.io/badge/HuggingFace%20Spaces-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)](https://huggingface.co/spaces/AyushSingh15/finrisk-api)
 
 **FinRisk** is a state-of-the-art Financial Risk Management Dashboard that leverages machine learning and AI to provide real-time risk assessment, portfolio intelligence, and actionable recommendations. Designed with a premium glassmorphic UI, it helps investors and institutions monitor market volatility, business risk, liquidity exposures, and more in a single unified interface.
 
@@ -74,6 +75,7 @@ FinRisk transforms complex financial data into actionable insights through:
 | Google OAuth | Secure authentication |
 | Bcrypt | Password hashing |
 | yfinance | Real-time market data |
+| Hugging Face Spaces | Docker-based backend hosting (always-on) |
 
 ---
 
@@ -164,6 +166,12 @@ FinRisk/
 │   └── requirements.txt
 │
 ├── README.md                       # Project documentation
+├── deploy/                          # Deployment config
+│   └── hf-space/                   # Hugging Face Space files
+│       ├── Dockerfile              # Container build for HF Spaces
+│       ├── README.md               # Space metadata & env docs
+│       └── .dockerignore           # Build exclusions
+│
 └── .gitignore                     # Git ignore rules
 ```
 
@@ -231,6 +239,50 @@ npm run dev
 ```
 
 Frontend will be available at: `http://localhost:5173`
+
+---
+
+---
+
+## 🚢 Deployment
+
+### **Backend (Hugging Face Spaces)**
+
+The API is deployed as a Docker Space on Hugging Face at:
+- **URL:** `https://ayushsingh15-finrisk-api.hf.space`
+- **SDK:** Docker (custom `Dockerfile`)
+
+To deploy your own instance:
+
+```bash
+# Clone the HF Space repo
+git clone https://huggingface.co/spaces/YOUR_USERNAME/finrisk-api
+cd finrisk-api
+
+# Copy backend code and models
+cp -r Backend/ Models/ Dockerfile .
+
+# Set env vars in HF Space Settings → Repository secrets:
+#   DATABASE_URL, OPENROUTER_API_KEY, GOOGLE_CLIENT_ID, FRONTEND_URL
+
+git add . && git commit -m "Deploy"
+git push
+```
+
+### **Frontend (Vercel)**
+
+The dashboard is deployed on Vercel. Set these environment variables:
+
+| Variable | Value |
+|----------|-------|
+| `VITE_API_BASE_URL` | `https://ayushsingh15-finrisk-api.hf.space` |
+| `VITE_GOOGLE_CLIENT_ID` | Your Google OAuth client ID |
+
+### **Database (Neon PostgreSQL)**
+
+Serverless PostgreSQL on [Neon](https://neon.tech). Free tier provides:
+- 0.5 GB storage
+- Shared compute
 
 ---
 
