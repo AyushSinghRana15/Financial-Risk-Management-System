@@ -58,8 +58,6 @@ const riskSignals = [
 ];
 
 function OriginHelpModal({ onClose, missingClientId }) {
-  const currentOrigin = window.location.origin;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-md">
       <div className="w-full max-w-lg overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
@@ -69,16 +67,16 @@ function OriginHelpModal({ onClose, missingClientId }) {
           </div>
           <div>
             <h3 className="text-base font-semibold text-slate-950 dark:text-white">
-              Google Sign-In Configuration
+              Google Sign-In Setup
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Check these values before deploying.
+              Follow the official Google OAuth documentation to configure sign-in.
             </p>
           </div>
           <button
             onClick={onClose}
             className="ml-auto rounded-lg p-2 text-slate-500 transition hover:bg-slate-200 hover:text-slate-950 dark:hover:bg-slate-800 dark:hover:text-white"
-            aria-label="Close Google sign-in help"
+            aria-label="Close"
           >
             <X size={18} />
           </button>
@@ -91,28 +89,13 @@ function OriginHelpModal({ onClose, missingClientId }) {
             </div>
           )}
 
-          <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-800">
-            <p className="font-medium text-slate-950 dark:text-white">Authorized JavaScript origins</p>
-            <div className="mt-3 space-y-2 font-mono text-xs">
-              <div className="rounded-md bg-slate-100 px-3 py-2 text-slate-700 dark:bg-slate-950 dark:text-emerald-300">
-                {currentOrigin}
-              </div>
-              <div className="rounded-md bg-slate-100 px-3 py-2 text-slate-700 dark:bg-slate-950 dark:text-emerald-300">
-                http://localhost:5173
-              </div>
-            </div>
-            <p className="mt-2 text-xs text-slate-400">
-              Add <strong>{currentOrigin}</strong> and <strong>http://localhost:5173</strong> to your Google Cloud credentials.
-            </p>
-          </div>
-
           <a
-            href="https://console.cloud.google.com/apis/credentials"
+            href="https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-blue-700 transition hover:text-blue-600 dark:text-blue-300"
+            className="flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700"
           >
-            Open Google Cloud credentials <ExternalLink size={14} />
+            Open OAuth documentation <ExternalLink size={16} />
           </a>
         </div>
       </div>
