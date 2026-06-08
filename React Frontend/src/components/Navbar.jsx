@@ -23,6 +23,12 @@ function Navbar() {
             setUnreadCount(0);
             return;
         }
+
+        if (localStorage.getItem(`finrisk_cleared:${userEmail}`)) {
+            setUnreadCount(0);
+            return;
+        }
+
         try {
             const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?email=${userEmail}`);
             if (!res.ok) {

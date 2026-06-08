@@ -1,3 +1,5 @@
+import random
+import hashlib
 from fastapi import FastAPI, Depends, HTTPException
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
@@ -272,212 +274,334 @@ def ai_risk_alerts(data: dict = None):
         "response": str(result)
     }
 
-# ================= NOTIFICATIONS =================
+# =====================================================================
+# NOTIFICATIONS — dynamic, session‑aware, with message template variety
+# =====================================================================
+
+TIME_TIPS = [
+    "Review your portfolio before major economic announcements this week.",
+    "Consider rebalancing if any single asset exceeds 40 % of your portfolio.",
+    "Run a market risk scan after significant index movements.",
+    "Add stop‑loss alerts for your highest‑volatility positions.",
+    "Schedule a weekly risk review to stay ahead of exposure changes.",
+    "Check your liquidity ratio if you plan new capital deployments.",
+    "Diversify across uncorrelated asset classes to lower overall VaR.",
+    "Monitor credit spreads if you hold corporate bonds or loans.",
+]
+
+CREDIT_TEMPLATES = {
+    "high": [
+        "⚠️  Credit risk elevated at {score:.1f}% — review borrower exposure.",
+        "High credit alert: score hit {score:.1f}%. Tighten lending criteria.",
+        "Credit portfolio at {score:.1f}% risk. Consider hedging strategies.",
+    ],
+    "moderate": [
+        "Moderate credit risk at {score:.1f}%. Keep an eye on delinquencies.",
+        "Credit score is {score:.1f}% — within watchlist territory.",
+        "Credit risk creeping up to {score:.1f}%. Run a stress test soon.",
+    ],
+    "low": [
+        "✅ Credit risk under control at {score:.1f}%.",
+        "Low credit exposure ({score:.1f}%) — favourable conditions persist.",
+        "Credit risk remains healthy at {score:.1f}%.",
+    ],
+}
+
+MARKET_TEMPLATES = {
+    "high": [
+        "🚨 Market VaR spiked to {score:.1f}% for {symbol}. Hedge exposure.",
+        "VaR alert: {symbol} at {score:.1f}%. Consider reducing position size.",
+        "Elevated market risk detected — {symbol} VaR is {score:.1f}%.",
+    ],
+    "moderate": [
+        "Market VaR at {score:.1f}% for {symbol} — above‑average volatility.",
+        "{symbol} showing elevated risk ({score:.1f}% VaR). Watch closely.",
+        "Moderate market risk: {symbol} VaR is {score:.1f}%.",
+    ],
+    "low": [
+        "✅ Market risk contained at {score:.1f}% VaR for {symbol}.",
+        "Low market volatility — {symbol} VaR is {score:.1f}%.",
+        "Market conditions stable ({score:.1f}% VaR). No action needed.",
+    ],
+}
+
+BUSINESS_TEMPLATES = {
+    "high": [
+        "⚠️  Business risk at {score:.1f}% — review revenue concentration.",
+        "High business risk: {score:.1f}%. Diversify income streams.",
+        "Revenue analysis flags {score:.1f}% business risk. Consider cost controls.",
+    ],
+    "moderate": [
+        "Business risk moderate at {score:.1f}%. Monitor quarterly trends.",
+        "Revenue analysis shows {score:.1f}% risk — within acceptable range.",
+        "Business risk at {score:.1f}%. Keep overhead in check.",
+    ],
+    "low": [
+        "✅ Business risk low at {score:.1f}%. Revenue outlook stable.",
+        "Healthy business metrics — risk score is {score:.1f}%.",
+        "Low business risk ({score:.1f}%). Good operational footing.",
+    ],
+}
+
+LIQUIDITY_TEMPLATES = {
+    "high": [
+        "⚠️  Liquidity risk high ({score:.1f}%, ratio {ratio:.2f}). Boost cash reserves.",
+        "Liquidity warning: {score:.1f}% risk. Evaluate short‑term obligations.",
+        "Tight liquidity — {score:.1f}% risk, ratio {ratio:.2f}. Plan inflows.",
+    ],
+    "moderate": [
+        "Liquidity at {score:.1f}% (ratio {ratio:.2f}). Maintain buffer.",
+        "Moderate liquidity risk ({score:.1f}%). Review upcoming payables.",
+        "Liquidity ratio {ratio:.2f} signals moderate exposure ({score:.1f}%).",
+    ],
+    "low": [
+        "✅ Liquidity healthy at {score:.1f}% (ratio {ratio:.2f}).",
+        "Strong liquidity position — {score:.1f}% risk, ratio {ratio:.2f}.",
+        "Liquidity well‑managed at {score:.1f}% risk.",
+    ],
+}
+
+FINANCIAL_TEMPLATES = {
+    "high": [
+        "⚠️  Financial risk high ({score:.1f}%) — reduce leverage.",
+        "Debt‑to‑asset analysis: {score:.1f}% risk. Consider deleveraging.",
+        "High financial risk at {score:.1f}%. Review debt structure.",
+    ],
+    "moderate": [
+        "Financial risk moderate at {score:.1f}%. Watch debt ratios.",
+        "Debt‑to‑asset score is {score:.1f}% — within range.",
+        "Moderate financial risk ({score:.1f}%). Maintain current leverage.",
+    ],
+    "low": [
+        "✅ Financial risk low at {score:.1f}%. Healthy balance sheet.",
+        "Debt‑to‑asset metrics solid — {score:.1f}% risk.",
+        "Low financial exposure ({score:.1f}%). Good capital structure.",
+    ],
+}
+
+FRAUD_TEMPLATES = {
+    "alert": [
+        "🚨 Fraud alert: {probability:.1f}% on a {method} transaction.",
+        "Suspicious {method} transaction — fraud probability {probability:.1f}%.",
+        "High fraud risk ({probability:.1f}%) detected on {method}.",
+    ],
+    "safe": [
+        "✅ Fraud check passed for recent {method} transaction.",
+        "No fraud flags on latest {method} transaction ({probability:.1f}%).",
+        "Transaction integrity confirmed — {method} at {probability:.1f}% fraud probability.",
+    ],
+}
+
+
+def _daily_seed(user_id: int) -> int:
+    """Deterministic seed per user per day so notifications vary daily
+    but stay consistent within the same day (avoids flickering)."""
+    date_tag = datetime.now().strftime("%Y-%m-%d")
+    raw = f"{user_id}-{date_tag}"
+    return int(hashlib.md5(raw.encode()).hexdigest(), 16)
+
+
+def _pick(templates, seed, key=None):
+    """Pick a random template variant using the daily seed."""
+    pool = templates[key] if key else templates
+    idx = seed % len(pool)
+    return pool[idx]
+
+
+def _time_greeting(dt: datetime = None) -> str:
+    dt = dt or datetime.now()
+    h = dt.hour
+    if h < 12:
+        return "morning"
+    if h < 17:
+        return "afternoon"
+    return "evening"
+
+
 @app.get("/notifications")
 def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email).first()
 
     notifications = []
-    notification_id = 1
+    nid = 1
 
-    def add_notification(text, type="info", timestamp=None):
-        nonlocal notification_id
+    def add(text, ntype="info", ts=None):
+        nonlocal nid
         notifications.append({
-            "id": notification_id,
+            "id": nid,
             "text": text,
-            "type": type,
-            "timestamp": timestamp.isoformat() if hasattr(timestamp, "isoformat") else (timestamp or datetime.now().isoformat()),
-            "read": False
+            "type": ntype,
+            "timestamp": ts.isoformat() if hasattr(ts, "isoformat") else (ts or datetime.now().isoformat()),
+            "read": False,
         })
-        notification_id += 1
+        nid += 1
 
     if not user:
-        return [
-            {
-                "id": 1,
-                "text": "Welcome to FinRisk! Start by adding assets to your portfolio.",
-                "type": "info",
-                "timestamp": datetime.now().isoformat(),
-                "read": False
-            }
-        ]
+        return [{"id": 1, "text": "Welcome to FinRisk! Add assets to your portfolio to get started.", "type": "info", "timestamp": datetime.now().isoformat(), "read": False}]
 
     first_name = (user.name or user.email.split("@")[0]).split()[0]
+    seed = _daily_seed(user.id)
+    rng = random.Random(seed)
 
-    # Fetch latest risk predictions
-    latest_credit = db.query(CreditPrediction).filter(
-        CreditPrediction.user_id == user.id
-    ).order_by(desc(CreditPrediction.id)).first()
+    # ---- time‑of‑day greeting ----
+    add(f"Good {_time_greeting()}, {first_name}. Here is your risk snapshot for today.")
 
-    latest_market = db.query(MarketRiskData).filter(
-        MarketRiskData.user_id == user.id
-    ).order_by(desc(MarketRiskData.id)).first()
+    # ---- risk‑profile intro ----
+    if user.risk_profile:
+        profile_lines = [
+            f"Dashboard tuned for {user.risk_profile.lower()} risk profile — notifications reflect that threshold.",
+            f"Your {user.risk_profile.lower()} risk profile shapes the alerts below.",
+        ]
+        add(profile_lines[seed % len(profile_lines)], "info", user.created_at)
 
-    latest_business = db.query(BusinessRisk).filter(
-        BusinessRisk.user_id == user.id
-    ).order_by(desc(BusinessRisk.id)).first()
-
-    latest_liquidity = db.query(LiquidityRisk).filter(
-        LiquidityRisk.user_id == user.id
-    ).order_by(desc(LiquidityRisk.id)).first()
-
-    latest_financial = db.query(FinancialRisk).filter(
-        FinancialRisk.user_id == user.id
-    ).order_by(desc(FinancialRisk.id)).first()
-
-    latest_fraud = db.query(FraudPrediction).filter(
-        FraudPrediction.user_id == user.id
-    ).order_by(desc(FraudPrediction.id)).first()
-
+    # ---- latest risk predictions ----
+    latest_credit = db.query(CreditPrediction).filter(CreditPrediction.user_id == user.id).order_by(desc(CreditPrediction.id)).first()
+    latest_market = db.query(MarketRiskData).filter(MarketRiskData.user_id == user.id).order_by(desc(MarketRiskData.id)).first()
+    latest_business = db.query(BusinessRisk).filter(BusinessRisk.user_id == user.id).order_by(desc(BusinessRisk.id)).first()
+    latest_liquidity = db.query(LiquidityRisk).filter(LiquidityRisk.user_id == user.id).order_by(desc(LiquidityRisk.id)).first()
+    latest_financial = db.query(FinancialRisk).filter(FinancialRisk.user_id == user.id).order_by(desc(FinancialRisk.id)).first()
+    latest_fraud = db.query(FraudPrediction).filter(FraudPrediction.user_id == user.id).order_by(desc(FraudPrediction.id)).first()
     portfolio_assets = db.query(Portfolio).filter(Portfolio.user_id == user.id).all()
 
-    if user.risk_profile:
-        add_notification(
-            f"{first_name}, your dashboard is tuned for a {user.risk_profile.lower()} risk profile.",
-            "info",
-            user.created_at
-        )
-
+    # ---- portfolio notifications ----
     if not portfolio_assets:
-        add_notification(
-            "Add portfolio assets to unlock concentration, diversification, and exposure alerts.",
-            "info",
-            user.created_at
-        )
+        portfolio_msgs = [
+            "No assets in your portfolio yet. Add positions to unlock concentration and diversification alerts.",
+            "Your portfolio is empty — start by adding assets to receive personalised risk insights.",
+            "Head to the portfolio page to add your first asset and begin tracking exposure.",
+        ]
+        add(portfolio_msgs[seed % len(portfolio_msgs)], "info", user.created_at)
     else:
         asset_values = []
         value_by_type = {}
         total_value = 0
         invested_value = 0
-
         for asset in portfolio_assets:
-            current_value = (asset.current_price or 0) * (asset.quantity or 0)
-            buy_value = (asset.buy_price or 0) * (asset.quantity or 0)
-            total_value += current_value
-            invested_value += buy_value
-            asset_values.append((asset.asset_name or "Asset", current_value))
-            value_by_type[asset.asset_type or "Other"] = value_by_type.get(asset.asset_type or "Other", 0) + current_value
+            cv = (asset.current_price or 0) * (asset.quantity or 0)
+            bv = (asset.buy_price or 0) * (asset.quantity or 0)
+            total_value += cv
+            invested_value += bv
+            asset_values.append((asset.asset_name or "Asset", cv))
+            value_by_type[asset.asset_type or "Other"] = value_by_type.get(asset.asset_type or "Other", 0) + cv
 
         if total_value > 0:
             top_name, top_value = max(asset_values, key=lambda item: item[1])
             top_weight = (top_value / total_value) * 100
-            asset_type_count = len([value for value in value_by_type.values() if value > 0])
+            asset_type_count = sum(1 for v in value_by_type.values() if v > 0)
 
             if top_weight >= 50:
-                add_notification(
-                    f"{top_name} makes up {top_weight:.0f}% of your portfolio. Consider reducing concentration risk.",
-                    "warning"
-                )
+                conc_msgs = [
+                    f"{top_name} is {top_weight:.0f}% of your portfolio — consider trimming to reduce concentration risk.",
+                    f"Concentration alert: {top_name} weighs {top_weight:.0f}%. Diversify to lower single‑asset exposure.",
+                    f"{top_weight:.0f}% of your portfolio sits in {top_name}. Spread risk across more positions.",
+                ]
+                add(conc_msgs[seed % len(conc_msgs)], "warning")
             elif asset_type_count >= 3:
-                add_notification(
-                    f"Your portfolio is spread across {asset_type_count} asset classes, which improves diversification.",
-                    "success"
-                )
+                div_msgs = [
+                    f"Well diversified across {asset_type_count} asset classes — this reduces unsystematic risk.",
+                    f"Your portfolio spans {asset_type_count} different asset types, which helps during sector‑specific downturns.",
+                    f"✅ Good diversification ({asset_type_count} asset classes). Maintain this balance.",
+                ]
+                add(div_msgs[seed % len(div_msgs)], "success")
             else:
-                add_notification(
-                    "Your portfolio is still concentrated in a few asset classes. Add variety to reduce risk.",
-                    "info"
-                )
+                conc_msgs = [
+                    "Portfolio concentrated in just a few asset classes. Adding variety can lower overall risk.",
+                    "Consider adding uncorrelated assets to improve diversification.",
+                    "A more balanced asset mix would help reduce portfolio volatility.",
+                ]
+                add(conc_msgs[seed % len(conc_msgs)], "info")
 
             if invested_value > 0:
-                pnl_percent = ((total_value - invested_value) / invested_value) * 100
-                if pnl_percent >= 5:
-                    add_notification(
-                        f"Portfolio is up {pnl_percent:.1f}% from buy price. Review gains before rebalancing.",
-                        "success"
-                    )
-                elif pnl_percent <= -5:
-                    add_notification(
-                        f"Portfolio is down {abs(pnl_percent):.1f}% from buy price. Check downside exposure.",
-                        "warning"
-                    )
+                pnl_pct = ((total_value - invested_value) / invested_value) * 100
+                if pnl_pct >= 5:
+                    gain_msgs = [
+                        f"📈 Portfolio up {pnl_pct:.1f}% from cost basis. Lock in partial gains or let winners run.",
+                        f"Unrealised gain of {pnl_pct:.1f}%. Consider tax‑efficient rebalancing.",
+                        f"Your portfolio has gained {pnl_pct:.1f}% — review if target weights still hold.",
+                    ]
+                    add(gain_msgs[seed % len(gain_msgs)], "success")
+                elif pnl_pct <= -5:
+                    loss_msgs = [
+                        f"📉 Portfolio down {abs(pnl_pct):.1f}% from cost. Check stop‑loss levels and downside exposure.",
+                        f"Unrealised loss of {abs(pnl_pct):.1f}%. Evaluate whether fundamentals have changed.",
+                        f"Portfolio declined {abs(pnl_pct):.1f}%. Review your risk tolerance and hedge if needed.",
+                    ]
+                    add(loss_msgs[seed % len(loss_msgs)], "warning")
 
-    # Generate risk alerts from the user's latest model runs
-    if latest_credit and latest_credit.risk_score:
-        risk_score = latest_credit.risk_score * 100
-        if risk_score > 70:
-            add_notification(
-                f"High credit risk alert: your latest score is {risk_score:.1f}%.",
-                "warning",
-                latest_credit.predicted_at
-            )
-        elif risk_score > 40:
-            add_notification(
-                f"Moderate credit risk: your latest score is {risk_score:.1f}%.",
-                "info",
-                latest_credit.predicted_at
-            )
+    # ---- credit risk ----
+    if latest_credit and latest_credit.risk_score is not None:
+        score = latest_credit.risk_score * 100
+        if score > 70:
+            add(_pick(CREDIT_TEMPLATES, seed, "high").format(score=score), "warning", latest_credit.predicted_at)
+        elif score > 40:
+            add(_pick(CREDIT_TEMPLATES, seed, "moderate").format(score=score), "info", latest_credit.predicted_at)
         else:
-            add_notification(
-                f"Credit risk is currently low at {risk_score:.1f}%.",
-                "success",
-                latest_credit.predicted_at
-            )
+            add(_pick(CREDIT_TEMPLATES, seed, "low").format(score=score), "success", latest_credit.predicted_at)
 
-    if latest_market and latest_market.risk_score:
-        risk_score = latest_market.risk_score * 100
-        if risk_score > 5:
-            add_notification(
-                f"Market VaR alert: {latest_market.symbol or 'latest asset'} risk is {risk_score:.1f}%.",
-                "warning",
-                latest_market.recorded_at
-            )
-        elif risk_score > 2:
-            add_notification(
-                f"Elevated market risk: VaR is {risk_score:.1f}% for {latest_market.symbol or 'your latest run'}.",
-                "info",
-                latest_market.recorded_at
-            )
+    # ---- market risk ----
+    if latest_market and latest_market.risk_score is not None:
+        score = latest_market.risk_score * 100
+        symbol = latest_market.symbol or "latest asset"
+        if score > 5:
+            add(_pick(MARKET_TEMPLATES, seed, "high").format(score=score, symbol=symbol), "warning", latest_market.recorded_at)
+        elif score > 2:
+            add(_pick(MARKET_TEMPLATES, seed, "moderate").format(score=score, symbol=symbol), "info", latest_market.recorded_at)
         else:
-            add_notification(
-                f"Market risk is contained at {risk_score:.1f}% VaR.",
-                "success",
-                latest_market.recorded_at
-            )
+            add(_pick(MARKET_TEMPLATES, seed, "low").format(score=score, symbol=symbol), "success", latest_market.recorded_at)
 
+    # ---- business risk ----
     if latest_business and latest_business.risk_score is not None:
-        risk_score = latest_business.risk_score * 100
-        notification_type = "warning" if risk_score >= 70 else "info" if risk_score >= 40 else "success"
-        add_notification(
-            f"Business risk is {latest_business.risk_level or f'{risk_score:.1f}%'} based on your latest revenue analysis.",
-            notification_type,
-            latest_business.recorded_at
-        )
+        score = latest_business.risk_score * 100
+        if score >= 70:
+            add(_pick(BUSINESS_TEMPLATES, seed, "high").format(score=score), "warning", latest_business.recorded_at)
+        elif score >= 40:
+            add(_pick(BUSINESS_TEMPLATES, seed, "moderate").format(score=score), "info", latest_business.recorded_at)
+        else:
+            add(_pick(BUSINESS_TEMPLATES, seed, "low").format(score=score), "success", latest_business.recorded_at)
 
+    # ---- liquidity risk ----
     if latest_liquidity and latest_liquidity.risk_score is not None:
-        risk_score = latest_liquidity.risk_score * 100
-        notification_type = "warning" if risk_score >= 70 else "info" if risk_score >= 40 else "success"
-        ratio_text = f" with ratio {latest_liquidity.liquidity_ratio:.2f}" if latest_liquidity.liquidity_ratio is not None else ""
-        add_notification(
-            f"Liquidity check: {latest_liquidity.risk_label or f'{risk_score:.1f}% risk'}{ratio_text}.",
-            notification_type,
-            latest_liquidity.recorded_at
-        )
+        score = latest_liquidity.risk_score * 100
+        ratio = latest_liquidity.liquidity_ratio or 0.0
+        if score >= 70:
+            add(_pick(LIQUIDITY_TEMPLATES, seed, "high").format(score=score, ratio=ratio), "warning", latest_liquidity.recorded_at)
+        elif score >= 40:
+            add(_pick(LIQUIDITY_TEMPLATES, seed, "moderate").format(score=score, ratio=ratio), "info", latest_liquidity.recorded_at)
+        else:
+            add(_pick(LIQUIDITY_TEMPLATES, seed, "low").format(score=score, ratio=ratio), "success", latest_liquidity.recorded_at)
 
+    # ---- financial risk ----
     if latest_financial and latest_financial.risk_score is not None:
-        risk_score = latest_financial.risk_score * 100
-        notification_type = "warning" if risk_score >= 70 else "info" if risk_score >= 40 else "success"
-        add_notification(
-            f"Financial risk is {latest_financial.risk_label or f'{risk_score:.1f}%'} from your latest debt-to-asset review.",
-            notification_type,
-            latest_financial.recorded_at
-        )
+        score = latest_financial.risk_score * 100
+        if score >= 70:
+            add(_pick(FINANCIAL_TEMPLATES, seed, "high").format(score=score), "warning", latest_financial.recorded_at)
+        elif score >= 40:
+            add(_pick(FINANCIAL_TEMPLATES, seed, "moderate").format(score=score), "info", latest_financial.recorded_at)
+        else:
+            add(_pick(FINANCIAL_TEMPLATES, seed, "low").format(score=score), "success", latest_financial.recorded_at)
 
+    # ---- fraud detection ----
     if latest_fraud and latest_fraud.fraud_probability is not None:
-        fraud_score = latest_fraud.fraud_probability * 100
-        notification_type = "alert" if fraud_score >= 50 else "success"
-        add_notification(
-            f"E-commerce fraud check: {latest_fraud.label or f'{fraud_score:.1f}% probability'} for a {latest_fraud.payment_method or 'recent'} transaction.",
-            notification_type,
-            latest_fraud.predicted_at
-        )
+        prob = latest_fraud.fraud_probability * 100
+        method = latest_fraud.payment_method or "recent"
+        if prob >= 50:
+            add(_pick(FRAUD_TEMPLATES, seed, "alert").format(probability=prob, method=method), "alert", latest_fraud.predicted_at)
+        else:
+            add(_pick(FRAUD_TEMPLATES, seed, "safe").format(probability=prob, method=method), "success", latest_fraud.predicted_at)
 
+    # ---- tip of the day (rotates daily) ----
+    tip_index = seed % len(TIME_TIPS)
+    add(f"💡 Tip: {TIME_TIPS[tip_index]}", "info")
+
+    # ---- fallback if somehow still empty ----
+    if len(notifications) <= 1:  # only the greeting exists
+        welcome_msgs = [
+            f"Welcome back, {first_name}. Run a risk model or add portfolio assets to see personalised alerts.",
+            f"Hi {first_name}. No new risk signals yet — try a market or credit risk prediction.",
+            f"Your dashboard is ready, {first_name}. Generate risk reports to populate alerts here.",
+        ]
+        add(welcome_msgs[seed % len(welcome_msgs)], "info")
+
+    # ---- sort newest first, cap at 8 ----
     notifications.sort(key=lambda item: item["timestamp"], reverse=True)
-
-    if len(notifications) == 0:
-        add_notification(
-            f"Welcome back, {first_name}. Run a risk model or add portfolio assets to receive personalized alerts.",
-            "info"
-        )
-
     return notifications[:8]

@@ -83,6 +83,15 @@ export default function NotificationPanel({ onClose }) {
             return;
         }
 
+        const clearedKey = `finrisk_cleared:${userEmail}`;
+        const clearedAt = localStorage.getItem(clearedKey);
+        if (clearedAt) {
+            setNotifications([]);
+            setLoading(false);
+            setError(null);
+            return;
+        }
+
         try {
             const res = await fetch(`${API_ENDPOINTS.NOTIFICATIONS}?email=${userEmail}`);
             if (!res.ok) throw new Error("Failed to fetch");
@@ -105,12 +114,15 @@ export default function NotificationPanel({ onClose }) {
 
     useEffect(() => {
         const handleRefresh = () => {
+            if (userEmail) {
+                localStorage.removeItem(`finrisk_cleared:${userEmail}`);
+            }
             setLoading(true);
             fetchNotifications();
         };
         window.addEventListener("refreshNotifications", handleRefresh);
         return () => window.removeEventListener("refreshNotifications", handleRefresh);
-    }, [fetchNotifications]);
+    }, [fetchNotifications, userEmail]);
 
     const markAsRead = (id) => {
         setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
@@ -118,10 +130,15 @@ export default function NotificationPanel({ onClose }) {
 
     const markAllRead = () => {
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        window.dispatchEvent(new Event("refreshNotifications"));
     };
 
     const clearAll = () => {
         setNotifications([]);
+        if (userEmail) {
+            localStorage.setItem(`finrisk_cleared:${userEmail}`, Date.now().toString());
+        }
+        window.dispatchEvent(new Event("refreshNotifications"));
     };
 
     const getStyles = (type) => {

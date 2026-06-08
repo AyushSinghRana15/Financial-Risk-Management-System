@@ -66,7 +66,7 @@ FinRisk transforms complex financial data into actionable insights through:
 - **Dynamic Portfolio Management**: Real-time asset tracking with live price updates from yfinance.
 - **Premium User Experience**: Aurora-style animated backgrounds, glassmorphism UI, and smooth page transitions.
 - **Secure Authentication**: Integrated Google OAuth and traditional Email/Password login.
-- **Instant Notifications**: Real-time alerts for critical risk movements.
+- **Instant Notifications**: Real-time alerts for critical risk movements with daily rotating message templates, time-of-day greetings, and smart dedup via localStorage.
 
 ---
 
@@ -131,7 +131,7 @@ FinRisk transforms complex financial data into actionable insights through:
 FinRisk/
 │
 ├── Backend/                          # FastAPI REST API
-│   ├── main.py                       # App entry, CORS, routers
+│   ├── main.py                       # App entry, CORS, routers, dynamic notification engine
 │   ├── ai_service.py                 # OpenRouter AI integration
 │   ├── database.py                   # SQLAlchemy engine setup
 │   ├── models.py                    # User, Portfolio, Risk schemas
@@ -174,7 +174,7 @@ FinRisk/
 │   │   ├── components/            # Reusable UI components
 │   │   │   ├── Navbar.jsx         # Top navigation bar
 │   │   │   ├── Sidebar.jsx        # Collapsible sidebar nav
-│   │   │   ├── NotificationPanel.jsx  # Notifications dropdown
+│   │   │   ├── NotificationPanel.jsx  # Notifications dropdown (mark-read, clear-all, localStorage dedup)
 │   │   │   ├── ProtectedRoute.jsx  # Auth guard component
 │   │   │   └── ProfileSection.jsx # User profile page
 │   │   │
@@ -226,20 +226,20 @@ FinRisk/
 | File | Purpose |
 |------|---------|
 | `App.jsx` | Main app with React Router, DashboardLayout wrapper |
-| `index.css` | Global styles: glassmorphism, animations, scrollbar styling |
-| `Navbar.jsx` | Top bar with nav links, notifications, user menu |
+| `index.css` | Global styles: glassmorphism, animations, scrollbar styling, login page theme (light/dark) with grid overlay, animated scanlines, mosaic tiles, and responsive breakpoints |
+| `Navbar.jsx` | Top bar with nav links, notification bell with live unread badge, user menu |
 | `Sidebar.jsx` | Collapsible sidebar with lucide icons |
 | `Dashboard.jsx` | KPI cards, charts, portfolio intelligence |
 | `Portfolio.jsx` | Asset management with add/edit/delete |
 | `PortfolioAnalytics.jsx` | Charts: allocation, performance, correlation |
-| `Login.jsx` | Google OAuth + email/password auth |
+| `Login.jsx` | Google OAuth + email/password auth with dynamic themed visuals, animated risk mosaic, live risk signals panel, and auto-detecting origin URLs in help modal |
 | `Risk pages` | Individual ML-powered risk prediction forms |
 
 ### **Backend File Details**
 
 | File | Purpose |
 |------|---------|
-| `main.py` | FastAPI app, CORS, routers for all modules |
+| `main.py` | FastAPI app, CORS, routers for all modules, dynamic notification engine with daily-rotating message templates and time-of-day greetings |
 | `ai_service.py` | OpenRouter API wrapper for AI analysis |
 | `database.py` | SQLAlchemy SessionLocal, engine creation |
 | `models.py` | User, Portfolio, CreditPrediction, MarketRiskData, BusinessRisk schemas |

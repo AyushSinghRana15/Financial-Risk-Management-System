@@ -58,6 +58,8 @@ const riskSignals = [
 ];
 
 function OriginHelpModal({ onClose, missingClientId }) {
+  const currentOrigin = window.location.origin;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-md">
       <div className="w-full max-w-lg overflow-hidden rounded-lg border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
@@ -93,12 +95,15 @@ function OriginHelpModal({ onClose, missingClientId }) {
             <p className="font-medium text-slate-950 dark:text-white">Authorized JavaScript origins</p>
             <div className="mt-3 space-y-2 font-mono text-xs">
               <div className="rounded-md bg-slate-100 px-3 py-2 text-slate-700 dark:bg-slate-950 dark:text-emerald-300">
-                https://finrisk.online
+                {currentOrigin}
               </div>
               <div className="rounded-md bg-slate-100 px-3 py-2 text-slate-700 dark:bg-slate-950 dark:text-emerald-300">
                 http://localhost:5173
               </div>
             </div>
+            <p className="mt-2 text-xs text-slate-400">
+              Add <strong>{currentOrigin}</strong> and <strong>http://localhost:5173</strong> to your Google Cloud credentials.
+            </p>
           </div>
 
           <a
