@@ -3,10 +3,7 @@ function Skeleton({ className = "", count = 1 }) {
   return (
     <>
       {items.map((_, i) => (
-        <div
-          key={i}
-          className={`animate-pulse bg-slate-200 dark:bg-slate-700 rounded-xl ${className}`}
-        />
+        <div key={i} className={`shimmer rounded-xl ${className}`} />
       ))}
     </>
   );
@@ -29,7 +26,7 @@ function SkeletonChart() {
       <Skeleton className="h-4 w-1/4 mb-4" />
       <div className="flex items-end gap-2 h-32">
         {[40, 60, 30, 80, 50, 70, 45, 90, 55, 65, 35, 75].map((h, i) => (
-          <div key={i} className="flex-1 bg-slate-200 dark:bg-slate-700 rounded-t-lg animate-pulse" style={{ height: `${h}%` }} />
+          <div key={i} className="flex-1 shimmer rounded-t-lg" style={{ height: `${h}%` }} />
         ))}
       </div>
     </div>
