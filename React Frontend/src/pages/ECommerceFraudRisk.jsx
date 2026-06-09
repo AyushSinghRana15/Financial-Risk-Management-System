@@ -8,6 +8,7 @@ import { FaShoppingCart, FaMoneyBillWave, FaMobileAlt, FaGlobeAmericas, FaCredit
 import { API_ENDPOINTS } from "../config/api";
 import SEO from "../components/SEO";
 
+import EmptyState from "../components/EmptyState";
 const features = [
   { name: "Transaction Amount", importance: 0.28, icon: FaMoneyBillWave, color: "blue", desc: "Larger amounts tend to have higher fraud risk, especially overnight" },
   { name: "Account Age", importance: 0.21, icon: FaHistory, color: "indigo", desc: "Newly created accounts are significantly more likely to be fraudulent" },
@@ -319,7 +320,7 @@ function PredictorTab({ form, setForm, handleChange, handlePredict, loading, res
               </div>
             </div>
 
-        {history.length > 0 && (
+        {history.length > 0 ? (
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-5">
             <div className="flex items-center gap-2 mb-4">
               <FaHistory className="text-gray-500" />
@@ -337,6 +338,8 @@ function PredictorTab({ form, setForm, handleChange, handlePredict, loading, res
               ))}
             </div>
           </div>
+        ) : (
+          <EmptyState icon={<FaHistory className="text-3xl" />} title="No predictions yet" description="Fill the form and click Predict to see your history here." />
         )}
           </>
       </div>

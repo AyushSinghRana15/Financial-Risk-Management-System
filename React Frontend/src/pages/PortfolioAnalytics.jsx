@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { FaChartPie, FaChartBar, FaChartLine, FaWallet, FaArrowUp, FaArrowDown, FaSync, FaLayerGroup, FaExclamationTriangle, FaShieldAlt, FaPercent, FaBalanceScale, FaHistory, FaFire, FaLeaf } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 import SEO from "../components/SEO";
+import { SkeletonCard, SkeletonChart } from "../components/Skeleton";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 const ASSET_TYPE_COLORS = {
@@ -206,8 +207,12 @@ export default function PortfolioAnalytics() {
             </div>
 
             {loading ? (
-                <div className="flex items-center justify-center py-32">
-                    <svg className="animate-spin h-8 w-8 text-blue-500" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                <div className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[1,2,3,4].map(i => <SkeletonCard key={i} rows={2} />)}
+                    </div>
+                    <SkeletonChart />
+                    <SkeletonChart />
                 </div>
             ) : assets.length === 0 ? (
                 <div className="bg-white dark:bg-slate-800 rounded-2xl p-16 text-center shadow border border-gray-100 dark:border-slate-700">

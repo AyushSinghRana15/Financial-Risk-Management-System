@@ -5,6 +5,7 @@ import { FaTint, FaChartLine, FaExclamationTriangle, FaCheckCircle, FaBolt, FaHi
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 import SEO from "../components/SEO";
 
+import EmptyState from "../components/EmptyState";
 const LEVEL_COLORS = {
   "Very Low": { color: "#22c55e", bg: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" },
   "Low": { color: "#16a34a", bg: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" },
@@ -212,7 +213,7 @@ export default function LiquidityRisk() {
                 </div>
               </div>
           {/* HISTORY */}
-          {history.length > 0 && (
+          {history.length > 0 ? (
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-5">
               <div className="flex items-center gap-2 mb-4">
                 <FaHistory className="text-gray-500" />
@@ -231,6 +232,8 @@ export default function LiquidityRisk() {
                 })}
               </div>
             </div>
+          ) : (
+            <EmptyState icon={<FaHistory className="text-3xl" />} title="No predictions yet" description="Fill the form and click Predict to see your history here." />
           )}
         </div>
         )}

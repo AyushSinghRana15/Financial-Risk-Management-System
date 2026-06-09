@@ -8,6 +8,7 @@ import { FaChartLine, FaExclamationTriangle, FaCheckCircle, FaBolt, FaHistory, F
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 import SEO from "../components/SEO";
 
+import EmptyState from "../components/EmptyState";
 function FinancialRisk() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userEmail = user?.email || "";
@@ -214,7 +215,7 @@ function FinancialRisk() {
               </div>
 
           {/* HISTORY */}
-          {history.length > 0 && (
+          {history.length > 0 ? (
             <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-5">
               <div className="flex items-center gap-2 mb-4">
                 <FaHistory className="text-gray-500" />
@@ -232,6 +233,8 @@ function FinancialRisk() {
                 ))}
               </div>
             </div>
+          ) : (
+            <EmptyState icon={<FaHistory className="text-3xl" />} title="No predictions yet" description="Fill the form and click Predict to see your history here." />
           )}
             </>
         </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
 import SEO from "../components/SEO";
+import { SkeletonCard } from "../components/Skeleton";
 
 function Settings() {
 
@@ -137,7 +138,11 @@ function Settings() {
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-10">Loading...</div>
+                    <div className="grid grid-cols-1 gap-6 py-10">
+                        <div className="h-32 bg-slate-200 dark:bg-slate-700 rounded-2xl animate-pulse" />
+                        <div className="h-48 bg-slate-200 dark:bg-slate-700 rounded-2xl animate-pulse" />
+                        <div className="h-24 bg-slate-200 dark:bg-slate-700 rounded-2xl animate-pulse" />
+                    </div>
                 ) : (
                 <>
                 {/* Google Profile Card - Read Only */}

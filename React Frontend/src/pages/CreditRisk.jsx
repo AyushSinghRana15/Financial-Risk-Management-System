@@ -7,6 +7,7 @@ import {
 import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap, FaInfoCircle, FaChevronDown, FaShieldAlt, FaCreditCard, FaChartLine, FaCheckCircle, FaExclamationTriangle, FaMoneyBillWave, FaUserTie, FaChartBar, FaHistory, FaBolt, FaCreditCard as FaCard, FaPiggyBank, FaBriefcase, FaClock, FaPercent } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 import SEO from "../components/SEO";
+import EmptyState from "../components/EmptyState";
 
 const behaviorOptions = {
   ext1: [
@@ -410,13 +411,13 @@ export default function CreditRisk() {
         {/* RIGHT PANEL - 2 cols */}
         <div className="lg:col-span-2 space-y-6">
 
-          {/* HISTORY - always visible when exists, placed at top */}
-          {history.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <FaHistory className="text-gray-500" />
-                <h3 className="font-semibold text-gray-800 dark:text-white">Recent Predictions</h3>
-              </div>
+          {/* HISTORY */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <FaHistory className="text-gray-500" />
+              <h3 className="font-semibold text-gray-800 dark:text-white">Recent Predictions</h3>
+            </div>
+            {history.length > 0 ? (
               <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
                 {history.slice(0, 5).map(h => (
                   <div key={h.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
@@ -430,8 +431,14 @@ export default function CreditRisk() {
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <EmptyState
+                icon={<FaHistory className="text-3xl" />}
+                title="No predictions yet"
+                description="Fill the form and click Predict to see your credit risk assessment history here."
+              />
+            )}
+          </div>
 
           {result ? (
             <>
