@@ -723,32 +723,32 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
     if latest_business and latest_business.risk_score is not None:
         score = latest_business.risk_score * 100
         if score >= 70:
-            add(_pick(BUSINESS_TEMPLATES, seed, "high").format(score=score), "warning", latest_business.recorded_at)
+            add(_pick(BUSINESS_TEMPLATES, seed, "high").format(score=score), "warning", latest_business.created_at)
         elif score >= 40:
-            add(_pick(BUSINESS_TEMPLATES, seed, "moderate").format(score=score), "info", latest_business.recorded_at)
+            add(_pick(BUSINESS_TEMPLATES, seed, "moderate").format(score=score), "info", latest_business.created_at)
         else:
-            add(_pick(BUSINESS_TEMPLATES, seed, "low").format(score=score), "success", latest_business.recorded_at)
+            add(_pick(BUSINESS_TEMPLATES, seed, "low").format(score=score), "success", latest_business.created_at)
 
     # ---- liquidity risk ----
     if latest_liquidity and latest_liquidity.risk_score is not None:
         score = latest_liquidity.risk_score * 100
         ratio = (latest_liquidity.assets / latest_liquidity.liabilities) if latest_liquidity.liabilities else 0.0
         if score >= 70:
-            add(_pick(LIQUIDITY_TEMPLATES, seed, "high").format(score=score, ratio=ratio), "warning", latest_liquidity.recorded_at)
+            add(_pick(LIQUIDITY_TEMPLATES, seed, "high").format(score=score, ratio=ratio), "warning", latest_liquidity.created_at)
         elif score >= 40:
-            add(_pick(LIQUIDITY_TEMPLATES, seed, "moderate").format(score=score, ratio=ratio), "info", latest_liquidity.recorded_at)
+            add(_pick(LIQUIDITY_TEMPLATES, seed, "moderate").format(score=score, ratio=ratio), "info", latest_liquidity.created_at)
         else:
-            add(_pick(LIQUIDITY_TEMPLATES, seed, "low").format(score=score, ratio=ratio), "success", latest_liquidity.recorded_at)
+            add(_pick(LIQUIDITY_TEMPLATES, seed, "low").format(score=score, ratio=ratio), "success", latest_liquidity.created_at)
 
     # ---- financial risk ----
     if latest_financial and latest_financial.risk_score is not None:
         score = latest_financial.risk_score * 100
         if score >= 70:
-            add(_pick(FINANCIAL_TEMPLATES, seed, "high").format(score=score), "warning", latest_financial.recorded_at)
+            add(_pick(FINANCIAL_TEMPLATES, seed, "high").format(score=score), "warning", latest_financial.created_at)
         elif score >= 40:
-            add(_pick(FINANCIAL_TEMPLATES, seed, "moderate").format(score=score), "info", latest_financial.recorded_at)
+            add(_pick(FINANCIAL_TEMPLATES, seed, "moderate").format(score=score), "info", latest_financial.created_at)
         else:
-            add(_pick(FINANCIAL_TEMPLATES, seed, "low").format(score=score), "success", latest_financial.recorded_at)
+            add(_pick(FINANCIAL_TEMPLATES, seed, "low").format(score=score), "success", latest_financial.created_at)
 
     # ---- fraud detection ----
     if latest_fraud and latest_fraud.fraud_probability is not None:

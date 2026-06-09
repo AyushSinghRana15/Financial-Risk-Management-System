@@ -104,7 +104,7 @@ def get_financial_history(email: str, db: Session = Depends(get_db)):
     
     records = db.query(FinancialRisk).filter(
         FinancialRisk.user_id == user.id
-    ).order_by(FinancialRisk.recorded_at.desc()).limit(10).all()
+    ).order_by(FinancialRisk.created_at.desc()).limit(10).all()
     
     return {
         "history": [
@@ -112,7 +112,7 @@ def get_financial_history(email: str, db: Session = Depends(get_db)):
                 "id": r.id,
                 "risk_score": r.risk_score,
                 "risk_label": r.risk_label,
-                "recorded_at": r.recorded_at.isoformat() if r.recorded_at else None
+                "recorded_at": r.created_at.isoformat() if r.created_at else None
             }
             for r in records
         ]

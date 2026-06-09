@@ -33,6 +33,7 @@ class Portfolio(Base):
     quantity = Column(Float)
     buy_price = Column(Float)
     current_price = Column(Float)
+    total_value = Column(Float)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -115,9 +116,10 @@ class LiquidityRisk(Base):
     assets = Column(Float)
     liabilities = Column(Float)
     cash_flow = Column(Float)
+    liquidity_ratio = Column(Float)
     risk_score = Column(Float)
     risk_label = Column(String(50))
-    recorded_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 # ================= OPERATIONAL =================
@@ -147,7 +149,7 @@ class BusinessRisk(Base):
     growth_rate = Column(Float)
     risk_score = Column(Float)
     risk_level = Column(String(20))
-    recorded_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 # ================= FINANCIAL =================
@@ -162,7 +164,7 @@ class FinancialRisk(Base):
     financial_ratio = Column(Float)
     risk_score = Column(Float)
     risk_label = Column(String(50))
-    recorded_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 # ================= ANALYSIS =================

@@ -660,3 +660,5 @@ This project is for educational and research purposes in financial risk modeling
 - **Neon Database** for serverless PostgreSQL
 - **Google Cloud** for OAuth authentication
 - **yfinance** for real-time market data
+- **Vercel** for frontend hosting and deployment
+- **Hugging Face Spaces** for backend hosting (Docker)

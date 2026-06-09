@@ -101,7 +101,7 @@ def get_business_risk_history(email: str, db: Session = Depends(get_db)):
     
     records = db.query(BusinessRisk).filter(
         BusinessRisk.user_id == user.id
-    ).order_by(BusinessRisk.recorded_at.desc()).limit(10).all()
+    ).order_by(BusinessRisk.created_at.desc()).limit(10).all()
     
     return {
         "history": [
@@ -109,7 +109,7 @@ def get_business_risk_history(email: str, db: Session = Depends(get_db)):
                 "id": r.id,
                 "risk_score": r.risk_score,
                 "risk_label": r.risk_level,
-                "recorded_at": r.recorded_at.isoformat() if r.recorded_at else None
+                "recorded_at": r.created_at.isoformat() if r.created_at else None
             }
             for r in records
         ]
