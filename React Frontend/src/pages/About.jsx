@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { FaGithub, FaLinkedin, FaTwitter, FaExternalLinkAlt, FaQuoteLeft } from "react-icons/fa";
+import { FaRocket, FaExternalLinkAlt, FaQuoteLeft } from "react-icons/fa";
 import SEO from "../components/SEO";
 
 const team = [
@@ -93,7 +93,7 @@ function About() {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="flex flex-wrap justify-center gap-3 mt-8"
                     >
-                        {["ML-Powered", "Real-time Data", "7 Risk Models", "Open Source"].map((tag) => (
+                        {["ML-Powered", "Real-time Data", "7 Risk Models", "Live at finrisk.online"].map((tag) => (
                             <span key={tag} className="px-4 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full text-sm text-slate-600 dark:text-slate-300 shadow-sm">
                                 {tag}
                             </span>
@@ -291,25 +291,25 @@ function About() {
                     </div>
                 </motion.section>
 
-                {/* GITHUB CTA */}
+                {/* TRY IT CTA */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="text-center bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-10 shadow-xl"
+                    className="text-center bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-800 rounded-2xl p-10 shadow-xl"
                 >
-                    <FaGithub className="text-4xl text-white mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-white mb-2">Open Source</h2>
-                    <p className="text-slate-300 mb-6 max-w-md mx-auto">
-                        FinRisk is open source. Contribute, fork, or just explore the code.
+                    <FaRocket className="text-4xl text-white mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold text-white mb-2">Try FinRisk</h2>
+                    <p className="text-blue-100 mb-6 max-w-md mx-auto">
+                        Explore the live platform — run risk predictions, track your portfolio, and get AI-powered insights.
                     </p>
                     <a
-                        href="https://github.com/AyushSinghRana15/Financial-Risk-Management-System"
+                        href="https://finrisk.online"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-all border border-white/20"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-700 rounded-xl font-semibold transition-all hover:bg-blue-50 shadow-lg"
                     >
-                        View on GitHub <FaExternalLinkAlt className="text-xs" />
+                        Go to Dashboard <FaExternalLinkAlt className="text-xs" />
                     </a>
                 </motion.div>
 
