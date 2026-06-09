@@ -153,6 +153,271 @@ FinRisk transforms complex financial data into actionable insights through:
 
 ---
 
+## 🗄️ Database Design
+
+### Overview
+
+The system uses **Neon PostgreSQL** (production) with **SQLite** fallback for local development. All models are defined via **SQLAlchemy ORM** (`Backend/models.py`) and managed through declarative base. The schema is normalized to **3NF** with 11 tables.
+
+### Connection Configuration (`Backend/database.py`)
+
+| Setting | Production (Neon PostgreSQL) | Local Dev (SQLite) |
+|---------|------------------------------|-------------------|
+| Pool Size | 5 connections | N/A |
+| Max Overflow | 10 connections | N/A |
+| Pool Pre-Ping | Enabled (stale connection detection) | N/A |
+| Pool Recycle | 300 seconds | N/A |
+| SSL | `sslmode=require` | N/A |
+| Thread Safety | `check_same_thread=False` | Required for SQLite |
+
+### Entity Relationship Summary
+
+```
+users (1) ──┬── (N) portfolio
+            ├── (N) credit_predictions
+            ├── (N) market_risk_data
+            ├── (N) business_risk
+            ├── (N) liquidity_risk
+            ├── (N) financial_risk
+            └── (N) fraud_predictions
+```
+
+### Table Schemas
+
+#### `users` — User accounts & authentication
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| `id` | `Integer` | `PK, INDEX` | Auto-increment user ID |
+| `name` | `String(100)` | `NULLABLE` | Display name |
+| `email` | `String(100)` | `UNIQUE, NOT NULL, INDEX` | Login identifier |
+| `password_hash` | `String(255)` | `NOT NULL` | Bcrypt hashed password |
+| `age` | `Integer` | `NULLABLE` | User age |
+| `risk_profile` | `String(20)` | `NULLABLE` | Risk preference (Low/Medium/High) |
+| `is_verified` | `Boolean` | `default=False` | Email verification status |
+| `verification_token` | `String(255)` | `NULLABLE` | Email verification token |
+| `created_at` | `DateTime(tz)` | `server_default=now()` | Registration timestamp |
+
+*Normalization:* 3NF. Email is a candidate key separate from the surrogate `id` PK. Profile fields kept in the same table (no 1:1 split) because access pattern always fetches user + profile together.
+
+---
+
+#### `portfolio` — User investment holdings
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| `id` | `Integer` | `PK, INDEX` | Auto-increment ID |
+| `user_id` | `Integer` | `FK → users.id` | Owner |
+| `asset_name` | `String` | — | Ticker/symbol (e.g. AAPL, BTC) |
+| `asset_type` | `String` | — | stock, crypto, etf, etc. |
+| `quantity` | `Float` | — | Number of units held |
+| `buy_price` | `Float` | — | Average buy price |
+| `current_price` | `Float` | — | Latest market price (from yfinance) |
+| `total_value` | `Float` | — | `quantity × current_price` (denormalized for fast aggregation) |
+| `created_at` | `DateTime(tz)` | `server_default=now()` | Added timestamp |
+
+*Normalization:* 3NF. `total_value` is intentionally denormalized to avoid repeated multiplication on every dashboard load (the dashboard aggregates all portfolio values). Updated on price refresh.
+
+*Access pattern:* Dashboard stats endpoint `SELECT total_value WHERE user_id = ?` runs in parallel with other queries.
+
+---
+
+#### `credit_applications` — Raw credit application features
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | `Integer PK` | Auto-increment |
+| `income`, `credit`, `annuity` | `Float` | Financial inputs |
+| `goods_price` | `Float` | Price of goods being financed |
+| `children`, `family_members` | `Integer` | Family composition |
+| `age` | `Float` | Applicant age |
+| `employment_years` | `Float` | Years in current job |
+| `ext1–ext3` | `Float` | External risk scores (bureau) |
+| `ext_mean`, `ext_std`, `ext_min`, `ext_max` | `Float` | Aggregated external features |
+| `credit_income_ratio` | `Float` | Engineered: `credit / income` |
+| `annuity_income_ratio` | `Float` | Engineered: `annuity / income` |
+| `credit_term` | `Float` | Engineered loan term proxy |
+| `income_per_child` | `Float` | Engineered: `income / children` |
+| `credit_goods_ratio` | `Float` | Engineered: `credit / goods_price` |
+| `bureau_year`, `bureau_week`, `bureau_month` | `Float` | Bureau query recency |
+| `def30`, `def60` | `Float` | Days past due (30/60) |
+
+*Purpose:* Stores raw features before model inference. Used for reproducibility and audit trails.
+
+---
+
+#### `credit_predictions` — Credit risk model output
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| `id` | `Integer` | `PK, INDEX` | Auto-increment |
+| `user_id` | `Integer` | `FK → users.id, NULLABLE, INDEX` | User who requested prediction |
+| `application_id` | `Integer` | — | Link to source `credit_applications` |
+| `risk_score` | `Float` | — | Default probability (0–1) |
+| `risk_label` | `String(20)` | — | Low / Medium / High Risk |
+| `confidence` | `Float` | — | Model confidence |
+| `predicted_at` | `DateTime(tz)` | `server_default=now()` | Prediction timestamp |
+
+*Index:* `user_id` is indexed for fast "latest prediction per user" lookups on the dashboard.
+
+---
+
+#### `market_risk_data` — Market VaR predictions
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| `id` | `Integer` | `PK, INDEX` | Auto-increment |
+| `user_id` | `Integer` | `FK → users.id, NULLABLE, INDEX` | User |
+| `symbol` | `String(20)` | — | Market index/symbol |
+| `open_price`–`low_price` | `Float` | — | OHLC data |
+| `volume` | `BigInteger` | — | Trading volume |
+| `risk_score` | `Float` | — | VaR value (monetary loss) |
+| `risk_level` | `String(50)` | — | Low / Medium / High |
+| `recorded_at` | `DateTime(tz)` | `server_default=now()` | Timestamp |
+
+---
+
+#### `business_risk` — Business risk assessments
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| `id` | `Integer` | `PK, INDEX` | Auto-increment |
+| `user_id` | `Integer` | `FK → users.id, NULLABLE, INDEX` | User |
+| `revenue` | `Float` | — | Annual revenue |
+| `expenses` | `Float` | — | Annual expenses |
+| `competition_level` | `String(50)` | — | Low / Medium / High |
+| `growth_rate` | `Float` | — | Year-over-year growth |
+| `risk_score` | `Float` | — | Risk probability (0–1) |
+| `risk_level` | `String(20)` | — | Risk category |
+| `recorded_at` | `DateTime(tz)` | `server_default=now()` | Timestamp |
+
+---
+
+#### `liquidity_risk` — Liquidity/cash-flow risk
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| `id` | `Integer` | `PK, INDEX` | Auto-increment |
+| `user_id` | `Integer` | `FK → users.id, NULLABLE` | User |
+| `assets` | `Float` | — | Total liquid assets |
+| `liabilities` | `Float` | — | Short-term liabilities |
+| `cash_flow` | `Float` | — | Operating cash flow |
+| `liquidity_ratio` | `Float` | — | `assets / liabilities` |
+| `risk_score` | `Float` | — | Risk score |
+| `risk_label` | `String(50)` | — | Risk level |
+| `created_at` | `DateTime(tz)` | `server_default=now()` | Timestamp |
+
+---
+
+#### `financial_risk` — Financial/capital structure risk
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| `id` | `Integer` | `PK, INDEX` | Auto-increment |
+| `user_id` | `Integer` | `FK → users.id, NULLABLE` | User |
+| `income` | `Float` | — | Income |
+| `debt` | `Float` | — | Total debt |
+| `assets` | `Float` | — | Total assets |
+| `financial_ratio` | `Float` | — | Debt-to-income or similar |
+| `risk_score` | `Float` | — | Risk score |
+| `risk_label` | `String(50)` | — | Low / Medium / High |
+| `created_at` | `DateTime(tz)` | `server_default=now()` | Timestamp |
+
+---
+
+#### `fraud_predictions` — E-commerce fraud detection
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| `id` | `Integer` | `PK, INDEX` | Auto-increment |
+| `user_id` | `Integer` | `FK → users.id, NULLABLE` | User |
+| `amount` | `Float` | — | Transaction amount |
+| `payment_method` | `String(50)` | — | Credit Card, PayPal, etc. |
+| `product_category` | `String(50)` | — | Electronics, Clothing, etc. |
+| `fraud_probability` | `Float` | — | Probability of fraud (0–1) |
+| `label` | `String(20)` | — | Fraud / Legitimate |
+| `predicted_at` | `DateTime(tz)` | `server_default=now()` | Timestamp |
+
+---
+
+#### `operational_risk` — Operational risk events
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| `id` | `Integer` | `PK, INDEX` | Auto-increment |
+| `event_type` | `String(50)` | — | Category (e.g. System Failure) |
+| `description` | `Text` | — | Free-text event description |
+| `severity` | `String(20)` | — | Low / Medium / High / Critical |
+| `financial_loss` | `Float` | — | Estimated loss amount |
+| `department` | `String(50)` | — | Affected department |
+| `risk_score` | `Float` | — | Computed risk score |
+| `occurred_at` | `DateTime(tz)` | `server_default=now()` | Event timestamp |
+
+*Note:* Operational risk is tenant-agnostic (no `user_id` FK) — it records system-wide events.
+
+---
+
+#### `ml_predictions` — Generic ML prediction audit log
+
+| Column | Type | Constraints | Description |
+|--------|------|------------|-------------|
+| `id` | `Integer` | `PK, INDEX` | Auto-increment |
+| `model_name` | `String(50)` | — | Model identifier (xgboost, catboost, etc.) |
+| `risk_type` | `String(50)` | — | credit, market, fraud, etc. |
+| `entity_id` | `Integer` | — | Reference to source record |
+| `input_features` | `Text` | — | JSON-serialized feature vector |
+| `risk_score` | `Float` | — | Prediction score |
+| `risk_label` | `String(20)` | — | Classification label |
+| `confidence` | `Float` | — | Model confidence |
+| `predicted_at` | `DateTime(tz)` | `server_default=now()` | Timestamp |
+
+---
+
+### Indexes Summary
+
+| Table | Column(s) | Type | Purpose |
+|-------|-----------|------|---------|
+| `users` | `id` | Primary | Row lookup |
+| `users` | `email` | Unique | Auth lookup by email |
+| `portfolio` | `id` | Primary | Row lookup |
+| `credit_predictions` | `id` | Primary | Row lookup |
+| `credit_predictions` | `user_id` | Foreign Key | Dashboard: latest prediction per user |
+| `market_risk_data` | `id` | Primary | Row lookup |
+| `market_risk_data` | `user_id` | Foreign Key | Dashboard: latest VaR per user |
+| `business_risk` | `id` | Primary | Row lookup |
+| `business_risk` | `user_id` | Foreign Key | Dashboard: latest assessment per user |
+| `liquidity_risk` | `id` | Primary | Row lookup |
+| `financial_risk` | `id` | Primary | Row lookup |
+| `fraud_predictions` | `id` | Primary | Row lookup |
+| `operational_risk` | `id` | Primary | Row lookup |
+| `ml_predictions` | `id` | Primary | Row lookup |
+
+### Normalization Level
+
+The schema is **Third Normal Form (3NF)**:
+
+- **1NF**: All columns are atomic (no arrays or JSON blobs except `ml_predictions.input_features` which stores serialized features — intentional for audit flexibility)
+- **2NF**: Every non-key column depends on the entire primary key (all tables have single-column surrogate PKs)
+- **3NF**: No transitive dependencies. Profile fields (`age`, `risk_profile`) remain in `users` because they are queried together with authentication data in every profile access — splitting would add a join without benefit.
+
+**Deliberate denormalization:**
+- `portfolio.total_value` — precomputed `quantity × current_price` to avoid recalculating across N assets on every dashboard load
+- `credit_applications` stores both raw inputs AND engineered features (ratios, aggregations) in the same row — this preserves audit trail without requiring feature pipeline replay
+
+### Key Query Patterns
+
+| Pattern | Tables Involved | Frequency |
+|---------|----------------|-----------|
+| Auth | `users` (WHERE email = ?) | Every request |
+| Dashboard | `users` → `portfolio`, `credit_predictions`, `market_risk_data`, `business_risk` | Page load |
+| Prediction + History | Risk table (INSERT new row, SELECT latest N for user) | Per prediction |
+| Portfolio CRUD | `portfolio` (WHERE user_id = ?) | On interaction |
+| Notifications | `fraud_predictions`, `credit_predictions`, `market_risk_data`, `business_risk`, `liquidity_risk`, `financial_risk` (WHERE user_id = ? ORDER BY predicted_at DESC LIMIT 10) | Page load (via notification panel) |
+
+Dashboard queries are now **parallelized** via `ThreadPoolExecutor` (4 workers) — portfolio, credit, market, and business risk lookups run concurrently, cutting wall-clock time from sum-of-latencies to max-of-latencies.
+
+---
+
 ## 📂 Project Structure
 
 ```
