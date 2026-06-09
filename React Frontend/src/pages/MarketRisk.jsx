@@ -320,6 +320,47 @@ function MarketRisk() {
                             {/* Divider */}
                             <div className="border-t border-gray-100 dark:border-slate-700" />
 
+                            {/* Our ML Model */}
+                            <div className="relative">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
+                                        <FaBolt className="text-cyan-600 dark:text-cyan-400 text-xl" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Our ML Model: XGBoost Hybrid VaR</h3>
+                                </div>
+                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">
+                                    Our model uses a <span className="font-semibold text-cyan-600 dark:text-cyan-400">Hybrid ML VaR</span> approach — 
+                                    an <span className="font-semibold text-cyan-600 dark:text-cyan-400">XGBoost Regressor</span> trained on 5 years of NIFTY 50 market data 
+                                    (2021–2026) to predict the next day's return. VaR is then computed by adjusting this prediction with 
+                                    the historical tail-risk residual (5th percentile of errors). This captures both <span className="font-semibold">predictable market patterns</span> 
+                                    and <span className="font-semibold">extreme tail events</span>.
+                                </p>
+                                <div className="mt-4 ml-11 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 p-4 rounded-xl border border-cyan-100 dark:border-cyan-800">
+                                        <p className="font-semibold text-cyan-700 dark:text-cyan-300 text-sm mb-2">Hybrid ML VaR Formula</p>
+                                        <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2">
+                                            <p><b>VaR = Predicted Return + Residual VaR</b></p>
+                                            <p className="mt-2">Where:</p>
+                                            <p>• Predicted Return from XGBoost (next-day NIFTY return)</p>
+                                            <p>• Residual VaR = 5th percentile of training errors</p>
+                                            <p>• Acts as a tail-risk safety buffer</p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-4 rounded-xl border border-emerald-100 dark:border-emerald-800">
+                                        <p className="font-semibold text-emerald-700 dark:text-emerald-300 text-sm mb-2">Training Details</p>
+                                        <div className="text-xs text-gray-600 dark:text-gray-300 space-y-2">
+                                            <p>• <b>Data:</b> NIFTY 50 daily (5 yrs, ~1,200 rows)</p>
+                                            <p>• <b>Split:</b> 80/20 chronological (no shuffle)</p>
+                                            <p>• <b>Features:</b> 13 market indicators</p>
+                                            <p>• <b>Validation:</b> 5.24% breach rate (well calibrated)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="border-t border-gray-100 dark:border-slate-700" />
+
                             {/* What is VaR */}
                             <div className="relative">
                                 <div className="flex items-center gap-3 mb-3">
@@ -417,39 +458,36 @@ function MarketRisk() {
                             <div className="relative">
                                 <div className="flex items-center gap-3 mb-3">
                                     <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                                        <FaChartLine className="text-purple-600 dark:text-purple-400 text-xl" />
+                                        <FaGlobeAsia className="text-purple-600 dark:text-purple-400 text-xl" />
                                     </div>
                                     <h3 className="text-lg font-bold text-gray-800 dark:text-white">Understanding Market Indicators</h3>
                                 </div>
                                 <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">
-                                    Our model uses multiple market indicators to assess risk. Each indicator represents a different aspect of market behavior. 
+                                    Our model uses <span className="font-semibold text-purple-600 dark:text-purple-400">13 carefully selected market indicators</span> 
+                                    to assess risk. These features capture returns, volatility, tail behavior, implied fear, and individual stock performance.
                                     Enter the values below based on current market data to get an accurate VaR prediction.
                                 </p>
                                 
                                 {/* Indicator Types */}
                                 <div className="mt-4 ml-11 space-y-4">
-                                    {/* Current Values */}
+                                    {/* How Features Are Engineered */}
                                     <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-4 rounded-xl border border-purple-100 dark:border-purple-800">
                                         <p className="font-semibold text-purple-700 dark:text-purple-300 text-sm mb-3 flex items-center gap-2">
-                                            <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                                            Current Market Values
+                                            <FaChartBar className="text-purple-500" />
+                                            Feature Engineering Pipeline
                                         </p>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-500 dark:text-gray-400">Stock Indices:</span>
-                                                <span className="font-mono bg-white dark:bg-slate-700 px-2 py-0.5 rounded text-purple-600 dark:text-purple-300">e.g., 17850.25</span>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                                            <div className="bg-white dark:bg-slate-700 p-3 rounded-lg">
+                                                <p className="font-semibold text-purple-600 dark:text-purple-300 mb-1">Returns</p>
+                                                <p>Log returns of indices, stocks, and VIX. Includes 1, 2, and 5-day lags for trend detection.</p>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-500 dark:text-gray-400">VIX:</span>
-                                                <span className="font-mono bg-white dark:bg-slate-700 px-2 py-0.5 rounded text-purple-600 dark:text-purple-300">e.g., 18.45</span>
+                                            <div className="bg-white dark:bg-slate-700 p-3 rounded-lg">
+                                                <p className="font-semibold text-purple-600 dark:text-purple-300 mb-1">Volatility &amp; Tails</p>
+                                                <p>20-day and 60-day rolling volatility. Skewness and kurtosis capture distribution tail risk.</p>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-500 dark:text-gray-400">USD/INR:</span>
-                                                <span className="font-mono bg-white dark:bg-slate-700 px-2 py-0.5 rounded text-purple-600 dark:text-purple-300">e.g., 83.50</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-500 dark:text-gray-400">Gold:</span>
-                                                <span className="font-mono bg-white dark:bg-slate-700 px-2 py-0.5 rounded text-purple-600 dark:text-purple-300">e.g., 2020.50</span>
+                                            <div className="bg-white dark:bg-slate-700 p-3 rounded-lg">
+                                                <p className="font-semibold text-purple-600 dark:text-purple-300 mb-1">Fear &amp; Liquidity</p>
+                                                <p>India VIX level (fear gauge) and trading volumes as liquidity proxies.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -480,7 +518,7 @@ function MarketRisk() {
                                     <div className="bg-gray-50 dark:bg-slate-700/50 p-4 rounded-xl border border-gray-100 dark:border-slate-600">
                                         <p className="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-2 flex items-center gap-2">
                                             <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                                            Volatility
+                                            Volatility (20-day &amp; 60-day rolling std)
                                         </p>
                                         <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                                             Measures how much prices fluctuate. Higher volatility = Higher VaR.
@@ -502,47 +540,81 @@ function MarketRisk() {
                                             Lagged Values (Historical)
                                         </p>
                                         <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                                            Past values (1, 5, 10, 15, 20 days ago) help identify trends and patterns.
+                                            Past values (1, 2, 5 days ago) help the model identify trends, momentum, and mean-reversion patterns.
                                         </p>
                                         <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
                                             <span>1-day lag = Yesterday's close</span>
                                             <span>•</span>
                                             <span>5-day lag = Last week's value</span>
                                             <span>•</span>
-                                            <span>20-day lag = ~1 month ago</span>
+                                            <span>20-day vol = ~1 month volatility</span>
                                         </div>
                                     </div>
 
-                                    {/* How Values Affect Risk */}
-                                    <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-4 rounded-xl border border-red-100 dark:border-red-800">
-                                        <p className="font-semibold text-red-700 dark:text-red-300 text-sm mb-3 flex items-center gap-2">
-                                            <FaExclamationTriangle className="text-red-500" />
-                                            What Increases Risk?
-                                        </p>
-                                        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                                            <li className="flex items-start gap-2">
-                                                <span className="text-red-500 mt-0.5">•</span>
-                                                <span><b>High volatility</b> - Large daily swings indicate instability</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="text-red-500 mt-0.5">•</span>
-                                                <span><b>Negative returns</b> - Falling markets increase loss potential</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="text-red-500 mt-0.5">•</span>
-                                                <span><b>High VIX</b> - Fear index above 20 signals market stress</span>
-                                            </li>
-                                            <li className="flex items-start gap-2">
-                                                <span className="text-red-500 mt-0.5">•</span>
-                                                <span><b>INR weakening</b> - Currency depreciation affects international holdings</span>
-                                            </li>
-                                        </ul>
+                                    {/* What Increases vs Decreases Risk */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-4 rounded-xl border border-red-100 dark:border-red-800">
+                                            <p className="font-semibold text-red-700 dark:text-red-300 text-sm mb-3 flex items-center gap-2">
+                                                <FaExclamationTriangle className="text-red-500" />
+                                                Increases Risk ✗
+                                            </p>
+                                            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                                                <li className="flex items-start gap-2">
+                                                    <span className="text-red-500 mt-0.5">•</span>
+                                                    <span><b>High volatility</b> — Large daily swings signal instability</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span className="text-red-500 mt-0.5">•</span>
+                                                    <span><b>Negative returns</b> — Falling markets increase loss potential</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span className="text-red-500 mt-0.5">•</span>
+                                                    <span><b>VIX &gt; 20</b> — Fear index signals market stress</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span className="text-red-500 mt-0.5">•</span>
+                                                    <span><b>INR weakening</b> — Hurts international holdings</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span className="text-red-500 mt-0.5">•</span>
+                                                    <span><b>Fat tails</b> — High kurtosis = extreme events more likely</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-xl border border-green-100 dark:border-green-800">
+                                            <p className="font-semibold text-green-700 dark:text-green-300 text-sm mb-3 flex items-center gap-2">
+                                                <FaShieldAlt className="text-green-500" />
+                                                Decreases Risk ✓
+                                            </p>
+                                            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                                                <li className="flex items-start gap-2">
+                                                    <span className="text-green-500 mt-0.5">•</span>
+                                                    <span><b>Low volatility</b> — Calm, predictable markets</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span className="text-green-500 mt-0.5">•</span>
+                                                    <span><b>Positive momentum</b> — Rising indices with consistent returns</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span className="text-green-500 mt-0.5">•</span>
+                                                    <span><b>VIX &lt; 15</b> — Low fear, stable outlook</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span className="text-green-500 mt-0.5">•</span>
+                                                    <span><b>Strong INR</b> — Favorable for foreign investors</span>
+                                                </li>
+                                                <li className="flex items-start gap-2">
+                                                    <span className="text-green-500 mt-0.5">•</span>
+                                                    <span><b>Normal distribution</b> — Low skew/kurtosis = fewer surprises</span>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
 
                                     {/* Quick Reference */}
                                     <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-xl border border-green-100 dark:border-green-800">
                                         <p className="font-semibold text-green-700 dark:text-green-300 text-sm mb-3 flex items-center gap-2">
-                                            <FaShieldAlt className="text-green-500" />
+                                            <FaChartBar className="text-green-500" />
                                             Quick Value Reference
                                         </p>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
@@ -567,6 +639,49 @@ function MarketRisk() {
                                             Tip: Use decimal format. For 1.5%, enter <span className="font-mono bg-gray-200 dark:bg-slate-600 px-1 rounded">0.015</span>
                                         </p>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="border-t border-gray-100 dark:border-slate-700" />
+
+                            {/* Interpreting Results */}
+                            <div className="relative">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                                        <FaRegLightbulb className="text-amber-600 dark:text-amber-400 text-xl" />
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-800 dark:text-white">Interpreting Your VaR Results</h3>
+                                </div>
+                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">
+                                    Your VaR result represents the <span className="font-semibold text-amber-600 dark:text-amber-400">maximum expected loss</span> 
+                                    for a ₹1,00,00,000 (₹1 Cr) portfolio over one trading day at the selected confidence level.
+                                </p>
+                                <div className="mt-4 ml-11 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className={`p-4 rounded-xl border ${prediction !== null && Math.abs(prediction) < 0.02 ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-400" : "bg-gray-50 dark:bg-slate-700/50 border-gray-100 dark:border-slate-600"}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                                            <p className="font-semibold text-green-700 dark:text-green-300">Low Risk (&lt; ₹2L)</p>
+                                        </div>
+                                        <p className="text-xs text-gray-600 dark:text-gray-300">Market conditions are stable. Potential loss is under ₹2 Lakhs. Suitable for normal operations with standard risk monitoring.</p>
+                                    </div>
+                                    <div className={`p-4 rounded-xl border ${prediction !== null && Math.abs(prediction) >= 0.02 && Math.abs(prediction) <= 0.05 ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 ring-2 ring-yellow-400" : "bg-gray-50 dark:bg-slate-700/50 border-gray-100 dark:border-slate-600"}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                            <p className="font-semibold text-yellow-700 dark:text-yellow-300">Moderate Risk (₹2L–₹5L)</p>
+                                        </div>
+                                        <p className="text-xs text-gray-600 dark:text-gray-300">Elevated volatility present. Could lose ₹2–5 Lakhs. Consider reducing position sizes or adding hedges.</p>
+                                    </div>
+                                    <div className={`p-4 rounded-xl border ${prediction !== null && Math.abs(prediction) > 0.05 ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 ring-2 ring-red-400" : "bg-gray-50 dark:bg-slate-700/50 border-gray-100 dark:border-slate-600"}`}>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                                            <p className="font-semibold text-red-700 dark:text-red-300">High Risk (&gt; ₹5L)</p>
+                                        </div>
+                                        <p className="text-xs text-gray-600 dark:text-gray-300">Significant market stress detected. Potential loss &gt; ₹5 Lakhs. Consider reducing exposure, buying puts, or moving to cash.</p>
+                                    </div>
+                                </div>
+                                <div className="mt-4 ml-11 text-xs text-gray-500 dark:text-gray-400 p-3 bg-gray-50 dark:bg-slate-700/50 rounded-lg border border-gray-100 dark:border-slate-600">
+                                    <span className="font-semibold">Pro Tip:</span> A high VaR doesn't mean you <i>will</i> lose that amount — it means there's a 5% chance of losing more than that. Use it as a <span className="font-semibold">red flag</span> to review your portfolio's risk exposure.
                                 </div>
                             </div>
 

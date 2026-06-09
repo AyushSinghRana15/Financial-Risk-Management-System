@@ -167,6 +167,8 @@ export default function CreditRisk() {
             className="overflow-hidden"
           >
             <div ref={infoRef} className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-100 dark:border-slate-700 p-6 space-y-6">
+
+              {/* What is Credit Risk */}
               <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
@@ -174,13 +176,135 @@ export default function CreditRisk() {
                   </div>
                   <h3 className="text-lg font-bold text-gray-800 dark:text-white">What is Credit Risk?</h3>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">Credit Risk is the possibility that a borrower may fail to repay a loan or meet their financial obligations.</p>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">
+                  Credit Risk is the possibility that a borrower may fail to repay a loan or meet their financial obligations. 
+                  Our ML model predicts this probability based on financial history, personal profile, and behavioral patterns.
+                </p>
                 <div className="mt-4 ml-11 grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border"><p className="font-medium text-sm text-gray-700 dark:text-gray-200">Default Risk</p><p className="text-xs text-gray-500 dark:text-gray-400">Borrower fails to repay</p></div>
-                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border"><p className="font-medium text-sm text-gray-700 dark:text-gray-200">Late Payment Risk</p><p className="text-xs text-gray-500 dark:text-gray-400">Delays in repayment</p></div>
-                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border"><p className="font-medium text-sm text-gray-700 dark:text-gray-200">Recovery Risk</p><p className="text-xs text-gray-500 dark:text-gray-400">Difficulty in recovering funds</p></div>
+                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-100 dark:border-slate-600">
+                    <p className="font-medium text-sm text-gray-700 dark:text-gray-200">Default Risk</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Borrower fails to repay entirely</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-100 dark:border-slate-600">
+                    <p className="font-medium text-sm text-gray-700 dark:text-gray-200">Delinquency Risk</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Payments delayed beyond grace period</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg border border-gray-100 dark:border-slate-600">
+                    <p className="font-medium text-sm text-gray-700 dark:text-gray-200">Exposure Risk</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Potential loss amount if default occurs</p>
+                  </div>
                 </div>
               </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-100 dark:border-slate-700" />
+
+              {/* The Model */}
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <FaChartBar className="text-blue-600 dark:text-blue-400 text-xl" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800 dark:text-white">Our ML Model: XGBoost + CatBoost Ensemble</h3>
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed ml-11">
+                  We use a hybrid ensemble of <span className="font-semibold text-blue-600 dark:text-blue-400">XGBoost</span> and <span className="font-semibold text-blue-600 dark:text-blue-400">CatBoost</span> — 
+                  two state-of-the-art gradient boosting algorithms. Each model independently predicts the default probability, 
+                  and the final score is a weighted combination for maximum accuracy.
+                </p>
+                <div className="mt-4 ml-11 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
+                    <p className="font-semibold text-blue-700 dark:text-blue-300 text-sm mb-2">XGBoost</p>
+                    <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
+                      <li>• Handles missing data automatically</li>
+                      <li>• Great with numerical features (income, ratios)</li>
+                      <li>• Built-in regularization prevents overfitting</li>
+                    </ul>
+                  </div>
+                  <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-4 rounded-xl border border-emerald-100 dark:border-emerald-800">
+                    <p className="font-semibold text-emerald-700 dark:text-emerald-300 text-sm mb-2">CatBoost</p>
+                    <ul className="text-xs text-gray-600 dark:text-gray-300 space-y-1">
+                      <li>• Excellently handles categorical features (gender, education)</li>
+                      <li>• Ordered boosting reduces target leakage</li>
+                      <li>• Robust to noisy real-world financial data</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-100 dark:border-slate-700" />
+
+              {/* How Inputs Affect Risk */}
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                    <FaExclamationTriangle className="text-amber-600 dark:text-amber-400 text-xl" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800 dark:text-white">How Your Inputs Affect Risk</h3>
+                </div>
+                <div className="mt-4 ml-11 space-y-3">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-xl border border-green-100 dark:border-green-800">
+                    <p className="font-semibold text-green-700 dark:text-green-300 text-sm mb-2">Reduces Risk ✓</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-300">
+                      <span>• Higher income → lower debt burden</span>
+                      <span>• Longer employment → job stability</span>
+                      <span>• Always on-time bill payments</span>
+                      <span>• Regular savings habit</span>
+                      <span>• Owns house → asset stability</span>
+                      <span>• Higher education → earning potential</span>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 p-4 rounded-xl border border-red-100 dark:border-red-800">
+                    <p className="font-semibold text-red-700 dark:text-red-300 text-sm mb-2">Increases Risk ✗</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-300">
+                      <span>• High loan-to-income ratio (&gt;5x)</span>
+                      <span>• Short/no employment history</span>
+                      <span>• History of late payments</span>
+                      <span>• No savings or irregular savings</span>
+                      <span>• Previous loan defaults</span>
+                      <span>• Lower education level</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-100 dark:border-slate-700" />
+
+              {/* Interpreting Results */}
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <FaShieldAlt className="text-purple-600 dark:text-purple-400 text-xl" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800 dark:text-white">Interpreting Your Results</h3>
+                </div>
+                <div className="mt-4 ml-11 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className={`p-4 rounded-xl border ${prob <= 35 ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 ring-2 ring-green-400" : "bg-gray-50 dark:bg-slate-700/50 border-gray-100 dark:border-slate-600"}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                      <p className="font-semibold text-green-700 dark:text-green-300">Low Risk (&lt; 35%)</p>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Borrower appears financially stable. High likelihood of on-time repayment. Standard lending terms apply.</p>
+                  </div>
+                  <div className={`p-4 rounded-xl border ${prob > 35 && prob <= 65 ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 ring-2 ring-yellow-400" : "bg-gray-50 dark:bg-slate-700/50 border-gray-100 dark:border-slate-600"}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-3 h-3 rounded-full bg-yellow-500"></span>
+                      <p className="font-semibold text-yellow-700 dark:text-yellow-300">Medium Risk (35-65%)</p>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Some risk indicators present. Consider tighter terms, higher interest rates, or additional collateral.</p>
+                  </div>
+                  <div className={`p-4 rounded-xl border ${prob > 65 ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 ring-2 ring-red-400" : "bg-gray-50 dark:bg-slate-700/50 border-gray-100 dark:border-slate-600"}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                      <p className="font-semibold text-red-700 dark:text-red-300">High Risk (&gt; 65%)</p>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Significant default risk. Recommend enhanced due diligence, secured lending, or declining the application.</p>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </motion.div>
         )}
@@ -282,8 +406,32 @@ export default function CreditRisk() {
           </button>
         </div>
 
-        {/* RIGHT PANEL - 2 cols (results + history always visible) */}
+        {/* RIGHT PANEL - 2 cols */}
         <div className="lg:col-span-2 space-y-6">
+
+          {/* HISTORY - always visible when exists, placed at top */}
+          {history.length > 0 && (
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <FaHistory className="text-gray-500" />
+                <h3 className="font-semibold text-gray-800 dark:text-white">Recent Predictions</h3>
+              </div>
+              <div className="space-y-2 max-h-[260px] overflow-y-auto pr-1">
+                {history.slice(0, 5).map(h => (
+                  <div key={h.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(h.predicted_at).toLocaleDateString()}</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-100">{(h.risk_score * 100).toFixed(1)}%</span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                      h.risk_label === 'High Risk' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' :
+                      h.risk_label === 'Medium Risk' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' :
+                      'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                    }`}>{h.risk_label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {result ? (
             <>
               <div className="grid grid-cols-2 gap-4">
@@ -355,29 +503,6 @@ export default function CreditRisk() {
               <div>
                 <FaChartLine className="text-4xl mx-auto mb-3 opacity-40" />
                 <p className="text-sm">Run prediction to see results</p>
-              </div>
-            </div>
-          )}
-
-          {/* HISTORY - always visible when exists */}
-          {history.length > 0 && (
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <FaHistory className="text-gray-500" />
-                <h3 className="font-semibold text-gray-800 dark:text-white">Recent Predictions</h3>
-              </div>
-              <div className="space-y-2">
-                {history.slice(0, 5).map(h => (
-                  <div key={h.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(h.predicted_at).toLocaleDateString()}</span>
-                    <span className="font-medium text-gray-800 dark:text-gray-100">{(h.risk_score * 100).toFixed(1)}%</span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      h.risk_label === 'High Risk' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' :
-                      h.risk_label === 'Medium Risk' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' :
-                      'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                    }`}>{h.risk_label}</span>
-                  </div>
-                ))}
               </div>
             </div>
           )}
