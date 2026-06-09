@@ -20,13 +20,36 @@ function Settings() {
         console.error("Failed to parse user from localStorage:", e);
     }
     
+    const storedPrefs = (() => {
+        try { return JSON.parse(localStorage.getItem('settings') || '{}'); }
+        catch { return {}; }
+    })();
+
     const [form, setForm] = useState({
         name: userName,
         email: userEmail,
         risk: "Medium",
-        alerts: true,
-        realtime: true
+        alerts: storedPrefs.alerts !== undefined ? storedPrefs.alerts : true,
+        realtime: storedPrefs.realtime !== undefined ? storedPrefs.realtime : true
     });
+
+    const [chatbotEnabled, setChatbotEnabled] = useState(
+        storedPrefs.chatbotEnabled !== undefined ? storedPrefs.chatbotEnabled : true
+    );
+    const [notificationFilters, setNotificationFilters] = useState(
+        storedPrefs.notificationFilters || {
+            credit: true,
+            market: true,
+            business: true,
+            liquidity: true,
+            financial: true,
+            fraud: true,
+            tips: true
+        }
+    );
+    const [defaultView, setDefaultView] = useState(
+        storedPrefs.defaultView || "dashboard"
+    );
 
     const [loading, setLoading] = useState(true);
     const [saveSuccess, setSaveSuccess] = useState(false);
@@ -78,6 +101,17 @@ function Settings() {
                 age: 22,
                 risk_profile: form.risk
             });
+
+            localStorage.setItem("settings", JSON.stringify({
+                alerts: form.alerts,
+                realtime: form.realtime,
+                chatbotEnabled,
+                notificationFilters,
+                defaultView
+            }));
+
+            window.dispatchEvent(new Event("settingsChanged"));
+
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (err) {
@@ -162,25 +196,99 @@ function Settings() {
                     </div>
                 </div>
 
-                {/* Risk Preference */}
+                {/* AI Chatbot */}
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow border space-y-4">
                     <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                        Risk Preference
+                        AI Chatbot
+                    </h2>
+
+                    <Toggle
+                        label="Enable Chatbot"
+                        value={chatbotEnabled}
+                        onChange={() => setChatbotEnabled(!chatbotEnabled)}
+                    />
+
+                    <button
+                        onClick={() => {
+                            localStorage.removeItem("chatbot_history");
+                            alert("Conversation history cleared.");
+                        }}
+                        className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition text-sm font-medium"
+                    >
+                        Clear Conversation History
+                    </button>
+
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Disable the floating chatbot icon or reset its memory.
+                    </p>
+                </div>
+
+                {/* Notification Filters */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow border space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                        Notification Filters
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 -mt-2">
+                        Choose which risk alerts appear in your notification panel.
+                    </p>
+
+                    <Toggle
+                        label="Credit Risk"
+                        value={notificationFilters.credit}
+                        onChange={() => setNotificationFilters(prev => ({ ...prev, credit: !prev.credit }))}
+                    />
+                    <Toggle
+                        label="Market Risk"
+                        value={notificationFilters.market}
+                        onChange={() => setNotificationFilters(prev => ({ ...prev, market: !prev.market }))}
+                    />
+                    <Toggle
+                        label="Business Risk"
+                        value={notificationFilters.business}
+                        onChange={() => setNotificationFilters(prev => ({ ...prev, business: !prev.business }))}
+                    />
+                    <Toggle
+                        label="Liquidity Risk"
+                        value={notificationFilters.liquidity}
+                        onChange={() => setNotificationFilters(prev => ({ ...prev, liquidity: !prev.liquidity }))}
+                    />
+                    <Toggle
+                        label="Financial Risk"
+                        value={notificationFilters.financial}
+                        onChange={() => setNotificationFilters(prev => ({ ...prev, financial: !prev.financial }))}
+                    />
+                    <Toggle
+                        label="Fraud Detection"
+                        value={notificationFilters.fraud}
+                        onChange={() => setNotificationFilters(prev => ({ ...prev, fraud: !prev.fraud }))}
+                    />
+                    <Toggle
+                        label="Daily Tips"
+                        value={notificationFilters.tips}
+                        onChange={() => setNotificationFilters(prev => ({ ...prev, tips: !prev.tips }))}
+                    />
+                </div>
+
+                {/* Default Dashboard View */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow border space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                        Default Dashboard View
                     </h2>
 
                     <select
-                        name="risk"
-                        value={form.risk}
-                        onChange={handleChange}
+                        value={defaultView}
+                        onChange={(e) => setDefaultView(e.target.value)}
                         className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white dark:border-slate-600"
                     >
-                        <option>Low</option>
-                        <option>Medium</option>
-                        <option>High</option>
+                        <option value="dashboard">Overview Dashboard</option>
+                        <option value="portfolio">Portfolio</option>
+                        <option value="market">Market Data</option>
+                        <option value="credit-risk">Credit Risk</option>
+                        <option value="market-risk">Market Risk</option>
                     </select>
 
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                        This influences AI risk analysis and alerts.
+                        Choose which page loads first when you visit the app.
                     </p>
                 </div>
 

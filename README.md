@@ -21,21 +21,26 @@ graph TB
 
     subgraph Vercel ["☁️ Vercel — Frontend"]
         React["React SPA<br/>Tailwind + Recharts"]
+        Chatbot["🤖 AI Chatbot<br/>Floating Assistant<br/>Portfolio-aware"]
     end
 
     subgraph HF ["🤗 Hugging Face Spaces — Backend"]
         API["FastAPI<br/>REST API"]
+        ChatbotAPI["POST /api/chatbot<br/>Portfolio + Risk Context"]
         ML["ML Models<br/>XGBoost / CatBoost<br/>21 .pkl files"]
     end
 
     subgraph Services ["🔌 External Services"]
         Neon[("Neon<br/>PostgreSQL")]
         OAuth["Google OAuth<br/>Authentication"]
-        OpenRouter["OpenRouter<br/>AI Insights"]
+        OpenRouter["OpenRouter<br/>GPT-4o-mini"]
         Yahoo["Yahoo Finance<br/>Market Data"]
     end
 
     Vercel -->|"API Calls"| API
+    Chatbot -->|"POST /api/chatbot"| ChatbotAPI
+    ChatbotAPI --> OpenRouter
+    ChatbotAPI --> Neon
     API --> ML
     API --> Neon
     API --> OAuth
@@ -47,7 +52,9 @@ graph TB
     style HF fill:#fef3c7,stroke:#f59e0b,color:#000
     style Services fill:#e0e7ff,stroke:#6366f1,color:#000
     style React fill:#3b82f6,stroke:#2563eb,color:#fff
+    style Chatbot fill:#7c3aed,stroke:#6d28d9,color:#fff
     style API fill:#059669,stroke:#047857,color:#fff
+    style ChatbotAPI fill:#8b5cf6,stroke:#7c3aed,color:#fff
     style ML fill:#d97706,stroke:#b45309,color:#fff
     style Neon fill:#6366f1,stroke:#4f46e5,color:#fff
     style OAuth fill:#dc2626,stroke:#b91c1c,color:#fff
@@ -61,7 +68,8 @@ graph TB
 
 FinRisk transforms complex financial data into actionable insights through:
 
-- **AI-Powered Intelligence**: Holistic portfolio analysis with narrative overviews and specific actionable recommendations generated via Gemini (OpenRouter).
+- **AI-Powered Intelligence**: Holistic portfolio analysis with narrative overviews and specific actionable recommendations generated via GPT-4o-mini (OpenRouter).
+- **AI Chatbot Assistant**: Floating financial agent on every page — ask questions about your portfolio, risk scores, asset allocation, and get instant AI-driven advice via natural language.
 - **Multi-Module Risk Tracking**: Six specialized risk modules covering every dimension of financial exposure.
 - **Dynamic Portfolio Management**: Real-time asset tracking with live price updates from yfinance.
 - **Premium User Experience**: Aurora-style animated backgrounds, glassmorphism UI, and smooth page transitions.
@@ -89,6 +97,7 @@ FinRisk transforms complex financial data into actionable insights through:
 - Portfolio Overview: 2-3 sentence narrative analysis
 - Actionable Recommendations: Prioritized steps to improve portfolio health
 - Risk Alerts: Proactive notifications for critical movements
+- **Floating Chatbot**: Conversational AI assistant on every page — answers queries about portfolio holdings, risk levels, diversification, and market exposure using real user data
 
 ### **📈 Portfolio Tracking**
 
@@ -232,6 +241,7 @@ FinRisk/
 | `Dashboard.jsx` | KPI cards, charts, portfolio intelligence |
 | `Portfolio.jsx` | Asset management with add/edit/delete |
 | `PortfolioAnalytics.jsx` | Charts: allocation, performance, correlation |
+| `ChatBot.jsx` | Floating AI chatbot icon (bottom-right), opens glassmorphism chat panel with portfolio-aware conversational agent powered by OpenRouter |
 | `Login.jsx` | Google OAuth + email/password auth with dynamic themed visuals, animated risk mosaic, live risk signals panel, and auto-detecting origin URLs in help modal |
 | `Risk pages` | Individual ML-powered risk prediction forms |
 
@@ -239,8 +249,8 @@ FinRisk/
 
 | File | Purpose |
 |------|---------|
-| `main.py` | FastAPI app, CORS, routers for all modules, dynamic notification engine with daily-rotating message templates and time-of-day greetings |
-| `ai_service.py` | OpenRouter API wrapper for AI analysis |
+| `main.py` | FastAPI app, CORS, routers for all modules, dynamic notification engine with daily-rotating message templates and time-of-day greetings, `POST /api/chatbot` endpoint |
+| `ai_service.py` | OpenRouter API wrapper for AI analysis and `chatbot_response()` function for conversational chat |
 | `database.py` | SQLAlchemy SessionLocal, engine creation |
 | `models.py` | User, Portfolio, CreditPrediction, MarketRiskData, BusinessRisk schemas |
 | `portfolio.py` | Portfolio CRUD with yfinance price updates |

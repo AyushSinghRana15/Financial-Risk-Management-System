@@ -85,7 +85,14 @@ function formatMessage(content) {
 
 export default function ChatBot() {
     const [open, setOpen] = useState(false);
-    const [messages, setMessages] = useState([WELCOME_MSG]);
+    const [messages, setMessages] = useState(() => {
+        try {
+            const saved = localStorage.getItem("chatbot_history");
+            return saved ? JSON.parse(saved) : [WELCOME_MSG];
+        } catch {
+            return [WELCOME_MSG];
+        }
+    });
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
@@ -97,6 +104,15 @@ export default function ChatBot() {
     })();
     const userEmail = user.email || "";
 
+    const settings = (() => {
+        try { return JSON.parse(localStorage.getItem('settings') || '{}'); }
+        catch { return {}; }
+    })();
+
+    useEffect(() => {
+        localStorage.setItem("chatbot_history", JSON.stringify(messages));
+    }, [messages]);
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
@@ -106,6 +122,8 @@ export default function ChatBot() {
             setTimeout(() => inputRef.current?.focus(), 300);
         }
     }, [open]);
+
+    if (settings.chatbotEnabled === false) return null;
 
     const sendMessage = async () => {
         const text = input.trim();
