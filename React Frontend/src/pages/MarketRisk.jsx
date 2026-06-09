@@ -10,6 +10,7 @@ import {
 import { FaChartLine, FaSync, FaChevronDown, FaChevronUp, FaInfoCircle, FaShieldAlt, FaExclamationTriangle, FaChartArea, FaArrowUp, FaArrowDown, FaSearch, FaBolt, FaGlobeAsia, FaChartBar, FaChartPie, FaExchangeAlt, FaRegLightbulb, FaRedoAlt } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 import SEO from "../components/SEO";
+import { useToast } from "../components/Toast";
 
 function MarketRisk() {
 
@@ -25,6 +26,7 @@ function MarketRisk() {
     const [rollingData, setRollingData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
+    const addToast = useToast();
 
     useEffect(() => {
         axios.get(API_ENDPOINTS.RISK.MARKET_FEATURES)
@@ -176,9 +178,11 @@ function MarketRisk() {
             setRollingData(series);
             window.dispatchEvent(new Event("refreshDashboard"));
             window.dispatchEvent(new Event("refreshNotifications"));
+            addToast("Market risk assessment complete");
 
         } catch (err) {
             console.error(err);
+            addToast("Prediction failed. Please try again.", "error");
         } finally {
             setLoading(false);
         }

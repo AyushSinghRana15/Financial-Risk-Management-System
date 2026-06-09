@@ -6,6 +6,7 @@ import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 import SEO from "../components/SEO";
 
 import EmptyState from "../components/EmptyState";
+import { useToast } from "../components/Toast";
 const LEVEL_COLORS = {
   "Very Low": { color: "#22c55e", bg: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" },
   "Low": { color: "#16a34a", bg: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" },
@@ -23,6 +24,7 @@ export default function LiquidityRisk() {
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const addToast = useToast();
 
   useEffect(() => {
     axios.get(API_ENDPOINTS.RISK.LIQUIDITY_FEATURES)
@@ -52,6 +54,7 @@ export default function LiquidityRisk() {
       setResult(null);
       const res = await axios.post(API_ENDPOINTS.RISK.LIQUIDITY, { ...formData, email: userEmail });
       setResult(res.data);
+      addToast("Liquidity risk assessment complete");
       window.dispatchEvent(new Event("refreshDashboard"));
       if (userEmail) {
         axios.get(`${API_ENDPOINTS.RISK.LIQUIDITY_HISTORY}?email=${encodeURIComponent(userEmail)}`)
@@ -60,6 +63,7 @@ export default function LiquidityRisk() {
       }
     } catch (err) {
       console.error("Prediction Error:", err);
+      addToast("Prediction failed. Please try again.", "error");
       alert("Prediction failed");
     } finally {
       setLoading(false);

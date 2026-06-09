@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
 import SEO from "../components/SEO";
+import { useToast } from "./Toast";
 
 export default function ProfileSection() {
 
@@ -32,6 +33,7 @@ export default function ProfileSection() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
+    const addToast = useToast();
 
     useEffect(() => {
         if (!userEmail) {
@@ -72,6 +74,7 @@ export default function ProfileSection() {
             setUser(prev => ({ ...prev, age: age }));
             setEditingAge(false);
             setSaved(true);
+            addToast("Profile updated successfully");
             setTimeout(() => setSaved(false), 2500);
         } catch (err) {
             console.error("Failed to save age:", err);

@@ -3,6 +3,7 @@ import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
 import SEO from "../components/SEO";
 import { SkeletonCard } from "../components/Skeleton";
+import { useToast } from "../components/Toast";
 
 function Settings() {
 
@@ -56,6 +57,7 @@ function Settings() {
     const [loading, setLoading] = useState(true);
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [darkMode, setDarkMode] = useState(localStorage.getItem("theme") === "dark");
+    const addToast = useToast();
 
     const toggleDarkMode = () => {
         const newMode = !darkMode;
@@ -115,6 +117,7 @@ function Settings() {
             window.dispatchEvent(new Event("settingsChanged"));
 
             setSaveSuccess(true);
+            addToast("Settings saved");
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (err) {
             console.error(err);

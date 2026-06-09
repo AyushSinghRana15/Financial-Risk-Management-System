@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from "../config/api";
 import SEO from "../components/SEO";
 
 import EmptyState from "../components/EmptyState";
+import { useToast } from "../components/Toast";
 const features = [
   { name: "Transaction Amount", importance: 0.28, icon: FaMoneyBillWave, color: "blue", desc: "Larger amounts tend to have higher fraud risk, especially overnight" },
   { name: "Account Age", importance: 0.21, icon: FaHistory, color: "indigo", desc: "Newly created accounts are significantly more likely to be fraudulent" },
@@ -68,6 +69,7 @@ export default function ECommerceFraudRisk() {
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const addToast = useToast();
 
   useEffect(() => {
     if (userEmail) {
@@ -101,9 +103,11 @@ export default function ECommerceFraudRisk() {
     try {
       const res = await axios.post(API_ENDPOINTS.RISK.FRAUD, data);
       setResult(res.data);
+      addToast("Fraud risk assessment complete");
       window.dispatchEvent(new Event("refreshDashboard"));
     } catch (error) {
       console.error(error);
+      addToast("Prediction failed. Please try again.", "error");
     } finally {
       setLoading(false);
     }

@@ -9,6 +9,7 @@ import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 import SEO from "../components/SEO";
 
 import EmptyState from "../components/EmptyState";
+import { useToast } from "../components/Toast";
 function FinancialRisk() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userEmail = user?.email || "";
@@ -23,6 +24,7 @@ function FinancialRisk() {
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const addToast = useToast();
 
   useEffect(() => {
     if (userEmail) {
@@ -42,9 +44,11 @@ function FinancialRisk() {
       setResult(null);
       const res = await axios.post(API_ENDPOINTS.RISK.FINANCIAL, { ...form, email: userEmail });
       setResult(res.data);
+      addToast("Financial risk assessment complete");
       window.dispatchEvent(new Event("refreshDashboard"));
     } catch (err) {
       console.error(err);
+      addToast("Prediction failed. Please try again.", "error");
       alert("API Error");
     } finally {
       setLoading(false);

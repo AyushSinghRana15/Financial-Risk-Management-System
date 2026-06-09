@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageSquare, X, Send, Bot, User, ChevronDown } from "lucide-react";
 import { API_ENDPOINTS } from "../config/api";
+import { useToast } from "./Toast";
 
 const WELCOME_MSG = {
     role: "assistant",
@@ -108,6 +109,7 @@ export default function ChatBot() {
         try { return JSON.parse(localStorage.getItem('settings') || '{}'); }
         catch { return {}; }
     })();
+    const addToast = useToast();
 
     useEffect(() => {
         localStorage.setItem("chatbot_history", JSON.stringify(messages));
@@ -162,6 +164,12 @@ export default function ChatBot() {
         }
     };
 
+    const clearConversation = () => {
+        setMessages([WELCOME_MSG]);
+        localStorage.removeItem("chatbot_history");
+        addToast("Conversation history cleared", "info");
+    };
+
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
@@ -183,12 +191,21 @@ export default function ChatBot() {
                                 <p className="text-[10px] text-blue-200">Financial Risk Assistant</p>
                             </div>
                         </div>
-                        <button
-                            onClick={() => setOpen(false)}
-                            className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
-                        >
-                            <ChevronDown size={16} className="text-white/80" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={clearConversation}
+                                className="px-2 py-1 text-[10px] font-medium rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+                                title="Clear conversation"
+                            >
+                                Clear
+                            </button>
+                            <button
+                                onClick={() => setOpen(false)}
+                                className="w-7 h-7 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
+                            >
+                                <ChevronDown size={16} className="text-white/80" />
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50 dark:bg-slate-900/50">

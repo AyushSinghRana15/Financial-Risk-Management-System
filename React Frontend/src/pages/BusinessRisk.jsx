@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { FaChartLine, FaCalculator, FaBalanceScale, FaExclamationTriangle, FaCheckCircle, FaBolt, FaHistory, FaChartBar, FaBuilding } from "react-icons/fa";
 import { API_ENDPOINTS } from "../config/api";
 import SEO from "../components/SEO";
+import { useToast } from "../components/Toast";
 
 const FEATURES = [
   { key: "feature_32", label: "Current Ratio", placeholder: "e.g. 1.5", hint: "Current Assets / Current Liabilities" },
@@ -29,6 +30,7 @@ export default function BusinessRisk() {
   const [values, setValues] = useState({});
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const addToast = useToast();
 
   const handleChange = (key, value) => {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -46,9 +48,11 @@ export default function BusinessRisk() {
       });
       const data = await res.json();
       setResult(data);
+      addToast("Business risk assessment complete");
       window.dispatchEvent(new Event("refreshDashboard"));
     } catch (err) {
       console.error(err);
+      addToast("Prediction failed. Please try again.", "error");
     }
     setLoading(false);
   };

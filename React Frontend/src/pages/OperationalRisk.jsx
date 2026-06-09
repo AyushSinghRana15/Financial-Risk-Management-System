@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { predictOperationalRisk } from "../services/api";
 import SEO from "../components/SEO";
+import { useToast } from "../components/Toast";
 
 export default function OperationalRisk() {
 
@@ -15,6 +16,7 @@ export default function OperationalRisk() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const addToast = useToast();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -33,9 +35,11 @@ export default function OperationalRisk() {
       }
 
       setResult(res.data);
+      addToast("Operational risk assessment complete");
 
     } catch (err) {
       console.error("Prediction Error:", err);
+      addToast("Prediction failed. Please try again.", "error");
       setError("Failed to fetch prediction. Check backend.");
     } finally {
       setLoading(false);

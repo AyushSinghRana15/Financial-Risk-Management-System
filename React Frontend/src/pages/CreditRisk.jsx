@@ -8,6 +8,7 @@ import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap, FaInfoCircle, FaChevr
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
 import SEO from "../components/SEO";
 import EmptyState from "../components/EmptyState";
+import { useToast } from "../components/Toast";
 
 const behaviorOptions = {
   ext1: [
@@ -52,6 +53,7 @@ export default function CreditRisk() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const addToast = useToast();
 
   useEffect(() => {
     if (userEmail) {
@@ -80,9 +82,11 @@ export default function CreditRisk() {
       setLoading(true);
       const response = await axios.post(API_ENDPOINTS.RISK.CREDIT, formData);
       setResult(response.data);
+      addToast("Credit risk assessment complete");
       window.dispatchEvent(new Event("refreshDashboard"));
     } catch (error) {
       console.error("Prediction error:", error);
+      addToast("Prediction failed. Please try again.", "error");
     } finally {
       setLoading(false);
     }
