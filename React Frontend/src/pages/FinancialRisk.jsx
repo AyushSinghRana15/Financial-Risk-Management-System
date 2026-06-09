@@ -6,6 +6,7 @@ import {
 } from "recharts";
 import { FaChartLine, FaExclamationTriangle, FaCheckCircle, FaBolt, FaHistory, FaChartBar, FaBalanceScale, FaDollarSign, FaCogs, FaMoneyBillWave } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import SEO from "../components/SEO";
 
 function FinancialRisk() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -70,7 +71,7 @@ function FinancialRisk() {
 
   return (
     <div className="space-y-6">
-
+      <SEO title="Financial Risk" description="Predict financial distress and bankruptcy risk using ML models with ROA, leverage, and profitability metrics." path="/financial-risk" />
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Financial Risk System</h1>

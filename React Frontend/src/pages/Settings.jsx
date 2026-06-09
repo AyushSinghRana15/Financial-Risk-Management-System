@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
+import SEO from "../components/SEO";
 
 function Settings() {
 
@@ -122,6 +123,7 @@ function Settings() {
 
     return (
         <div className="flex justify-center mt-10 px-4">
+            <SEO title="Settings" description="Configure your FinRisk preferences — chatbot settings, notification filters, and default dashboard view." path="/settings" />
             <div className="w-full max-w-3xl space-y-6">
 
                 {/* Header */}

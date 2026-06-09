@@ -1,4 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 from sqlalchemy.orm import Session
 import pandas as pd
 import joblib
@@ -81,7 +85,8 @@ device_map = {
 # -------------------------------
 
 @router.post("/predict_fraud")
-def predict_fraud(data: dict, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def predict_fraud(request: Request, data: dict, db: Session = Depends(get_db)):
     try:
         # ✅ correct feature order dataframe
         df = pd.DataFrame(columns=features)

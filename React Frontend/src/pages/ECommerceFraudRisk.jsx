@@ -6,6 +6,7 @@ import {
 } from "recharts";
 import { FaShoppingCart, FaMoneyBillWave, FaMobileAlt, FaGlobeAmericas, FaCreditCard, FaExclamationTriangle, FaCheckCircle, FaBolt, FaHistory, FaChartBar, FaUserAlt, FaCalendarAlt, FaShieldAlt, FaCogs, FaArrowRight, FaBrain, FaLock } from "react-icons/fa";
 import { API_ENDPOINTS } from "../config/api";
+import SEO from "../components/SEO";
 
 const features = [
   { name: "Transaction Amount", importance: 0.28, icon: FaMoneyBillWave, color: "blue", desc: "Larger amounts tend to have higher fraud risk, especially overnight" },
@@ -112,7 +113,7 @@ export default function ECommerceFraudRisk() {
 
   return (
     <div className="space-y-6">
-
+      <SEO title="Fraud Detection" description="AI-powered e-commerce fraud detection using transaction amount, device, location, and behavioral analysis." path="/ecommerce-fraud" />
       {/* HEADER */}
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

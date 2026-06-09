@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { FaGithub, FaLinkedin, FaTwitter, FaExternalLinkAlt, FaQuoteLeft } from "react-icons/fa";
+import SEO from "../components/SEO";
 
 const team = [
     {
@@ -66,6 +67,7 @@ const stats = [
 function About() {
     return (
         <div>
+            <SEO title="About" description="Learn about FinRisk — an AI-powered financial risk management platform built with ML models for credit, market, and portfolio risk analysis." path="/about" />
             {/* HERO */}
             <section className="relative overflow-hidden px-6 pt-20 pb-16 md:pt-28 md:pb-20">
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-indigo-600/5 to-purple-700/5 dark:from-blue-600/10 dark:via-indigo-600/10 dark:to-purple-700/10" />

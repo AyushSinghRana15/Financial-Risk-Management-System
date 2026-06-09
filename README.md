@@ -84,8 +84,8 @@ FinRisk transforms complex financial data into actionable insights through:
 
 | Module | Description |
 |--------|-------------|
-| **Credit Risk** | ML-driven default prediction using XGBoost/CatBoost with probability-based thresholds (Low/Medium/High risk tiers) |
-| **Market Risk** | Value-at-Risk (VaR) estimation and volatility tracking |
+| **Credit Risk** | ML-driven default prediction using XGBoost/CatBoost ensemble with probability-based thresholds (Low/Medium/High risk tiers), feature importance explanations |
+| **Market Risk** | Value-at-Risk (VaR) estimation using XGBoost Hybrid ML VaR model with 5-year NIFTY 50 training data, tail-risk residual adjustment, confidence level selection (95%/99%) |
 | **Business Risk** | Revenue stability and competitive landscape assessment |
 | **Operational Risk** | Monitoring of system-wide failures and process risks |
 | **Financial Risk** | Capital structure and leverage analysis |
@@ -106,6 +106,23 @@ FinRisk transforms complex financial data into actionable insights through:
 - Performance tracking with P/L calculations
 - Correlation matrix for diversification analysis
 
+### **🔒 Security**
+
+- **Rate Limiting**: API endpoints protected with rate limits (10 req/min for predictions, 20 req/min for chatbot, 10 req/min for auth)
+- **Security Headers**: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Strict-Transport-Security`, `Permissions-Policy`, `Referrer-Policy`
+- **Input Validation**: Pydantic-based request validation across all prediction endpoints
+- **Authentication**: Google OAuth with credential verification
+- **CORS**: Strictly scoped to allowed frontend origins
+- **Password Hashing**: Bcrypt for stored credentials
+
+### **🔍 SEO**
+
+- **Per-Page Meta Tags**: Unique title, description, Open Graph, and Twitter Card tags for all 16 pages
+- **SEO Component**: Reusable `<SEO>` component using `react-helmet-async` for dynamic `<head>` management
+- **Sitemap**: `sitemap.xml` with all routes and priorities for search engine crawling
+- **Robots.txt**: Proper crawl directives pointing to sitemap
+- **Canonical URLs**: Every page has a self-referencing canonical link
+
 ---
 
 ## 🛠️ Technical Stack
@@ -119,6 +136,7 @@ FinRisk transforms complex financial data into actionable insights through:
 | Lucide React | Consistent icon library |
 | Framer Motion | Smooth page transitions |
 | Axios | HTTP client for API calls |
+| react-helmet-async | Dynamic SEO meta tags per page |
 
 ### **Backend**
 | Technology | Purpose |
@@ -131,6 +149,7 @@ FinRisk transforms complex financial data into actionable insights through:
 | Bcrypt | Password hashing |
 | yfinance | Real-time market data |
 | Hugging Face Spaces | Docker-based backend hosting (always-on) |
+| slowapi | Rate limiting for API endpoints |
 
 ---
 
@@ -185,6 +204,8 @@ FinRisk/
 │   │   │   ├── Sidebar.jsx        # Collapsible sidebar nav
 │   │   │   ├── NotificationPanel.jsx  # Notifications dropdown (mark-read, clear-all, localStorage dedup)
 │   │   │   ├── ProtectedRoute.jsx  # Auth guard component
+│   │   │   ├── ChatBot.jsx        # Floating AI chatbot (bottom-right, every page)
+│   │   │   ├── SEO.jsx            # Reusable SEO meta tags component
 │   │   │   └── ProfileSection.jsx # User profile page
 │   │   │
 │   │   ├── pages/                # Application pages
@@ -209,7 +230,12 @@ FinRisk/
 │   │   ├── main.jsx            # React entry point
 │   │   └── index.css          # Global styles & animations
 │   │
-│   ├── index.html               # HTML entry point
+│   ├── index.html               # HTML entry point (SEO meta tags, OG, Twitter cards)
+│   ├── public/
+│   │   ├── _redirects           # SPA redirect rules (Vercel)
+│   │   ├── _headers             # Security headers (CSP, HSTS, XFO)
+│   │   ├── robots.txt           # Crawler directives
+│   │   └── sitemap.xml          # Search engine sitemap
 │   ├── package.json             # Node dependencies
 │   ├── vite.config.js          # Vite configuration
 │   ├── tailwind.config.js      # Tailwind theme config
@@ -242,14 +268,16 @@ FinRisk/
 | `Portfolio.jsx` | Asset management with add/edit/delete |
 | `PortfolioAnalytics.jsx` | Charts: allocation, performance, correlation |
 | `ChatBot.jsx` | Floating AI chatbot icon (bottom-right), opens glassmorphism chat panel with portfolio-aware conversational agent powered by OpenRouter |
+| `SEO.jsx` | Reusable `<SEO>` component setting per-page title, description, OG/Twitter meta via `react-helmet-async` |
 | `Login.jsx` | Google OAuth + email/password auth with dynamic themed visuals, animated risk mosaic, live risk signals panel, and auto-detecting origin URLs in help modal |
 | `Risk pages` | Individual ML-powered risk prediction forms |
+| `Settings.jsx` | User preferences: AI chatbot toggle, notification filters (6 risk types), default dashboard view |
 
 ### **Backend File Details**
 
 | File | Purpose |
 |------|---------|
-| `main.py` | FastAPI app, CORS, routers for all modules, dynamic notification engine with daily-rotating message templates and time-of-day greetings, `POST /api/chatbot` endpoint |
+| `main.py` | FastAPI app, CORS, rate limiting (slowapi), security headers middleware, routers for all modules, dynamic notification engine with daily-rotating message templates and time-of-day greetings, `POST /api/chatbot` endpoint |
 | `ai_service.py` | OpenRouter API wrapper for AI analysis and `chatbot_response()` function for conversational chat |
 | `database.py` | SQLAlchemy SessionLocal, engine creation |
 | `models.py` | User, Portfolio, CreditPrediction, MarketRiskData, BusinessRisk schemas |

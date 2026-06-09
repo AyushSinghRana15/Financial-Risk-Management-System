@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { FaChartLine, FaCalculator, FaBalanceScale, FaExclamationTriangle, FaCheckCircle, FaBolt, FaHistory, FaChartBar, FaBuilding } from "react-icons/fa";
 import { API_ENDPOINTS } from "../config/api";
+import SEO from "../components/SEO";
 
 const FEATURES = [
   { key: "feature_32", label: "Current Ratio", placeholder: "e.g. 1.5", hint: "Current Assets / Current Liabilities" },
@@ -66,7 +67,7 @@ export default function BusinessRisk() {
 
   return (
     <div className="space-y-6">
-
+      <SEO title="Business Risk" description="Analyze business risk with ratio-based ML prediction covering liquidity, profitability, and leverage metrics." path="/business-risk" />
       {/* HEADER */}
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex justify-between items-center">
         <div>

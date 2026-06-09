@@ -3,6 +3,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import { FaTint, FaChartLine, FaExclamationTriangle, FaCheckCircle, FaBolt, FaHistory, FaChartBar, FaInfoCircle, FaBuilding } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import SEO from "../components/SEO";
 
 const LEVEL_COLORS = {
   "Very Low": { color: "#22c55e", bg: "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400" },
@@ -69,7 +70,7 @@ export default function LiquidityRisk() {
 
   return (
     <div className="space-y-6">
-
+      <SEO title="Liquidity Risk" description="Assess liquidity risk with ML-powered prediction using current ratio, quick ratio, and cash flow indicators." path="/liquidity-risk" />
       {/* HEADER */}
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex justify-between items-center">
         <div>

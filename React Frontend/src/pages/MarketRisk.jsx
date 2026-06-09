@@ -9,6 +9,7 @@ import {
 
 import { FaChartLine, FaSync, FaChevronDown, FaChevronUp, FaInfoCircle, FaShieldAlt, FaExclamationTriangle, FaChartArea, FaArrowUp, FaArrowDown, FaSearch, FaBolt, FaGlobeAsia, FaChartBar, FaChartPie, FaExchangeAlt, FaRegLightbulb, FaRedoAlt } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import SEO from "../components/SEO";
 
 function MarketRisk() {
 
@@ -236,7 +237,7 @@ function MarketRisk() {
 
     return (
         <div className="space-y-6">
-
+            <SEO title="Market Risk" description="Calculate Value at Risk (VaR) with XGBoost hybrid ML model using NIFTY 50, VIX, and global market indicators." path="/market-risk" />
             {/* HEADER */}
             <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex justify-between items-center">
                 <div>

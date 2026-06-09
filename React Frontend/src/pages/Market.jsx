@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { FaArrowDown, FaArrowUp, FaChevronDown, FaChevronUp, FaSync } from "react-icons/fa";
 import { API_ENDPOINTS } from "../config/api";
+import SEO from "../components/SEO";
 
 function Market() {
 
@@ -96,7 +97,7 @@ function Market() {
 
     return (
         <div className="space-y-6">
-
+            <SEO title="Market Overview" description="Live market data for NIFTY 50, global indices, cryptocurrencies, and commodities with real-time price tracking." path="/market" />
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>

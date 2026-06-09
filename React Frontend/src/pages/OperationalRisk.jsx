@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { predictOperationalRisk } from "../services/api";
+import SEO from "../components/SEO";
 
 export default function OperationalRisk() {
 
@@ -43,7 +44,7 @@ export default function OperationalRisk() {
 
   return (
     <div>
-
+      <SEO title="Operational Risk" description="Predict operational risk in IT service management using ticket reassignment, reopen rates, and SLA metrics." path="/operational-risk" />
       <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
         Operational Risk Analytics
       </h2>

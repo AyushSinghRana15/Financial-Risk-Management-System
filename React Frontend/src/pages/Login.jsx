@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import FinRiskLogo from "../assets/FinRisk.png";
 import { API_ENDPOINTS } from "../config/api";
+import SEO from "../components/SEO";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -216,6 +217,7 @@ export default function Login() {
 
   return (
     <div className="login-page">
+      <SEO title="Login" description="Sign in to FinRisk for AI-powered financial risk analytics and portfolio management." path="/login" />
       <div className="login-shell">
         <section className="login-visual">
           <div className="login-brand-chip">

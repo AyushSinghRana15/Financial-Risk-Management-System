@@ -1,10 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 import pandas as pd
 import numpy as np
 import joblib
 import sys
 import os
+
+limiter = Limiter(key_func=get_remote_address)
 
 CURRENT_FILE_PATH = os.path.abspath(__file__)
 BACKEND_DIR = os.path.dirname(CURRENT_FILE_PATH)
@@ -61,7 +65,8 @@ else:
 # -------------------------
 
 @router.post("/predict_credit_risk")
-def predict_credit_risk(data: dict, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def predict_credit_risk(request: Request, data: dict, db: Session = Depends(get_db)):
     if model is None:
         print("Model is None, attempting late load...")
         if os.path.exists(MODEL_FILE):

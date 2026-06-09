@@ -7,6 +7,7 @@ import {
     ResponsiveContainer
 } from "recharts";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import SEO from "../components/SEO";
 
 const COLORS = ["#2563eb", "#16a34a", "#dc2626", "#f59e0b", "#8b5cf6", "#ec4899"];
 
@@ -180,7 +181,7 @@ function Portfolio() {
 
     return (
         <div className="space-y-8">
-
+            <SEO title="Portfolio Risk" description="Track and manage your investment portfolio risk with real-time diversification and exposure analysis." path="/portfolio" />
             <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Portfolio Risk</h1>
 
             {!USER_EMAIL && (

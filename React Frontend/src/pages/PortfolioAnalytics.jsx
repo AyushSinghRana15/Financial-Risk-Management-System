@@ -9,6 +9,7 @@ import {
 import { motion } from "framer-motion";
 import { FaChartPie, FaChartBar, FaChartLine, FaWallet, FaArrowUp, FaArrowDown, FaSync, FaLayerGroup, FaExclamationTriangle, FaShieldAlt, FaPercent, FaBalanceScale, FaHistory, FaFire, FaLeaf } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import SEO from "../components/SEO";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 const ASSET_TYPE_COLORS = {
@@ -191,6 +192,7 @@ export default function PortfolioAnalytics() {
 
     return (
         <div className="space-y-6">
+            <SEO title="Portfolio Analytics" description="Advanced portfolio analytics with diversification metrics, risk decomposition, and performance attribution." path="/portfolio-analytics" />
             {/* HEADER */}
             <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex justify-between items-center">
                 <div>

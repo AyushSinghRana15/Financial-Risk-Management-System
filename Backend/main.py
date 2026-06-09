@@ -1,8 +1,11 @@
 import random
 import hashlib
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
 from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -67,6 +70,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Rate limiting
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    return response
+
 app.include_router(portfolio_router)
 
 # ================= DB DEPENDENCY =================
@@ -93,7 +108,8 @@ def root():
 
 # ================= GOOGLE AUTH =================
 @app.post("/auth/google")
-def google_auth(data: dict, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def google_auth(request: Request, data: dict, db: Session = Depends(get_db)):
     credential = data.get("credential")
     
     if not credential:
@@ -139,7 +155,8 @@ def google_auth(data: dict, db: Session = Depends(get_db)):
 
 # ================= PROFILE APIs =================
 @app.put("/profile")
-def update_profile(data: dict, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def update_profile(request: Request, data: dict, db: Session = Depends(get_db)):
 
     email = data.get("email")
 
@@ -276,7 +293,8 @@ def ai_risk_alerts(data: dict = None):
 
 # ================= CHATBOT ENDPOINT =================
 @app.post("/api/chatbot")
-def chatbot_chat(data: dict, db: Session = Depends(get_db)):
+@limiter.limit("20/minute")
+def chatbot_chat(request: Request, data: dict, db: Session = Depends(get_db)):
     email = data.get("email", "")
     user_message = data.get("message", "")
     history = data.get("history", [])

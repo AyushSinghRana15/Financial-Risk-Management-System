@@ -1,6 +1,10 @@
 import pandas as pd
 import joblib
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 from sqlalchemy.orm import Session
 import yfinance as yf
 import numpy as np
@@ -149,7 +153,8 @@ def get_live_market_data():
 # ----------------------------
 
 @router.post("/predict_market_risk")
-def predict_market_risk(data: dict, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def predict_market_risk(request: Request, data: dict, db: Session = Depends(get_db)):
 
     confidence = data.get("confidence", "95%")
 

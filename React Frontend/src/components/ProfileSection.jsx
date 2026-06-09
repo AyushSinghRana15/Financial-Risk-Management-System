@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
+import SEO from "../components/SEO";
 
 export default function ProfileSection() {
 
@@ -98,6 +99,7 @@ export default function ProfileSection() {
 
     return (
         <div className="flex justify-center mt-10 px-4">
+            <SEO title="Profile" description="View and edit your FinRisk profile including name, email, and account settings." path="/profile" />
             <div className="w-full max-w-xl bg-white dark:bg-slate-800 rounded-2xl shadow-xl border dark:border-slate-700 p-8">
 
                 {/* Header */}

@@ -9,6 +9,7 @@ import {
     Line,
     ResponsiveContainer
 } from "recharts";
+import SEO from "../components/SEO";
 
 const returnData = [
     { range: "-3%", value: 2 },
@@ -30,7 +31,7 @@ const volatilityData = [
 function RiskAnalytics() {
     return (
         <div>
-
+            <SEO title="Risk Analytics" description="Comprehensive risk analytics with return distribution, volatility analysis, and risk metric comparisons." path="/risk-analytics" />
             <h1 className="text-3xl font-bold mb-8 text-gray-800 dark:text-white">
                 Risk Analytics
             </h1>

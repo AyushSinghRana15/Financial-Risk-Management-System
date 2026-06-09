@@ -16,6 +16,7 @@ import {
     Area
 } from "recharts";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import SEO from "../components/SEO";
 
 const CHART_COLORS = ["#3b82f6", "#22c55e", "#ef4444", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
 
@@ -172,6 +173,7 @@ export default function Dashboard() {
 
     return (
         <div className="space-y-4 sm:space-y-6">
+            <SEO title="Dashboard" description="Financial risk dashboard with overview of credit, market, liquidity, and portfolio risks powered by AI/ML models." path="/dashboard" />
             <div className="flex items-center justify-between">
                 <div className="min-w-0">
                     <h1 className="text-2xl sm:text-3xl font-bold leading-tight text-slate-800 dark:text-white">

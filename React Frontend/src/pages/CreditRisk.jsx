@@ -6,6 +6,7 @@ import {
 } from "recharts";
 import { FaMale, FaFemale, FaCar, FaHome, FaGraduationCap, FaInfoCircle, FaChevronDown, FaShieldAlt, FaCreditCard, FaChartLine, FaCheckCircle, FaExclamationTriangle, FaMoneyBillWave, FaUserTie, FaChartBar, FaHistory, FaBolt, FaCreditCard as FaCard, FaPiggyBank, FaBriefcase, FaClock, FaPercent } from "react-icons/fa";
 import { API_ENDPOINTS, API_BASE_URL } from "../config/api";
+import SEO from "../components/SEO";
 
 const behaviorOptions = {
   ext1: [
@@ -127,7 +128,7 @@ export default function CreditRisk() {
 
   return (
     <div className="space-y-6">
-
+      <SEO title="Credit Risk" description="Predict loan default probability with XGBoost and CatBoost ensemble ML models. Analyze income, employment, and payment history." path="/credit-risk" />
       <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Credit Risk Prediction</h1>
