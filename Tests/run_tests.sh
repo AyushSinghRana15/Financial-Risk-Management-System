@@ -18,7 +18,7 @@ echo ""
 echo "[1/3] Running API Integration Tests..."
 echo "----------------------------------------"
 cd "$BACKEND_DIR"
-python -m pytest "$SCRIPT_DIR/test_api.py" -v --tb=short 2>&1 | tee "$RESULTS_DIR/api_tests_$TIMESTAMP.log"
+python3 -m pytest "$SCRIPT_DIR/test_api.py" -v --tb=short 2>&1 | tee "$RESULTS_DIR/api_tests_$TIMESTAMP.log"
 API_EXIT=${PIPESTATUS[0]}
 
 # 2. Locust Load Test (local, quick check)
