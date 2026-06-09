@@ -31,6 +31,7 @@ from final_financial_api import router as financial_router
 from routes.market import router as market_data_router
 from E_commerce_fraud_risk_api import router as fraud_router
 from portfolio import router as portfolio_router
+from operational_risk_api import router as operational_router
 
 # Env
 from dotenv import load_dotenv
@@ -98,6 +99,7 @@ app.include_router(credit_router)
 app.include_router(market_router)
 app.include_router(market_data_router)
 app.include_router(fraud_router)
+app.include_router(operational_router)
 app.include_router(business_router)
 app.include_router(liquidity_router, prefix="/liquidity")
 app.include_router(financial_router, prefix="/financial")
@@ -231,8 +233,11 @@ def get_dashboard_stats(request: Request, email: str, db: Session = Depends(get_
     def _portfolio():
         s = SessionLocal()
         try:
-            vals = s.execute(select(Portfolio.total_value).where(Portfolio.user_id == uid)).scalars().all()
-            return sum(v or 0 for v in vals)
+            rows = s.execute(
+                select(Portfolio.quantity, Portfolio.current_price)
+                .where(Portfolio.user_id == uid)
+            ).all()
+            return sum((qty or 0) * (price or 0) for qty, price in rows)
         finally:
             s.close()
 
@@ -365,7 +370,7 @@ def chatbot_chat(request: Request, data: dict, db: Session = Depends(get_db)):
         portfolio_assets = db.query(Portfolio).filter(Portfolio.user_id == user.id).all()
         if portfolio_assets:
             portfolio_str = "\n".join([
-                f"- {a.asset_name} ({a.asset_type}): {a.quantity} shares, buy price ₹{a.buy_price}, current ₹{a.current_price}, value ₹{a.total_value}"
+                f"- {a.asset_name} ({a.asset_type}): {a.quantity} shares, buy price ₹{a.buy_price}, current ₹{a.current_price}, value ₹{a.quantity * a.current_price}"
                 for a in portfolio_assets
             ])
             context_parts.append(f"PORTFOLIO:\n{portfolio_str}")
@@ -398,7 +403,8 @@ def chatbot_chat(request: Request, data: dict, db: Session = Depends(get_db)):
             LiquidityRisk.user_id == user.id
         ).order_by(desc(LiquidityRisk.id)).first()
         if latest_liquidity and latest_liquidity.risk_score is not None:
-            context_parts.append(f"LIQUIDITY RISK: Score {latest_liquidity.risk_score*100:.1f}%, Ratio: {latest_liquidity.liquidity_ratio or 0:.2f}")
+            l_ratio = (latest_liquidity.assets / latest_liquidity.liabilities) if latest_liquidity.liabilities else 0
+            context_parts.append(f"LIQUIDITY RISK: Score {latest_liquidity.risk_score*100:.1f}%, Ratio: {l_ratio:.2f}")
 
         # Financial risk
         latest_financial = db.query(FinancialRisk).filter(
@@ -726,7 +732,7 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
     # ---- liquidity risk ----
     if latest_liquidity and latest_liquidity.risk_score is not None:
         score = latest_liquidity.risk_score * 100
-        ratio = latest_liquidity.liquidity_ratio or 0.0
+        ratio = (latest_liquidity.assets / latest_liquidity.liabilities) if latest_liquidity.liabilities else 0.0
         if score >= 70:
             add(_pick(LIQUIDITY_TEMPLATES, seed, "high").format(score=score, ratio=ratio), "warning", latest_liquidity.recorded_at)
         elif score >= 40:

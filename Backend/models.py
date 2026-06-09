@@ -33,7 +33,6 @@ class Portfolio(Base):
     quantity = Column(Float)
     buy_price = Column(Float)
     current_price = Column(Float)
-    total_value = Column(Float)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -83,7 +82,7 @@ class CreditPrediction(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
-    application_id = Column(Integer)
+    application_id = Column(Integer, ForeignKey("credit_applications.id"), nullable=True)
     risk_score = Column(Float)
     risk_label = Column(String(20))
     confidence = Column(Float)
@@ -116,10 +115,9 @@ class LiquidityRisk(Base):
     assets = Column(Float)
     liabilities = Column(Float)
     cash_flow = Column(Float)
-    liquidity_ratio = Column(Float)
     risk_score = Column(Float)
     risk_label = Column(String(50))
-    recorded_at = Column("created_at", DateTime(timezone=True), server_default=func.now())
+    recorded_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 # ================= OPERATIONAL =================
@@ -127,6 +125,7 @@ class OperationalRisk(Base):
     __tablename__ = "operational_risk"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     event_type = Column(String(50))
     description = Column(Text)
     severity = Column(String(20))
@@ -148,7 +147,7 @@ class BusinessRisk(Base):
     growth_rate = Column(Float)
     risk_score = Column(Float)
     risk_level = Column(String(20))
-    recorded_at = Column("created_at", DateTime(timezone=True), server_default=func.now())
+    recorded_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 # ================= FINANCIAL =================
@@ -163,7 +162,7 @@ class FinancialRisk(Base):
     financial_ratio = Column(Float)
     risk_score = Column(Float)
     risk_label = Column(String(50))
-    recorded_at = Column("created_at", DateTime(timezone=True), server_default=func.now())
+    recorded_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 # ================= ANALYSIS =================
@@ -172,7 +171,7 @@ class RiskAnalysis(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     risk_type = Column(String(50))
-    entity_id = Column(Integer)
+    entity_id = Column(Integer, index=True)
     var_value = Column(Float)
     sharpe_ratio = Column(Float)
     beta = Column(Float)
@@ -203,9 +202,17 @@ class MLPrediction(Base):
     id = Column(Integer, primary_key=True, index=True)
     model_name = Column(String(50))
     risk_type = Column(String(50))
-    entity_id = Column(Integer)
-    input_features = Column(Text)
+    entity_id = Column(Integer, index=True)
     risk_score = Column(Float)
     risk_label = Column(String(20))
     confidence = Column(Float)
     predicted_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class MLPredictionFeature(Base):
+    __tablename__ = "ml_prediction_features"
+
+    id = Column(Integer, primary_key=True, index=True)
+    prediction_id = Column(Integer, ForeignKey("ml_predictions.id"), nullable=False, index=True)
+    feature_name = Column(String(100), nullable=False)
+    feature_value = Column(Float, nullable=False)

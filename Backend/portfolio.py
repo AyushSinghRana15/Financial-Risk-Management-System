@@ -36,8 +36,6 @@ def add_portfolio(data: PortfolioCreate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user)
 
-    total_value = data.quantity * data.current_price
-
     new_asset = Portfolio(
         user_id=user.id,
         asset_name=data.asset_name,
@@ -45,7 +43,6 @@ def add_portfolio(data: PortfolioCreate, db: Session = Depends(get_db)):
         quantity=data.quantity,
         buy_price=data.buy_price,
         current_price=data.current_price,
-        total_value=total_value
     )
 
     db.add(new_asset)
@@ -61,7 +58,7 @@ def add_portfolio(data: PortfolioCreate, db: Session = Depends(get_db)):
             "quantity": new_asset.quantity,
             "buy_price": new_asset.buy_price,
             "current_price": new_asset.current_price,
-            "total_value": new_asset.total_value
+            "total_value": new_asset.quantity * new_asset.current_price,
         }
     }
 
@@ -88,7 +85,7 @@ def get_portfolio(email: str, db: Session = Depends(get_db)):
             "quantity": a.quantity,
             "buy_price": a.buy_price,
             "current_price": a.current_price,
-            "total_value": a.total_value
+            "total_value": a.quantity * a.current_price,
         }
         for a in assets
     ]
