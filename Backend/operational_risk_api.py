@@ -29,7 +29,6 @@ def get_db():
         db.close()
 
 model = None
-feature_keys = ["reassignment_count", "reopen_count", "sys_mod_count", "active", "made_sla"]
 
 MODEL_FILE = os.path.join(MODELS_PATH, "operational_risk.pkl")
 
@@ -49,17 +48,16 @@ else:
 
 def _rule_based_score(row):
     raw = (
-        row["reassignment_count"] * 0.3
-        + row["reopen_count"] * 0.4
-        + row["sys_mod_count"] * 0.2
-        + (1 - row["made_sla"]) * 0.1
+        row["process_failures"] * 0.35
+        + row["system_errors"] * 0.4
+        + row["human_errors"] * 0.25
     )
-    return min(raw, 1.0)
+    return min(raw / 10.0, 1.0)
 
 
 @router.get("/operational_features")
 def get_operational_features():
-    return {"features": feature_keys}
+    return {"features": ["process_failures", "system_errors", "human_errors"]}
 
 
 @router.post("/predict_operational_risk")
@@ -73,11 +71,9 @@ def predict_operational_risk(data: dict, db: Session = Depends(get_db)):
                 user_id = user.id
 
         row = {
-            "reassignment_count": float(data.get("reassignment_count", 0)),
-            "reopen_count": float(data.get("reopen_count", 0)),
-            "sys_mod_count": float(data.get("sys_mod_count", 0)),
-            "active": 1 if str(data.get("active", "No")).lower() == "yes" else 0,
-            "made_sla": 1 if str(data.get("made_sla", "No")).lower() == "yes" else 0,
+            "process_failures": float(data.get("process_failures", data.get("reassignment_count", 0))),
+            "system_errors": float(data.get("system_errors", data.get("reopen_count", 0))),
+            "human_errors": float(data.get("human_errors", data.get("sys_mod_count", 0))),
         }
 
         df = pd.DataFrame([row])
@@ -91,7 +87,7 @@ def predict_operational_risk(data: dict, db: Session = Depends(get_db)):
         else:
             score = _rule_based_score(row)
             pred = 1 if score > 0.5 else 0
-            proba = np.array([1 - score, score]) if score <= 1 else np.array([0, 1])
+            proba = np.array([1 - score, score])
             proba = proba / proba.sum()
 
         risk_label = "High Risk" if pred == 1 else "Low Risk"
@@ -101,10 +97,11 @@ def predict_operational_risk(data: dict, db: Session = Depends(get_db)):
 
         record = OperationalRisk(
             user_id=user_id,
-            event_type="operational_risk_prediction",
-            severity=risk_label,
+            process_failures=int(row["process_failures"]),
+            system_errors=int(row["system_errors"]),
+            human_errors=int(row["human_errors"]),
             risk_score=float(pred),
-            description=f"Reassignments: {row['reassignment_count']}, Reopens: {row['reopen_count']}, SLA: {row['made_sla']}",
+            risk_level=risk_label,
         )
         db.add(record)
         db.commit()
@@ -141,9 +138,9 @@ def get_operational_risk_history(email: str, db: Session = Depends(get_db)):
         "history": [
             {
                 "id": r.id,
-                "severity": r.severity,
+                "severity": r.risk_level,
                 "risk_score": r.risk_score,
-                "predicted_at": r.occurred_at.isoformat() if r.occurred_at else None,
+                "predicted_at": r.created_at.isoformat() if r.created_at else None,
             }
             for r in records
         ]

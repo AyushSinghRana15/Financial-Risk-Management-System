@@ -128,13 +128,12 @@ class OperationalRisk(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
-    event_type = Column(String(50))
-    description = Column(Text)
-    severity = Column(String(20))
-    financial_loss = Column(Float)
-    department = Column(String(50))
+    process_failures = Column(Integer, default=0)
+    system_errors = Column(Integer, default=0)
+    human_errors = Column(Integer, default=0)
     risk_score = Column(Float)
-    occurred_at = Column(DateTime(timezone=True), server_default=func.now())
+    risk_level = Column(String(20))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 # ================= BUSINESS =================
