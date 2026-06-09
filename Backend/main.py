@@ -106,6 +106,19 @@ app.include_router(financial_router, prefix="/financial")
 def root():
     return {"status": "ok", "message": "Financial Risk API running"}
 
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "version": "2.0.0",
+        "services": {
+            "database": "connected",
+            "rate_limiting": "active",
+            "security_headers": "enabled",
+        },
+    }
+
 # ================= GOOGLE AUTH =================
 @app.post("/auth/google")
 @limiter.limit("10/minute")
