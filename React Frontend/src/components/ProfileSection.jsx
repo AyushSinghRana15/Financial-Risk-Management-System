@@ -25,7 +25,6 @@ export default function ProfileSection() {
         email: userEmail,
         picture: userPicture,
         age: "-",
-        risk_profile: "-"
     });
     const [editingAge, setEditingAge] = useState(false);
     const [ageInput, setAgeInput] = useState("");
@@ -182,25 +181,7 @@ export default function ProfileSection() {
                         )}
                     </div>
 
-                    {/* Risk Profile */}
-                    <div>
-                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400 block mb-2">Risk Preference</label>
-                        <div>
-                            {user.risk_profile && user.risk_profile !== "-" ? (
-                                <span className={`px-4 py-1.5 rounded-full text-sm font-bold shadow-sm
-                                    ${user.risk_profile === "High"
-                                        ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800"
-                                        : user.risk_profile === "Medium"
-                                            ? "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800"
-                                            : "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800"
-                                    }`}>
-                                    {user.risk_profile} Risk tolerance
-                                </span>
-                            ) : (
-                                <span className="text-gray-400 dark:text-gray-500 italic">Not set (Configure in Settings)</span>
-                            )}
-                        </div>
-                    </div>
+
 
                 </div>
 
