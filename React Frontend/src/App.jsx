@@ -1,31 +1,27 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import ECommerceFraudRisk from "./pages/ECommerceFraudRisk";
 
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import ChatBot from "./components/ChatBot";
 
-import Dashboard from "./pages/Dashboard";
-import CreditRisk from "./pages/CreditRisk";
-import MarketRisk from "./pages/MarketRisk";
-import RiskAnalytics from "./pages/RiskAnalytics";
-
-import Portfolio from "./pages/Portfolio";
-import PortfolioAnalytics from "./pages/PortfolioAnalytics";
-import LiquidityRisk from "./pages/LiquidityRisk";
-
-import BusinessRisk from "./pages/BusinessRisk";
-import FinancialRisk from "./pages/FinancialRisk";
-import OperationalRisk from "./pages/OperationalRisk";
-
-import ProfileSection from "./components/ProfileSection";
-import Login from "./pages/Login";
-import Settings from "./pages/Settings";
-
-import Market from "./pages/Market";
-import About from "./pages/About";
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const CreditRisk = lazy(() => import("./pages/CreditRisk"));
+const MarketRisk = lazy(() => import("./pages/MarketRisk"));
+const RiskAnalytics = lazy(() => import("./pages/RiskAnalytics"));
+const ECommerceFraudRisk = lazy(() => import("./pages/ECommerceFraudRisk"));
+const Portfolio = lazy(() => import("./pages/Portfolio"));
+const PortfolioAnalytics = lazy(() => import("./pages/PortfolioAnalytics"));
+const LiquidityRisk = lazy(() => import("./pages/LiquidityRisk"));
+const BusinessRisk = lazy(() => import("./pages/BusinessRisk"));
+const FinancialRisk = lazy(() => import("./pages/FinancialRisk"));
+const OperationalRisk = lazy(() => import("./pages/OperationalRisk"));
+const ProfileSection = lazy(() => import("./components/ProfileSection"));
+const Login = lazy(() => import("./pages/Login"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Market = lazy(() => import("./pages/Market"));
+const About = lazy(() => import("./pages/About"));
 
 function PageTransition({ children }) {
     return (
@@ -37,6 +33,14 @@ function PageTransition({ children }) {
         >
             {children}
         </motion.div>
+    );
+}
+
+function PageLoader() {
+    return (
+        <div className="flex items-center justify-center min-h-[60vh]">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500" />
+        </div>
     );
 }
 
@@ -73,11 +77,11 @@ function ProtectedPage({ children }) {
     if (!user) {
         return <Navigate to="/login" />;
     }
-    return <PageTransition>{children}</PageTransition>;
+    return <Suspense fallback={<PageLoader />}><PageTransition>{children}</PageTransition></Suspense>;
 }
 
 function PublicPage({ children }) {
-    return <PageTransition>{children}</PageTransition>;
+    return <Suspense fallback={<PageLoader />}><PageTransition>{children}</PageTransition></Suspense>;
 }
 
 function App() {
@@ -93,78 +97,23 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* Login page */}
                 <Route path="/login" element={<Login />} />
-
-                {/* Public pages with dashboard layout */}
-                <Route
-                    path="/"
-                    element={<AppLayout><PublicPage><Dashboard /></PublicPage></AppLayout>}
-                />
-                <Route
-                    path="/dashboard"
-                    element={<AppLayout><PublicPage><Dashboard /></PublicPage></AppLayout>}
-                />
-                <Route
-                    path="/market"
-                    element={<AppLayout><PublicPage><Market /></PublicPage></AppLayout>}
-                />
-                <Route
-                    path="/about"
-                    element={<AppLayout><PublicPage><About /></PublicPage></AppLayout>}
-                />
-
-                {/* Protected pages */}
-                <Route
-                    path="/credit-risk"
-                    element={<ProtectedPage><AppLayout><CreditRisk /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/market-risk"
-                    element={<ProtectedPage><AppLayout><MarketRisk /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/risk-analytics"
-                    element={<ProtectedPage><AppLayout><RiskAnalytics /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/ecommerce-fraud"
-                    element={<ProtectedPage><AppLayout><ECommerceFraudRisk /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/portfolio"
-                    element={<ProtectedPage><AppLayout><Portfolio /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/portfolio-analytics"
-                    element={<ProtectedPage><AppLayout><PortfolioAnalytics /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/liquidity-risk"
-                    element={<ProtectedPage><AppLayout><LiquidityRisk /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/business-risk"
-                    element={<ProtectedPage><AppLayout><BusinessRisk /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/financial-risk"
-                    element={<ProtectedPage><AppLayout><FinancialRisk /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/operational-risk"
-                    element={<ProtectedPage><AppLayout><OperationalRisk /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/profile"
-                    element={<ProtectedPage><AppLayout><ProfileSection /></AppLayout></ProtectedPage>}
-                />
-                <Route
-                    path="/settings"
-                    element={<ProtectedPage><AppLayout><Settings /></AppLayout></ProtectedPage>}
-                />
-
-                {/* Catch all - redirect to dashboard */}
+                <Route path="/" element={<AppLayout><PublicPage><Dashboard /></PublicPage></AppLayout>} />
+                <Route path="/dashboard" element={<AppLayout><PublicPage><Dashboard /></PublicPage></AppLayout>} />
+                <Route path="/market" element={<AppLayout><PublicPage><Market /></PublicPage></AppLayout>} />
+                <Route path="/about" element={<AppLayout><PublicPage><About /></PublicPage></AppLayout>} />
+                <Route path="/credit-risk" element={<ProtectedPage><AppLayout><CreditRisk /></AppLayout></ProtectedPage>} />
+                <Route path="/market-risk" element={<ProtectedPage><AppLayout><MarketRisk /></AppLayout></ProtectedPage>} />
+                <Route path="/risk-analytics" element={<ProtectedPage><AppLayout><RiskAnalytics /></AppLayout></ProtectedPage>} />
+                <Route path="/ecommerce-fraud" element={<ProtectedPage><AppLayout><ECommerceFraudRisk /></AppLayout></ProtectedPage>} />
+                <Route path="/portfolio" element={<ProtectedPage><AppLayout><Portfolio /></AppLayout></ProtectedPage>} />
+                <Route path="/portfolio-analytics" element={<ProtectedPage><AppLayout><PortfolioAnalytics /></AppLayout></ProtectedPage>} />
+                <Route path="/liquidity-risk" element={<ProtectedPage><AppLayout><LiquidityRisk /></AppLayout></ProtectedPage>} />
+                <Route path="/business-risk" element={<ProtectedPage><AppLayout><BusinessRisk /></AppLayout></ProtectedPage>} />
+                <Route path="/financial-risk" element={<ProtectedPage><AppLayout><FinancialRisk /></AppLayout></ProtectedPage>} />
+                <Route path="/operational-risk" element={<ProtectedPage><AppLayout><OperationalRisk /></AppLayout></ProtectedPage>} />
+                <Route path="/profile" element={<ProtectedPage><AppLayout><ProfileSection /></AppLayout></ProtectedPage>} />
+                <Route path="/settings" element={<ProtectedPage><AppLayout><Settings /></AppLayout></ProtectedPage>} />
                 <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </BrowserRouter>
