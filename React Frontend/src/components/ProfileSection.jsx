@@ -27,7 +27,11 @@ export default function ProfileSection() {
         age: "-",
         risk_profile: "-"
     });
+    const [editingAge, setEditingAge] = useState(false);
+    const [ageInput, setAgeInput] = useState("");
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
 
     useEffect(() => {
         if (!userEmail) {
@@ -53,6 +57,29 @@ export default function ProfileSection() {
                 setLoading(false);
             });
     }, [userEmail]);
+
+    const saveAge = async () => {
+        const age = parseInt(ageInput, 10);
+        if (isNaN(age) || age < 1 || age > 150) return;
+        setSaving(true);
+        try {
+            await axios.put(API_ENDPOINTS.PROFILE, {
+                email: userEmail,
+                name: user.name,
+                age: age,
+                risk_profile: user.risk_profile
+            });
+            setUser(prev => ({ ...prev, age: age }));
+            setEditingAge(false);
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2500);
+        } catch (err) {
+            console.error("Failed to save age:", err);
+            alert("Failed to save age");
+        } finally {
+            setSaving(false);
+        }
+    };
 
     if (!userEmail) {
         return (
@@ -113,7 +140,47 @@ export default function ProfileSection() {
 
                     <Field label="Full Name" value={user.name} />
                     <Field label="Email Address" value={user.email} />
-                    <Field label="Age" value={user.age} />
+
+                    {/* Editable Age */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-500 dark:text-gray-400 block mb-2">Age</label>
+                        {editingAge ? (
+                            <div className="flex gap-2">
+                                <input
+                                    type="number"
+                                    value={ageInput}
+                                    onChange={(e) => setAgeInput(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === "Enter") saveAge(); if (e.key === "Escape") setEditingAge(false); }}
+                                    className="flex-1 px-4 py-3 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:text-white"
+                                    min={1}
+                                    max={150}
+                                    autoFocus
+                                    disabled={saving}
+                                />
+                                <button
+                                    onClick={saveAge}
+                                    disabled={saving}
+                                    className="px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition text-sm font-medium disabled:opacity-50"
+                                >
+                                    {saving ? "..." : "Save"}
+                                </button>
+                                <button
+                                    onClick={() => setEditingAge(false)}
+                                    className="px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition text-sm"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        ) : (
+                            <div
+                                onClick={() => { setAgeInput(String(user.age)); setEditingAge(true); }}
+                                className="mt-1 px-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-100 dark:border-slate-600 rounded-xl text-gray-800 dark:text-gray-200 font-medium cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 transition-colors flex items-center justify-between group"
+                            >
+                                <span>{user.age || "-"}</span>
+                                <span className="text-xs text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">Click to edit</span>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Risk Profile */}
                     <div>
@@ -138,6 +205,15 @@ export default function ProfileSection() {
                 </div>
 
             </div>
+
+            {saved && (
+                <div className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-bounce z-50">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Age updated successfully!
+                </div>
+            )}
         </div>
     );
 }
