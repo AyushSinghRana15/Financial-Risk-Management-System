@@ -5,6 +5,7 @@ import ECommerceFraudRisk from "./pages/ECommerceFraudRisk";
 
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
+import ChatBot from "./components/ChatBot";
 
 import Dashboard from "./pages/Dashboard";
 import CreditRisk from "./pages/CreditRisk";
@@ -62,6 +63,7 @@ function AppLayout({ children }) {
                     </AnimatePresence>
                 </div>
             </main>
+            <ChatBot />
         </div>
     );
 }

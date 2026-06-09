@@ -30,6 +30,7 @@ export const API_ENDPOINTS = {
     },
     AI: {
         ALERTS: `${API_BASE_URL}/ai-risk-alerts`,
+        CHATBOT: `${API_BASE_URL}/api/chatbot`,
     },
     NOTIFICATIONS: `${API_BASE_URL}/notifications`,
     MARKET: {

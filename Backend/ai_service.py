@@ -106,3 +106,40 @@ Format:
         }
     except Exception as e:
         return {"error": str(e)}
+
+
+def chatbot_response(system_prompt, messages):
+    """
+    Takes a system prompt (with context about the user's portfolio/risk data)
+    and a list of chat messages, returns the AI response text.
+    """
+    openrouter_messages = [{"role": "system", "content": system_prompt}]
+    for msg in messages:
+        openrouter_messages.append({"role": msg["role"], "content": msg["content"]})
+
+    try:
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "openai/gpt-4o-mini",
+                "messages": openrouter_messages,
+                "max_tokens": 800
+            },
+            timeout=30
+        )
+
+        if response.status_code != 200:
+            return f"Error: {response.text}"
+
+        data = response.json()
+        content = data["choices"][0]["message"]["content"]
+        return content.strip()
+
+    except requests.Timeout:
+        return "I'm sorry, the AI service timed out. Please try again."
+    except Exception as e:
+        return f"Sorry, I encountered an error: {str(e)}"

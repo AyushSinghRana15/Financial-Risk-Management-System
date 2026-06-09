@@ -38,7 +38,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 
 # AI Service
-from ai_service import get_ai_insights
+from ai_service import get_ai_insights, chatbot_response
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
@@ -273,6 +273,96 @@ def ai_risk_alerts(data: dict = None):
         "recommendations": [],
         "response": str(result)
     }
+
+# ================= CHATBOT ENDPOINT =================
+@app.post("/api/chatbot")
+def chatbot_chat(data: dict, db: Session = Depends(get_db)):
+    email = data.get("email", "")
+    user_message = data.get("message", "")
+    history = data.get("history", [])
+
+    context_parts = []
+
+    # Fetch user
+    user = db.query(User).filter(User.email == email).first() if email else None
+
+    if user:
+        # Portfolio
+        portfolio_assets = db.query(Portfolio).filter(Portfolio.user_id == user.id).all()
+        if portfolio_assets:
+            portfolio_str = "\n".join([
+                f"- {a.asset_name} ({a.asset_type}): {a.quantity} shares, buy price ₹{a.buy_price}, current ₹{a.current_price}, value ₹{a.total_value}"
+                for a in portfolio_assets
+            ])
+            context_parts.append(f"PORTFOLIO:\n{portfolio_str}")
+        else:
+            context_parts.append("PORTFOLIO: User has no assets in their portfolio yet.")
+
+        # Credit risk
+        latest_credit = db.query(CreditPrediction).filter(
+            CreditPrediction.user_id == user.id
+        ).order_by(desc(CreditPrediction.id)).first()
+        if latest_credit and latest_credit.risk_score is not None:
+            context_parts.append(f"CREDIT RISK: Score {latest_credit.risk_score*100:.1f}%, Label: {latest_credit.risk_label or 'N/A'}")
+
+        # Market risk
+        latest_market = db.query(MarketRiskData).filter(
+            MarketRiskData.user_id == user.id
+        ).order_by(desc(MarketRiskData.id)).first()
+        if latest_market and latest_market.risk_score is not None:
+            context_parts.append(f"MARKET RISK: Symbol {latest_market.symbol or 'N/A'}, Score {latest_market.risk_score*100:.1f}%, Level: {latest_market.risk_level or 'N/A'}")
+
+        # Business risk
+        latest_business = db.query(BusinessRisk).filter(
+            BusinessRisk.user_id == user.id
+        ).order_by(desc(BusinessRisk.id)).first()
+        if latest_business and latest_business.risk_score is not None:
+            context_parts.append(f"BUSINESS RISK: Score {latest_business.risk_score*100:.1f}%, Level: {latest_business.risk_level or 'N/A'}")
+
+        # Liquidity risk
+        latest_liquidity = db.query(LiquidityRisk).filter(
+            LiquidityRisk.user_id == user.id
+        ).order_by(desc(LiquidityRisk.id)).first()
+        if latest_liquidity and latest_liquidity.risk_score is not None:
+            context_parts.append(f"LIQUIDITY RISK: Score {latest_liquidity.risk_score*100:.1f}%, Ratio: {latest_liquidity.liquidity_ratio or 0:.2f}")
+
+        # Financial risk
+        latest_financial = db.query(FinancialRisk).filter(
+            FinancialRisk.user_id == user.id
+        ).order_by(desc(FinancialRisk.id)).first()
+        if latest_financial and latest_financial.risk_score is not None:
+            context_parts.append(f"FINANCIAL RISK: Score {latest_financial.risk_score*100:.1f}%, Label: {latest_financial.risk_label or 'N/A'}")
+
+        # Fraud detection
+        latest_fraud = db.query(FraudPrediction).filter(
+            FraudPrediction.user_id == user.id
+        ).order_by(desc(FraudPrediction.id)).first()
+        if latest_fraud and latest_fraud.fraud_probability is not None:
+            context_parts.append(f"FRAUD DETECTION: Probability {latest_fraud.fraud_probability*100:.1f}%, Method: {latest_fraud.payment_method or 'N/A'}")
+
+    context_str = "\n\n".join(context_parts) if context_parts else "No user data available."
+
+    system_prompt = f"""You are FinRisk AI, a financial risk advisory assistant for the FinRisk platform.
+
+You have access to the user's portfolio and risk prediction data below. Use it to answer their questions concisely and helpfully.
+
+USER DATA:
+{context_str}
+
+Guidelines:
+- Be concise and direct. Use bullet points when helpful.
+- Provide specific financial insights based on the data.
+- If asked about something not in the data, say you can only advise on available portfolio/risk data.
+- For portfolio advice, consider diversification, concentration risk, and asset allocation.
+- For risk scores, explain what they mean in simple terms.
+- Keep responses under 150 words unless complex analysis is needed.
+- Do NOT make up data or numbers not provided in the context above.
+- You can suggest general financial best practices when relevant.
+- Be friendly but professional."""
+
+    response_text = chatbot_response(system_prompt, history + [{"role": "user", "content": user_message}])
+    return {"response": response_text}
+
 
 # =====================================================================
 # NOTIFICATIONS — dynamic, session‑aware, with message template variety
