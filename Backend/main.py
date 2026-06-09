@@ -7,7 +7,8 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy import desc, select
+import concurrent.futures
 
 from database import SessionLocal, engine, Base
 from models import (
@@ -214,7 +215,8 @@ def get_profile(email: str = Query(...), db: Session = Depends(get_db)):
 
 # ================= DASHBOARD STATS =================
 @app.get("/dashboard/stats")
-def get_dashboard_stats(email: str, db: Session = Depends(get_db)):
+@limiter.limit("30/minute")
+def get_dashboard_stats(request: Request, email: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email).first()
     if not user:
         return {
@@ -223,30 +225,71 @@ def get_dashboard_stats(email: str, db: Session = Depends(get_db)):
             "market_risk_level": None,
             "business_risk_score": None
         }
-    
-    portfolio_assets = db.query(Portfolio).filter(Portfolio.user_id == user.id).all()
-    portfolio_value = sum(a.total_value or 0 for a in portfolio_assets)
-    
-    latest_credit = db.query(CreditPrediction).filter(
-        CreditPrediction.user_id == user.id
-    ).order_by(desc(CreditPrediction.id)).first()
-    
-    latest_market = db.query(MarketRiskData).filter(
-        MarketRiskData.user_id == user.id
-    ).order_by(desc(MarketRiskData.id)).first()
-    
-    latest_business = db.query(BusinessRisk).filter(
-        BusinessRisk.user_id == user.id
-    ).order_by(desc(BusinessRisk.id)).first()
-    
+
+    uid = user.id
+
+    def _portfolio():
+        s = SessionLocal()
+        try:
+            vals = s.execute(select(Portfolio.total_value).where(Portfolio.user_id == uid)).scalars().all()
+            return sum(v or 0 for v in vals)
+        finally:
+            s.close()
+
+    def _credit():
+        s = SessionLocal()
+        try:
+            return s.execute(
+                select(CreditPrediction.risk_score, CreditPrediction.risk_label)
+                .where(CreditPrediction.user_id == uid)
+                .order_by(desc(CreditPrediction.id))
+                .limit(1)
+            ).first()
+        finally:
+            s.close()
+
+    def _market():
+        s = SessionLocal()
+        try:
+            return s.execute(
+                select(MarketRiskData.risk_score, MarketRiskData.risk_level)
+                .where(MarketRiskData.user_id == uid)
+                .order_by(desc(MarketRiskData.id))
+                .limit(1)
+            ).first()
+        finally:
+            s.close()
+
+    def _business():
+        s = SessionLocal()
+        try:
+            return s.execute(
+                select(BusinessRisk.risk_score, BusinessRisk.risk_level)
+                .where(BusinessRisk.user_id == uid)
+                .order_by(desc(BusinessRisk.id))
+                .limit(1)
+            ).first()
+        finally:
+            s.close()
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        fut_portfolio = pool.submit(_portfolio)
+        fut_credit = pool.submit(_credit)
+        fut_market = pool.submit(_market)
+        fut_business = pool.submit(_business)
+        portfolio_value = fut_portfolio.result()
+        latest_credit = fut_credit.result()
+        latest_market = fut_market.result()
+        latest_business = fut_business.result()
+
     return {
         "portfolio_value": portfolio_value,
-        "credit_risk_score": latest_credit.risk_score * 100 if latest_credit else None,
-        "credit_risk_label": latest_credit.risk_label if latest_credit else None,
-        "market_risk_level": latest_market.risk_level if latest_market else None,
-        "market_risk_score": latest_market.risk_score * 100 if latest_market else None,
-        "business_risk_score": latest_business.risk_score * 100 if latest_business else None,
-        "business_risk_label": latest_business.risk_level if latest_business else None
+        "credit_risk_score": latest_credit[0] * 100 if latest_credit else None,
+        "credit_risk_label": latest_credit[1] if latest_credit else None,
+        "market_risk_level": latest_market[1] if latest_market else None,
+        "market_risk_score": latest_market[0] * 100 if latest_market else None,
+        "business_risk_score": latest_business[0] * 100 if latest_business else None,
+        "business_risk_label": latest_business[1] if latest_business else None,
     }
 
 

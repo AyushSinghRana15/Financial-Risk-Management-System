@@ -82,7 +82,7 @@ class CreditPrediction(Base):
     __tablename__ = "credit_predictions"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     application_id = Column(Integer)
     risk_score = Column(Float)
     risk_label = Column(String(20))
@@ -95,7 +95,7 @@ class MarketRiskData(Base):
     __tablename__ = "market_risk_data"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     symbol = Column(String(20))
     open_price = Column(Float)
     close_price = Column(Float)
@@ -141,7 +141,7 @@ class BusinessRisk(Base):
     __tablename__ = "business_risk"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     revenue = Column(Float)
     expenses = Column(Float)
     competition_level = Column(String(50))
