@@ -643,9 +643,6 @@ Serverless PostgreSQL on [Neon](https://neon.tech). Free tier provides:
 - **Abhishek Kumar** - Data analysis, model training
 - **Bipin Singh** - Frontend UI/UX, visualization
 
-### **Mentor**
-**Mr. Alen Alexander**
-
 ---
 
 ## 📄 License
