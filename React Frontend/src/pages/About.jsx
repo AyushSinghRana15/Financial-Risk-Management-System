@@ -572,7 +572,7 @@ function About() {
                                 </div>
                             </div>
                             <a
-                                href="https://github.com/anomalyco/FinRisk"
+                                href="https://github.com/AyushSinghRana15/Financial-Risk-Management-System"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold transition-all hover:bg-slate-800 dark:hover:bg-slate-100 shadow-lg"
