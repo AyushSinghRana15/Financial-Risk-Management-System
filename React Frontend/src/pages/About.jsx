@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaRocket, FaExternalLinkAlt, FaQuoteLeft, FaTimes, FaBookOpen, FaFlask, FaLayerGroup } from "react-icons/fa";
+import { FaRocket, FaExternalLinkAlt, FaQuoteLeft, FaTimes, FaBookOpen, FaFlask, FaLayerGroup, FaGithub, FaStar, FaCodeBranch, FaEye } from "react-icons/fa";
 import SEO from "../components/SEO";
 
 const team = [
@@ -212,6 +212,7 @@ function About() {
         { key: "overview", label: "Overview", icon: FaRocket },
         { key: "models", label: "Models & Tech", icon: FaFlask },
         { key: "glossary", label: "Glossary", icon: FaBookOpen },
+        { key: "opensource", label: "Open Source", icon: FaGithub },
     ];
 
     return (
@@ -539,6 +540,47 @@ function About() {
                                     </button>
                                 ))}
                             </div>
+                        </div>
+                    </motion.section>
+                )}
+
+                {activeTab === "opensource" && (
+                    <motion.section
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        <div className="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-8 md:p-10 shadow-sm text-center">
+                            <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-2xl mb-6">
+                                <FaGithub className="text-3xl text-slate-700 dark:text-slate-300" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Open Source</h2>
+                            <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto mb-8">
+                                FinRisk is fully open source. Explore the codebase, contribute, report issues, or star the repo on GitHub.
+                            </p>
+                            <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-8">
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 border border-slate-100 dark:border-slate-600">
+                                    <FaStar className="text-lg text-yellow-500 mx-auto mb-1" />
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Star</p>
+                                </div>
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 border border-slate-100 dark:border-slate-600">
+                                    <FaCodeBranch className="text-lg text-slate-500 mx-auto mb-1" />
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Fork</p>
+                                </div>
+                                <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 border border-slate-100 dark:border-slate-600">
+                                    <FaEye className="text-lg text-slate-500 mx-auto mb-1" />
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Watch</p>
+                                </div>
+                            </div>
+                            <a
+                                href="https://github.com/anomalyco/FinRisk"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-semibold transition-all hover:bg-slate-800 dark:hover:bg-slate-100 shadow-lg"
+                            >
+                                <FaGithub className="text-lg" />
+                                View on GitHub
+                                <FaExternalLinkAlt className="text-xs" />
+                            </a>
                         </div>
                     </motion.section>
                 )}
