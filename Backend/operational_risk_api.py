@@ -47,12 +47,14 @@ else:
 
 
 def _rule_based_score(row):
+    # Fallback when no ML model is available — uses weighted sum of 3 factors
+    # Process failures = 35%, System errors = 40%, Human errors = 25%
     raw = (
         row["process_failures"] * 0.35
         + row["system_errors"] * 0.4
         + row["human_errors"] * 0.25
     )
-    return min(raw / 10.0, 1.0)
+    return min(raw / 10.0, 1.0)  # Cap at 1.0 (100% risk)
 
 
 @router.get("/operational_features")
@@ -70,6 +72,7 @@ def predict_operational_risk(data: dict, db: Session = Depends(get_db)):
             if user:
                 user_id = user.id
 
+        # Accepts either primary names or Jira-style fallback names
         row = {
             "process_failures": float(data.get("process_failures", data.get("reassignment_count", 0))),
             "system_errors": float(data.get("system_errors", data.get("reopen_count", 0))),
@@ -81,19 +84,19 @@ def predict_operational_risk(data: dict, db: Session = Depends(get_db)):
         if model is not None:
             pred = int(model.predict(df)[0])
             if hasattr(model, "predict_proba"):
-                proba = model.predict_proba(df)[0]
+                proba = model.predict_proba(df)[0]  # [prob_low, prob_high]
             else:
                 proba = None
         else:
             score = _rule_based_score(row)
             pred = 1 if score > 0.5 else 0
             proba = np.array([1 - score, score])
-            proba = proba / proba.sum()
+            proba = proba / proba.sum()  # Normalize to sum to 1.0
 
         risk_label = "High Risk" if pred == 1 else "Low Risk"
         prob_high = float(max(proba)) if proba is not None else (pred * 0.8 + 0.1)
         prob_low = float(min(proba)) if proba is not None else (1 - prob_high)
-        prob_medium = max(0.0, 1.0 - prob_high - prob_low)
+        prob_medium = max(0.0, 1.0 - prob_high - prob_low)  # Remainder assigned to medium
 
         record = OperationalRisk(
             user_id=user_id,

@@ -1,14 +1,14 @@
 import random
-import hashlib
+import hashlib  # For creating deterministic daily seeds via MD5 hash
 from fastapi import FastAPI, Depends, HTTPException, Request
 from datetime import datetime
-from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from fastapi.middleware.cors import CORSMiddleware  # Controls which domains can call this API from a browser
+from slowapi import Limiter, _rate_limit_exceeded_handler  # Rate limiting library to prevent abuse
+from slowapi.util import get_remote_address  # Extracts client IP address for rate limiting
 from slowapi.errors import RateLimitExceeded
-from sqlalchemy.orm import Session
-from sqlalchemy import desc, select
-import concurrent.futures
+from sqlalchemy.orm import Session  # ORM session for database queries
+from sqlalchemy import desc, select  # SQL helpers: desc = descending order, select = query builder
+import concurrent.futures  # Thread pool for running multiple DB queries in parallel
 
 from database import SessionLocal, engine, Base
 from models import (
@@ -33,21 +33,22 @@ from E_commerce_fraud_risk_api import router as fraud_router
 from portfolio import router as portfolio_router
 from operational_risk_api import router as operational_router
 
-# Env
+# Env — loads .env file into environment variables (API keys, DB URL, etc.)
 from dotenv import load_dotenv
 load_dotenv()
 import os
 
-# Google OAuth
-from google.oauth2 import id_token
-from google.auth.transport import requests
+# Google OAuth — verifies Google login tokens from the frontend
+from google.oauth2 import id_token  # Validates Google's signed JWT token
+from google.auth.transport import requests  # HTTP transport for fetching Google's public keys
 
-# AI Service
+# AI Service — LLM-powered chatbot and portfolio insights via OpenRouter
 from ai_service import get_ai_insights, chatbot_response
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 # ================= DB =================
+# Creates all database tables defined in models.py (if they don't exist yet)
 Base.metadata.create_all(bind=engine)
 
 # ================= APP =================
@@ -55,38 +56,45 @@ app = FastAPI()
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "").rstrip("/")
 
+# Allowed origins for CORS — only these domains can call this API from a browser
 allow_origins = [
     "https://finrisk.online",
     "https://www.finrisk.online",
-    "http://localhost:5173",
-    "http://localhost:3000",
+    "http://localhost:5173",  # Vite React dev server
+    "http://localhost:3000",  # Create React App dev server
 ]
 if FRONTEND_URL:
     allow_origins.append(FRONTEND_URL)
 
+# CORS middleware — without this, browsers block cross-origin requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"], # Explicitly allow OPTIONS
+    allow_credentials=True,  # Allows cookies/auth headers to be sent cross-origin
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"], # OPTIONS is the preflight request browsers send before real requests
     allow_headers=["*"],
 )
 
-# Rate limiting
-limiter = Limiter(key_func=get_remote_address)
+# Rate limiting — prevents a single IP from spamming the API
+limiter = Limiter(key_func=get_remote_address)  # Identifies clients by their IP address
 app.state.limiter = limiter
+# When rate limit is exceeded, return a 429 Too Many Requests instead of crashing
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
+    # Prevents browser from MIME-sniffing (e.g., treating a JS file as HTML)
     response.headers["X-Content-Type-Options"] = "nosniff"
+    # Prevents the site from being embedded in an iframe (clickjacking protection)
     response.headers["X-Frame-Options"] = "DENY"
     return response
 
 app.include_router(portfolio_router)
 
 # ================= DB DEPENDENCY =================
+# FastAPI dependency that provides a database session per request
+# The `yield` pattern ensures the session is closed after the request completes
 def get_db():
     db = SessionLocal()
     try:
@@ -95,6 +103,7 @@ def get_db():
         db.close()
 
 # ================= ROUTERS =================
+# Each router is a separate file with its own endpoints, organized by risk domain
 app.include_router(credit_router)
 app.include_router(market_router)
 app.include_router(market_data_router)
@@ -123,8 +132,9 @@ def health():
     }
 
 # ================= GOOGLE AUTH =================
+# Uses Google's OAuth2 to let users sign in with their Google account
 @app.post("/auth/google")
-@limiter.limit("10/minute")
+@limiter.limit("10/minute")  # Max 10 requests per minute per IP
 def google_auth(request: Request, data: dict, db: Session = Depends(get_db)):
     credential = data.get("credential")
     
@@ -133,6 +143,8 @@ def google_auth(request: Request, data: dict, db: Session = Depends(get_db)):
     
     try:
         CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+        # verify_oauth2_token decrypts and validates Google's signed JWT
+        # It checks: signature, expiry, audience (must match our CLIENT_ID)
         idinfo = id_token.verify_oauth2_token(credential, requests.Request(), CLIENT_ID)
         
         email = idinfo.get("email")
@@ -147,16 +159,18 @@ def google_auth(request: Request, data: dict, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == email).first()
 
     if not user:
+        # First-time login — create a new user record
         user = User(
             name=name or email.split("@")[0],
             email=email,
-            password_hash="google_oauth",
-            is_verified=True
+            password_hash="google_oauth",  # Placeholder — auth is handled by Google, not us
+            is_verified=True  # Google-verified users skip email verification
         )
         db.add(user)
         db.commit()
         db.refresh(user)
     else:
+        # Returning user — update name/picture in case they changed on Google
         user.name = name or user.name
         user.picture = picture
         user.is_verified = True
@@ -216,6 +230,8 @@ def get_profile(email: str = Query(...), db: Session = Depends(get_db)):
 
 
 # ================= DASHBOARD STATS =================
+# Aggregates key metrics for the user's dashboard in one call
+# Uses ThreadPoolExecutor to run 4 DB queries concurrently instead of sequentially
 @app.get("/dashboard/stats")
 @limiter.limit("30/minute")
 def get_dashboard_stats(request: Request, email: str, db: Session = Depends(get_db)):
@@ -230,6 +246,7 @@ def get_dashboard_stats(request: Request, email: str, db: Session = Depends(get_
 
     uid = user.id
 
+    # Each inner function opens its OWN session for thread-safe parallel execution
     def _portfolio():
         s = SessionLocal()
         try:
@@ -237,6 +254,7 @@ def get_dashboard_stats(request: Request, email: str, db: Session = Depends(get_
                 select(Portfolio.quantity, Portfolio.current_price)
                 .where(Portfolio.user_id == uid)
             ).all()
+            # Total portfolio value = sum of (quantity × current_price) for all assets
             return sum((qty or 0) * (price or 0) for qty, price in rows)
         finally:
             s.close()
@@ -247,8 +265,8 @@ def get_dashboard_stats(request: Request, email: str, db: Session = Depends(get_
             return s.execute(
                 select(CreditPrediction.risk_score, CreditPrediction.risk_label)
                 .where(CreditPrediction.user_id == uid)
-                .order_by(desc(CreditPrediction.id))
-                .limit(1)
+                .order_by(desc(CreditPrediction.id))  # Most recent first
+                .limit(1)  # Only the latest prediction
             ).first()
         finally:
             s.close()
@@ -277,6 +295,8 @@ def get_dashboard_stats(request: Request, email: str, db: Session = Depends(get_
         finally:
             s.close()
 
+    # ThreadPoolExecutor runs all 4 queries in parallel (max 4 worker threads)
+    # This is faster than running them one after another
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         fut_portfolio = pool.submit(_portfolio)
         fut_credit = pool.submit(_credit)
@@ -299,6 +319,7 @@ def get_dashboard_stats(request: Request, email: str, db: Session = Depends(get_
 
 
 # ================= AI INSIGHTS (Portfolio Based) =================
+# Demo endpoint — sends a hardcoded portfolio to the AI service for analysis
 @app.get("/ai-insights")
 def ai_insights(db: Session = Depends(get_db)):
     portfolio = [
@@ -310,6 +331,7 @@ def ai_insights(db: Session = Depends(get_db)):
     return result
 
 # ================= AI RISK ALERTS (Prompt Based) =================
+# Works with both GET (page load) and POST (user submits a prompt)
 @app.api_route("/ai-risk-alerts", methods=["GET", "POST"])
 def ai_risk_alerts(data: dict = None):
     # Handle GET requests (triggered by page reloads/initial visits)
@@ -353,12 +375,13 @@ def ai_risk_alerts(data: dict = None):
     }
 
 # ================= CHATBOT ENDPOINT =================
+# AI-powered financial advisor that has context of the user's portfolio and all risk scores
 @app.post("/api/chatbot")
 @limiter.limit("20/minute")
 def chatbot_chat(request: Request, data: dict, db: Session = Depends(get_db)):
     email = data.get("email", "")
     user_message = data.get("message", "")
-    history = data.get("history", [])
+    history = data.get("history", [])  # Previous conversation turns
 
     context_parts = []
 
@@ -422,6 +445,7 @@ def chatbot_chat(request: Request, data: dict, db: Session = Depends(get_db)):
 
     context_str = "\n\n".join(context_parts) if context_parts else "No user data available."
 
+    # System prompt tells the AI what role to play and what data is available
     system_prompt = f"""You are FinRisk AI, a financial risk advisory assistant for the FinRisk platform.
 
 You have access to the user's portfolio and risk prediction data below. Use it to answer their questions concisely and helpfully.
@@ -433,13 +457,14 @@ Guidelines:
 - Be concise and direct. Use bullet points when helpful.
 - Provide specific financial insights based on the data.
 - If asked about something not in the data, say you can only advise on available portfolio/risk data.
-- For portfolio advice, consider diversification, concentration risk, and asset allocation.
+- For portfolio advice, consider diversification (spreading across assets), concentration risk (over-reliance on one asset), and asset allocation (how money is split across stocks/crypto/etc).
 - For risk scores, explain what they mean in simple terms.
 - Keep responses under 150 words unless complex analysis is needed.
 - Do NOT make up data or numbers not provided in the context above.
 - You can suggest general financial best practices when relevant.
 - Be friendly but professional."""
 
+    # Send system prompt + conversation history to the LLM
     response_text = chatbot_response(system_prompt, history + [{"role": "user", "content": user_message}])
     return {"response": response_text}
 
@@ -450,13 +475,13 @@ Guidelines:
 
 TIME_TIPS = [
     "Review your portfolio before major economic announcements this week.",
-    "Consider rebalancing if any single asset exceeds 40 % of your portfolio.",
+    "Consider rebalancing if any single asset exceeds 40 % of your portfolio.",
     "Run a market risk scan after significant index movements.",
-    "Add stop‑loss alerts for your highest‑volatility positions.",
+    "Add stop‑loss alerts for your highest‑volatility positions.",  # stop-loss: automatic sell if price drops below a threshold
     "Schedule a weekly risk review to stay ahead of exposure changes.",
-    "Check your liquidity ratio if you plan new capital deployments.",
-    "Diversify across uncorrelated asset classes to lower overall VaR.",
-    "Monitor credit spreads if you hold corporate bonds or loans.",
+    "Check your liquidity ratio if you plan new capital deployments.",  # liquidity ratio: ability to cover short-term debts
+    "Diversify across uncorrelated asset classes to lower overall VaR.",  # VaR (Value at Risk): max expected loss over a period
+    "Monitor credit spreads if you hold corporate bonds or loans.",  # credit spread: difference between corporate and risk-free bond yields
 ]
 
 CREDIT_TEMPLATES = {
@@ -565,14 +590,17 @@ FRAUD_TEMPLATES = {
 
 def _daily_seed(user_id: int) -> int:
     """Deterministic seed per user per day so notifications vary daily
-    but stay consistent within the same day (avoids flickering)."""
+    but stay consistent within the same day (avoids flickering).
+    Same user + same date = same seed, so notifications don't shuffle on every page load."""
     date_tag = datetime.now().strftime("%Y-%m-%d")
     raw = f"{user_id}-{date_tag}"
+    # MD5 hash of user+date converted to a large integer to use as random seed
     return int(hashlib.md5(raw.encode()).hexdigest(), 16)
 
 
 def _pick(templates, seed, key=None):
-    """Pick a random template variant using the daily seed."""
+    """Pick a random template variant using the daily seed.
+    seed % len(pool) gives a deterministic index that changes daily per user."""
     pool = templates[key] if key else templates
     idx = seed % len(pool)
     return pool[idx]
@@ -656,10 +684,11 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
 
         if total_value > 0:
             top_name, top_value = max(asset_values, key=lambda item: item[1])
-            top_weight = (top_value / total_value) * 100
+            top_weight = (top_value / total_value) * 100  # Percentage of portfolio in the biggest asset
             asset_type_count = sum(1 for v in value_by_type.values() if v > 0)
 
             if top_weight >= 50:
+                # Concentration risk: too much money in one asset is dangerous
                 conc_msgs = [
                     f"{top_name} is {top_weight:.0f}% of your portfolio — consider trimming to reduce concentration risk.",
                     f"Concentration alert: {top_name} weighs {top_weight:.0f}%. Diversify to lower single‑asset exposure.",
@@ -667,6 +696,7 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
                 ]
                 add(conc_msgs[seed % len(conc_msgs)], "warning")
             elif asset_type_count >= 3:
+                # Unsystematic risk: risk specific to one company/sector, reduced by diversification
                 div_msgs = [
                     f"Well diversified across {asset_type_count} asset classes — this reduces unsystematic risk.",
                     f"Your portfolio spans {asset_type_count} different asset types, which helps during sector‑specific downturns.",
@@ -682,8 +712,10 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
                 add(conc_msgs[seed % len(conc_msgs)], "info")
 
             if invested_value > 0:
+                # PnL = Profit and Loss percentage (current value vs what was paid)
                 pnl_pct = ((total_value - invested_value) / invested_value) * 100
                 if pnl_pct >= 5:
+                    # Cost basis = original purchase price; unrealised gain = profit on paper but not yet sold
                     gain_msgs = [
                         f"📈 Portfolio up {pnl_pct:.1f}% from cost basis. Lock in partial gains or let winners run.",
                         f"Unrealised gain of {pnl_pct:.1f}%. Consider tax‑efficient rebalancing.",
@@ -691,6 +723,7 @@ def get_notifications(email: str = Query(...), db: Session = Depends(get_db)):
                     ]
                     add(gain_msgs[seed % len(gain_msgs)], "success")
                 elif pnl_pct <= -5:
+                    # Stop-loss: automatic sell order to limit losses; hedge: offset risk with another position
                     loss_msgs = [
                         f"📉 Portfolio down {abs(pnl_pct):.1f}% from cost. Check stop‑loss levels and downside exposure.",
                         f"Unrealised loss of {abs(pnl_pct):.1f}%. Evaluate whether fundamentals have changed.",

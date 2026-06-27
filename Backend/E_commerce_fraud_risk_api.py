@@ -34,7 +34,7 @@ def get_db():
         db.close()
 
 model = None
-features = []
+features = []  # Ordered list of feature names the model expects
 
 if os.path.exists(MODEL_FILE):
     try:
@@ -52,6 +52,7 @@ else:
 # -------------------------------
 # Mappings
 # -------------------------------
+# Convert categorical text values to numeric IDs the model understands
 
 payment_map = {
     "Credit Card": 0,
@@ -88,9 +89,9 @@ device_map = {
 @limiter.limit("10/minute")
 def predict_fraud(request: Request, data: dict, db: Session = Depends(get_db)):
     try:
-        # ✅ correct feature order dataframe
+        # Create dataframe with exact columns and order the model expects
         df = pd.DataFrame(columns=features)
-        df.loc[0] = 0
+        df.loc[0] = 0  # Initialize all values to 0
 
         df["Transaction Amount"] = data.get("amount", 100)
         df["Quantity"] = data.get("quantity", 1)
@@ -100,23 +101,24 @@ def predict_fraud(request: Request, data: dict, db: Session = Depends(get_db)):
         location = data.get("customer_location", "USA")
         device = data.get("device_used", "Mobile")
 
+        # Encode categoricals as integers using the mapping dicts
         df["Payment Method"] = payment_map.get(payment, 0)
         df["Product Category"] = product_map.get(product, 0)
         df["Customer Location"] = location_map.get(location, 0)
         df["Device Used"] = device_map.get(device, 0)
 
         df["Customer Age"] = data.get("customer_age", 30)
-        df["Account Age Days"] = data.get("account_age_days", 200)
-        df["Transaction Hour"] = data.get("transaction_hour", 12)
-        df["Transaction_Day"] = data.get("transaction_day", 15)
+        df["Account Age Days"] = data.get("account_age_days", 200)  # How long the account has existed
+        df["Transaction Hour"] = data.get("transaction_hour", 12)  # Hour of day (0-23)
+        df["Transaction_Day"] = data.get("transaction_day", 15)  # Day of month
         df["Transaction_Month"] = data.get("transaction_month", 6)
 
-        # 🔥 enforce correct order
+        # 🔥 enforce correct column order (order matters for some ML models)
         df = df[features]
 
         # Prediction
-        prediction = model.predict(df)[0]
-        probability = model.predict_proba(df)[0][1]
+        prediction = model.predict(df)[0]  # 0 = legitimate, 1 = fraud
+        probability = model.predict_proba(df)[0][1]  # Probability of fraud
 
         result = {
             "prediction": int(prediction),

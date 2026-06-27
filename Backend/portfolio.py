@@ -1,20 +1,20 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel  # For request validation
 from database import get_db
 from models import Portfolio, User
 
 router = APIRouter(prefix="/portfolio", tags=["Portfolio"])
 
 
-# 📥 Request Schema
+# 📥 Request Schema — Pydantic validates types and required fields automatically
 class PortfolioCreate(BaseModel):
     email: str
-    asset_name: str
-    asset_type: str
-    quantity: float
-    buy_price: float
-    current_price: float
+    asset_name: str  # e.g., "AAPL", "BTC", "Reliance Industries"
+    asset_type: str  # e.g., "stock", "crypto", "mutual_fund", "etf"
+    quantity: float  # Number of shares/units owned
+    buy_price: float  # Price per unit when purchased
+    current_price: float  # Current market price per unit
 
 
 # ➕ ADD ASSET
@@ -25,6 +25,7 @@ def add_portfolio(data: PortfolioCreate, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
 
     if not user:
+        # Auto-create user if they don't exist (for new Google OAuth users)
         user = User(
             name=data.email.split("@")[0],
             email=data.email,

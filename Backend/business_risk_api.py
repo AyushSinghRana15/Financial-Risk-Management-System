@@ -27,10 +27,11 @@ def get_db():
         db.close()
 
 model = None
-threshold = None
-feature_keys = []
-raw_features = []
+threshold = None  # Probability threshold for classifying as "risky" vs "safe"
+feature_keys = []  # Generic names: feature_0, feature_1, ...
+raw_features = []  # Original feature names from the XGBoost model
 
+# XGBoost is a gradient-boosted tree model popular for tabular data
 MODEL_FILE = os.path.join(MODELS_PATH, "xgboost_business_risk_model.pkl")
 THRESHOLD_FILE = os.path.join(MODELS_PATH, "business_risk_threshold.pkl")
 
@@ -39,6 +40,7 @@ if os.path.exists(MODEL_FILE):
         model = joblib.load(MODEL_FILE)
         threshold_file = joblib.load(THRESHOLD_FILE) if os.path.exists(THRESHOLD_FILE) else 0.5
         threshold = threshold_file
+        # Get feature names from the XGBoost booster object
         if hasattr(model, "get_booster"):
             raw_features = list(model.get_booster().feature_names)
         feature_keys = [f"feature_{i}" for i in range(len(raw_features))]
@@ -62,6 +64,7 @@ def predict_business_risk(data: dict, db: Session = Depends(get_db)):
     input_values = [data.get(f, 0) for f in feature_keys]
     input_df = pd.DataFrame([input_values], columns=raw_features)
 
+    # predict_proba[0][1] = probability of "risky" class
     prob = model.predict_proba(input_df)[0][1]
     prediction = 1 if prob >= threshold else 0
 

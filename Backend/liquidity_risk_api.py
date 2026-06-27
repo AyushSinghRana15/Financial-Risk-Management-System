@@ -36,8 +36,10 @@ def get_db():
 # ----------------------------
 # LOAD MODEL & SCALER
 # ----------------------------
+# Liquidity risk = ability to meet short-term financial obligations
+# Model is an XGBoost classifier trained on bank/company financial data
 model = None
-scaler = None
+scaler = None  # StandardScaler normalizes input features to mean=0, std=1 (required by many ML models)
 
 MODEL_FILE = os.path.join(MODELS_PATH, "liquidity_model.pkl")
 SCALER_FILE = os.path.join(MODELS_PATH, "scaler.pkl")
@@ -57,28 +59,33 @@ else:
 # ----------------------------
 # FEATURES (25)
 # ----------------------------
-features = ["EWAQ_GrossLoans",
-            "26_PROMISSORY_NOTES",
-            "XX_TOTAL_LIQUID_ASSET",
-            "18_BANKS_TZ","03_SAVINGS",
-            "22_TREASURY_BILLS",
-            "02_TIME_DEPOSIT",
-            "XX_TOTAL_LIQUID_LIAB",
-            "06_BORROWING_FROM_PUBLIC",
-            "EWAQ_NPL",
+# These are financial ratios/amounts from bank balance sheets
+# NPL = Non-Performing Loans (loans that aren't being repaid)
+features = ["EWAQ_GrossLoans",  # Total loans issued
+            "26_PROMISSORY_NOTES",  # Unsecured promises to pay
+            "XX_TOTAL_LIQUID_ASSET",  # Cash + assets easily converted to cash
+            "18_BANKS_TZ",  # Holdings in Tanzanian banks
+            "03_SAVINGS",  # Savings accounts
+            "22_TREASURY_BILLS",  # Government securities (very safe, liquid)
+            "02_TIME_DEPOSIT",  # Fixed-term deposits (cannot withdraw early without penalty)
+            "XX_TOTAL_LIQUID_LIAB",  # Short-term debts due soon
+            "06_BORROWING_FROM_PUBLIC",  # Money borrowed from the public
+            "EWAQ_NPL",  # Non-Performing Loans amount
             "10_FOREIGN_DEPOSITS_AND_BORROWINGS",
-            "15_SMR_ACC","05_BANKS_DEPOSITS",
+            "15_SMR_ACC",
+            "05_BANKS_DEPOSITS",
             "04_OTHER_DEPOSITS",
-            "25_COMMERCIAL_BILLS",
-            "11_OFF_BALSHEET_COMMITMENTS",
-            "07_INTERBANKS_LOAN_PAYABLE",
-            "INF",
-            "XX_BAL_IN_OTHER_BANKS",
-            "EWAQ_NPLsNetOfProvisions2CoreCapital",
-            "EWAQ_Capital",
-            "01_CURR_ACC",
-            "24_FOREIGN_CURRENCY",
-            "IBCM","08_CHEQUES_ISSUED"
+            "25_COMMERCIAL_BILLS",  # Short-term corporate debt
+            "11_OFF_BALSHEET_COMMITMENTS",  # Off-balance sheet: guarantees, letters of credit
+            "07_INTERBANKS_LOAN_PAYABLE",  # Loans borrowed from other banks
+            "INF",  # Inflation rate
+            "XX_BAL_IN_OTHER_BANKS",  # Balance held at other banks
+            "EWAQ_NPLsNetOfProvisions2CoreCapital",  # NPL ratio = NPL / Core Capital (key health metric)
+            "EWAQ_Capital",  # Total capital
+            "01_CURR_ACC",  # Current accounts (demand deposits)
+            "24_FOREIGN_CURRENCY",  # Foreign currency holdings
+            "IBCM",  # Interbank Call Money (short-term loans between banks)
+            "08_CHEQUES_ISSUED"  # Outstanding cheques
             ]
     
 
@@ -86,6 +93,7 @@ features = ["EWAQ_GrossLoans",
 # ----------------------------
 # CLEAN LABELS
 # ----------------------------
+# Maps internal feature codes to human-readable names
 feature_map = {
     "EWAQ_GrossLoans": "Gross Loans",
     "26_PROMISSORY_NOTES": "Promissory Notes",
@@ -171,6 +179,8 @@ def predict(data: dict, db: Session = Depends(get_db)):
         # ----------------------------
         # SCALE INPUT
         # ----------------------------
+        # StandardScaler transforms features to have mean=0 and std=1
+        # This is necessary because the model was trained on scaled data
         scaled = scaler.transform(df)
 
         # ----------------------------

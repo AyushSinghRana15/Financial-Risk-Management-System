@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel  # For request body validation (type checking, required fields)
 import numpy as np
 import joblib
 import sys
@@ -41,19 +41,20 @@ else:
     if os.path.exists(MODELS_PATH):
         print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
-# 🔥 FIXED THRESHOLD
+# 🔥 FIXED THRESHOLD — probability above this = "Risky Company"
 threshold = 0.45
 
 # -------------------------
 # INPUT SCHEMA
 # -------------------------
 class FinancialInput(BaseModel):
+    # Pydantic model automatically validates types and required fields
     email: str = ""
-    ROA: float
-    Leverage: float
-    Asset_Turnover: float
-    Gross_Profit_Liabilities: float
-    Operating_Profit: float
+    ROA: float  # Return on Assets = Net Income / Total Assets (profitability metric)
+    Leverage: float  # Debt-to-Equity ratio (how much debt vs equity)
+    Asset_Turnover: float  # Revenue / Total Assets (efficiency metric)
+    Gross_Profit_Liabilities: float  # Gross Profit / Total Liabilities
+    Operating_Profit: float  # Operating Income (profit from core operations)
 
 # -------------------------
 # API
@@ -69,6 +70,7 @@ def predict(data: FinancialInput, db: Session = Depends(get_db)):
         data.Operating_Profit
     ]])
 
+    # predict_proba returns [prob_safe, prob_risky]; [0][1] = probability of "risky"
     prob = model.predict_proba(input_array)[0][1]
 
     if prob >= threshold:

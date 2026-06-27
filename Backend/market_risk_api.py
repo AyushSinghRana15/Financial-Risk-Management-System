@@ -6,7 +6,7 @@ from slowapi.util import get_remote_address
 
 limiter = Limiter(key_func=get_remote_address)
 from sqlalchemy.orm import Session
-import yfinance as yf
+import yfinance as yf  # Yahoo Finance API — fetches live stock/index prices
 import numpy as np
 import sys
 import os
@@ -19,6 +19,8 @@ MODELS_PATH = os.path.join(SRC_DIR, "Models")
 if not os.path.exists(MODELS_PATH):
     MODELS_PATH = os.path.join(SRC_DIR, "models")
 
+# VaR (Value at Risk) model: estimates max potential loss over a time period
+# The model was trained on global market indices and commodities
 MODEL_FILE = os.path.join(MODELS_PATH, "ml_var_model.pkl")
 
 sys.path.append(BACKEND_DIR)
@@ -36,14 +38,14 @@ def get_db():
 
 model_package = None
 model = None
-features = []
-residual_var = None
+features = []  # List of ticker symbols the model expects
+residual_var = None  # Residual variance: additional uncertainty not captured by the model
 
 if os.path.exists(MODEL_FILE):
     try:
         model_package = joblib.load(MODEL_FILE)
         model = model_package["model"]
-        features = model_package["features"]
+        features = model_package["features"]  # e.g. ["^NSEI", "^INDIAVIX", "GC=F", ...]
         residual_var = model_package["residual_var"]
         print(f"✅ Successfully loaded: {MODEL_FILE}")
     except Exception as e:
@@ -56,24 +58,25 @@ else:
 # ----------------------------
 # FEATURE NAME CLEANING
 # ----------------------------
+# Converts Yahoo Finance ticker symbols into human-readable names
 
 def clean_feature_name(feature):
 
     feature_map = {
-        "^NSEI": "NIFTY 50",
-        "^INDIAVIX": "India VIX",
-        "^DJI": "Dow Jones Industrial Average",
-        "^GSPC": "S&P 500",
-        "^IXIC": "NASDAQ Composite",
-        "^FTSE": "FTSE 100",
-        "^N225": "Nikkei 225",
-        "^HSI": "Hang Seng Index",
-        "^BSESN": "Sensex",
-        "GC=F": "Gold Futures",
-        "CL=F": "Crude Oil Futures",
+        "^NSEI": "NIFTY 50",  # National Stock Exchange of India index
+        "^INDIAVIX": "India VIX",  # India Volatility Index (fear gauge)
+        "^DJI": "Dow Jones Industrial Average",  # US blue-chip index
+        "^GSPC": "S&P 500",  # US large-cap index
+        "^IXIC": "NASDAQ Composite",  # Tech-heavy US index
+        "^FTSE": "FTSE 100",  # UK index
+        "^N225": "Nikkei 225",  # Japan index
+        "^HSI": "Hang Seng Index",  # Hong Kong index
+        "^BSESN": "Sensex",  # Indian index (BSE)
+        "GC=F": "Gold Futures",  # Gold commodity
+        "CL=F": "Crude Oil Futures",  # Oil commodity
         "SI=F": "Silver Futures",
-        "DX-Y.NYB": "US Dollar Index",
-        "INR=X": "USD/INR Exchange Rate",
+        "DX-Y.NYB": "US Dollar Index",  # USD strength vs major currencies
+        "INR=X": "USD/INR Exchange Rate",  # Dollar to Rupee rate
         "EURUSD=X": "EUR/USD Exchange Rate"
     }
 
@@ -102,6 +105,7 @@ def get_market_features():
 # ----------------------------
 # LIVE MARKET DATA (YAHOO FINANCE)
 # ----------------------------
+# Fetches real-time prices for all features the model was trained on
 
 def fetch_live_market_data():
     try:
@@ -109,6 +113,7 @@ def fetch_live_market_data():
 
         for feature in features:
             try:
+                # Download 2 days of data so we can calculate daily returns
                 ticker = yf.download(feature, period="2d", progress=False, timeout=2)
 
                 # If data not available → skip
@@ -116,15 +121,15 @@ def fetch_live_market_data():
                     data[feature] = 0
                     continue
 
-                # If feature is index/stock → use return
+                # If feature is index/stock → use percentage return
                 if feature.startswith("^") or "=X" in feature or "=F" in feature:
-                    prev_close = ticker["Close"].iloc[-2]
-                    latest_close = ticker["Close"].iloc[-1]
+                    prev_close = ticker["Close"].iloc[-2]  # Yesterday's close
+                    latest_close = ticker["Close"].iloc[-1]  # Today's close
 
-                    value = (latest_close - prev_close) / prev_close
+                    value = (latest_close - prev_close) / prev_close  # Daily return %
 
                 else:
-                    # fallback → raw close
+                    # fallback → raw close price
                     value = ticker["Close"].iloc[-1]
 
                 data[feature] = float(value) if not np.isnan(value) else 0
@@ -151,6 +156,8 @@ def get_live_market_data():
 # ----------------------------
 # MARKET RISK PREDICTION
 # ----------------------------
+# VaR (Value at Risk) = the maximum loss expected over a period at a given confidence level
+# e.g., "95% VaR of 5%" means there's a 5% chance of losing more than 5% in a day
 
 @router.post("/predict_market_risk")
 @limiter.limit("10/minute")
@@ -167,12 +174,13 @@ def predict_market_risk(request: Request, data: dict, db: Session = Depends(get_
 
     prediction = model.predict(input_df)[0]
 
-    # Add residual variance
+    # Add residual variance: accounts for uncertainty the model couldn't capture
     var_prediction = prediction + residual_var
 
     # ----------------------------
     # RISK CLASSIFICATION
     # ----------------------------
+    # VaR thresholds: >5% = high risk, 2-5% = moderate, <2% = low
 
     if var_prediction > 0.05:
         risk_level = "High Market Risk"
