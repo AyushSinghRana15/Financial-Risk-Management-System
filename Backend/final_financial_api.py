@@ -30,16 +30,21 @@ def get_db():
         db.close()
 
 model = None
-if os.path.exists(MODEL_FILE):
-    try:
-        model = joblib.load(MODEL_FILE)
-        print(f"✅ Successfully loaded: {MODEL_FILE}")
-    except Exception as e:
-        print(f"❌ Error loading model file: {e}")
-else:
-    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
-    if os.path.exists(MODELS_PATH):
-        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
+
+def _ensure_model_loaded():
+    global model
+    if model is not None:
+        return
+    if os.path.exists(MODEL_FILE):
+        try:
+            model = joblib.load(MODEL_FILE)
+            print(f"✅ Successfully loaded: {MODEL_FILE}")
+        except Exception as e:
+            print(f"❌ Error loading model file: {e}")
+    else:
+        print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+        if os.path.exists(MODELS_PATH):
+            print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
 # 🔥 FIXED THRESHOLD — probability above this = "Risky Company"
 threshold = 0.45
@@ -61,7 +66,9 @@ class FinancialInput(BaseModel):
 # -------------------------
 @router.post("/predict")
 def predict(data: FinancialInput, db: Session = Depends(get_db)):
-
+    _ensure_model_loaded()
+    if model is None:
+        return {"error": "Financial risk model not loaded", "probability": 0, "result": "Unknown"}
     input_array = np.array([[
         data.ROA,
         data.Leverage,

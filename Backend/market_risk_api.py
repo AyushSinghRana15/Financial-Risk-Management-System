@@ -41,19 +41,23 @@ model = None
 features = []  # List of ticker symbols the model expects
 residual_var = None  # Residual variance: additional uncertainty not captured by the model
 
-if os.path.exists(MODEL_FILE):
-    try:
-        model_package = joblib.load(MODEL_FILE)
-        model = model_package["model"]
-        features = model_package["features"]  # e.g. ["^NSEI", "^INDIAVIX", "GC=F", ...]
-        residual_var = model_package["residual_var"]
-        print(f"✅ Successfully loaded: {MODEL_FILE}")
-    except Exception as e:
-        print(f"❌ Error loading model file: {e}")
-else:
-    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
-    if os.path.exists(MODELS_PATH):
-        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
+def _ensure_model_loaded():
+    global model_package, model, features, residual_var
+    if model is not None:
+        return
+    if os.path.exists(MODEL_FILE):
+        try:
+            model_package = joblib.load(MODEL_FILE)
+            model = model_package["model"]
+            features = model_package["features"]
+            residual_var = model_package["residual_var"]
+            print(f"✅ Successfully loaded: {MODEL_FILE}")
+        except Exception as e:
+            print(f"❌ Error loading model file: {e}")
+    else:
+        print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+        if os.path.exists(MODELS_PATH):
+            print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
 # ----------------------------
 # FEATURE NAME CLEANING
@@ -95,7 +99,7 @@ def clean_feature_name(feature):
 
 @router.get("/market_features")
 def get_market_features():
-
+    _ensure_model_loaded()
     cleaned_labels = [clean_feature_name(f) for f in features]
 
     return {
@@ -108,6 +112,7 @@ def get_market_features():
 # Fetches real-time prices for all features the model was trained on
 
 def fetch_live_market_data():
+    _ensure_model_loaded()
     try:
         data = {}
 
@@ -162,7 +167,9 @@ def get_live_market_data():
 @router.post("/predict_market_risk")
 @limiter.limit("10/minute")
 def predict_market_risk(request: Request, data: dict, db: Session = Depends(get_db)):
-
+    _ensure_model_loaded()
+    if model is None:
+        return {"error": "Market risk model not loaded", "predicted_var": 0, "risk_level": "Unknown"}
     confidence = data.get("confidence", "95%")
 
     input_values = []

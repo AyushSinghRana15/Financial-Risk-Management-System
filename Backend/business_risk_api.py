@@ -31,29 +31,32 @@ threshold = None  # Probability threshold for classifying as "risky" vs "safe"
 feature_keys = []  # Generic names: feature_0, feature_1, ...
 raw_features = []  # Original feature names from the XGBoost model
 
-# XGBoost is a gradient-boosted tree model popular for tabular data
 MODEL_FILE = os.path.join(MODELS_PATH, "xgboost_business_risk_model.pkl")
 THRESHOLD_FILE = os.path.join(MODELS_PATH, "business_risk_threshold.pkl")
 
-if os.path.exists(MODEL_FILE):
-    try:
-        model = joblib.load(MODEL_FILE)
-        threshold_file = joblib.load(THRESHOLD_FILE) if os.path.exists(THRESHOLD_FILE) else 0.5
-        threshold = threshold_file
-        # Get feature names from the XGBoost booster object
-        if hasattr(model, "get_booster"):
-            raw_features = list(model.get_booster().feature_names)
-        feature_keys = [f"feature_{i}" for i in range(len(raw_features))]
-        print(f"✅ Successfully loaded: {MODEL_FILE}")
-    except Exception as e:
-        print(f"❌ Error loading model file: {e}")
-else:
-    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
-    if os.path.exists(MODELS_PATH):
-        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
+def _ensure_model_loaded():
+    global model, threshold, feature_keys, raw_features
+    if model is not None:
+        return
+    if os.path.exists(MODEL_FILE):
+        try:
+            model = joblib.load(MODEL_FILE)
+            threshold_file = joblib.load(THRESHOLD_FILE) if os.path.exists(THRESHOLD_FILE) else 0.5
+            threshold = threshold_file
+            if hasattr(model, "get_booster"):
+                raw_features = list(model.get_booster().feature_names)
+            feature_keys = [f"feature_{i}" for i in range(len(raw_features))]
+            print(f"✅ Successfully loaded: {MODEL_FILE}")
+        except Exception as e:
+            print(f"❌ Error loading model file: {e}")
+    else:
+        print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+        if os.path.exists(MODELS_PATH):
+            print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
 @router.get("/business_features")
 def get_business_features():
+    _ensure_model_loaded()
     return {
         "features": feature_keys,
         "labels": raw_features
@@ -61,6 +64,9 @@ def get_business_features():
 
 @router.post("/predict_business_risk")
 def predict_business_risk(data: dict, db: Session = Depends(get_db)):
+    _ensure_model_loaded()
+    if model is None:
+        return {"error": "Business risk model not loaded", "risk_probability": 0, "risk_level": "Unknown"}
     input_values = [data.get(f, 0) for f in feature_keys]
     input_df = pd.DataFrame([input_values], columns=raw_features)
 

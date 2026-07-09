@@ -32,18 +32,22 @@ model = None
 
 MODEL_FILE = os.path.join(MODELS_PATH, "operational_risk.pkl")
 
-if os.path.exists(MODEL_FILE):
-    try:
-        loaded = joblib.load(MODEL_FILE)
-        if hasattr(loaded, "predict"):
-            model = loaded
-            print(f"✅ Successfully loaded: {MODEL_FILE}")
-        else:
-            print(f"⚠️ Model file has type {type(loaded).__name__}, using rule-based fallback")
-    except Exception as e:
-        print(f"❌ Error loading model file: {e}")
-else:
-    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+def _ensure_model_loaded():
+    global model
+    if model is not None:
+        return
+    if os.path.exists(MODEL_FILE):
+        try:
+            loaded = joblib.load(MODEL_FILE)
+            if hasattr(loaded, "predict"):
+                model = loaded
+                print(f"✅ Successfully loaded: {MODEL_FILE}")
+            else:
+                print(f"⚠️ Model file has type {type(loaded).__name__}, using rule-based fallback")
+        except Exception as e:
+            print(f"❌ Error loading model file: {e}")
+    else:
+        print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
 
 
 def _rule_based_score(row):
@@ -64,6 +68,7 @@ def get_operational_features():
 
 @router.post("/predict_operational_risk")
 def predict_operational_risk(data: dict, db: Session = Depends(get_db)):
+    _ensure_model_loaded()
     try:
         email = data.get("email")
         user_id = None

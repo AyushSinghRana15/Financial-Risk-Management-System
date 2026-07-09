@@ -44,17 +44,21 @@ scaler = None  # StandardScaler normalizes input features to mean=0, std=1 (requ
 MODEL_FILE = os.path.join(MODELS_PATH, "liquidity_model.pkl")
 SCALER_FILE = os.path.join(MODELS_PATH, "scaler.pkl")
 
-if os.path.exists(MODEL_FILE):
-    try:
-        model = joblib.load(MODEL_FILE)
-        scaler = joblib.load(SCALER_FILE) if os.path.exists(SCALER_FILE) else None
-        print(f"✅ Successfully loaded: {MODEL_FILE}")
-    except Exception as e:
-        print(f"❌ Error loading model file: {e}")
-else:
-    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
-    if os.path.exists(MODELS_PATH):
-        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
+def _ensure_model_loaded():
+    global model, scaler
+    if model is not None:
+        return
+    if os.path.exists(MODEL_FILE):
+        try:
+            model = joblib.load(MODEL_FILE)
+            scaler = joblib.load(SCALER_FILE) if os.path.exists(SCALER_FILE) else None
+            print(f"✅ Successfully loaded: {MODEL_FILE}")
+        except Exception as e:
+            print(f"❌ Error loading model file: {e}")
+    else:
+        print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+        if os.path.exists(MODELS_PATH):
+            print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
 # ----------------------------
 # FEATURES (25)
@@ -148,7 +152,9 @@ def sample():
 # ----------------------------
 @router.post("/predict")
 def predict(data: dict, db: Session = Depends(get_db)):
-
+    _ensure_model_loaded()
+    if model is None or scaler is None:
+        return {"error": "Liquidity risk model not loaded"}
     try:
         # ----------------------------
         # VALIDATE INPUT

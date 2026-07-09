@@ -36,18 +36,22 @@ def get_db():
 model = None
 features = []  # Ordered list of feature names the model expects
 
-if os.path.exists(MODEL_FILE):
-    try:
-        model = joblib.load(MODEL_FILE)
-        if os.path.exists(FEATURES_FILE):
-            features = joblib.load(FEATURES_FILE)
-        print(f"✅ Successfully loaded: {MODEL_FILE}")
-    except Exception as e:
-        print(f"❌ Error loading model file: {e}")
-else:
-    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
-    if os.path.exists(MODELS_PATH):
-        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
+def _ensure_model_loaded():
+    global model, features
+    if model is not None:
+        return
+    if os.path.exists(MODEL_FILE):
+        try:
+            model = joblib.load(MODEL_FILE)
+            if os.path.exists(FEATURES_FILE):
+                features = joblib.load(FEATURES_FILE)
+            print(f"✅ Successfully loaded: {MODEL_FILE}")
+        except Exception as e:
+            print(f"❌ Error loading model file: {e}")
+    else:
+        print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
+        if os.path.exists(MODELS_PATH):
+            print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
 
 # -------------------------------
 # Mappings
@@ -88,6 +92,9 @@ device_map = {
 @router.post("/predict_fraud")
 @limiter.limit("10/minute")
 def predict_fraud(request: Request, data: dict, db: Session = Depends(get_db)):
+    _ensure_model_loaded()
+    if model is None:
+        return {"error": "Fraud detection model not loaded", "prediction": 0, "fraud_probability": 0}
     try:
         # Create dataframe with exact columns and order the model expects
         df = pd.DataFrame(columns=features)

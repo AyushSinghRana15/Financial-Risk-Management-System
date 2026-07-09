@@ -40,31 +40,6 @@ model = None
 feature_names = []  # List of column names the model was trained on
 model_data = None
 
-if os.path.exists(MODEL_FILE):
-    try:
-        model_data = joblib.load(MODEL_FILE)
-        # Two possible formats: a dict {"model": ..., "feature_columns": [...]} or a raw model object
-        if isinstance(model_data, dict):
-            model = model_data["model"]
-            feature_names = model_data.get("feature_columns", [])
-            print(f"✅ Successfully loaded: {MODEL_FILE} (CatBoost model from dict)")
-        else:
-            model = model_data
-            # Try to extract feature names from the model object (different ML libraries store them differently)
-            if hasattr(model, "get_feature_names"):
-                feature_names = model.get_feature_names()
-            elif hasattr(model, "get_booster"):
-                feature_names = model.get_booster().feature_names
-            else:
-                feature_names = getattr(model, "feature_names_in_", [])
-            print(f"✅ Successfully loaded: {MODEL_FILE}")
-    except Exception as e:
-        print(f"❌ Error loading model file: {e}")
-else:
-    print(f"❌ CRITICAL: File does not exist at {MODEL_FILE}")
-    if os.path.exists(MODELS_PATH):
-        print(f"Files inside {MODELS_PATH}: {os.listdir(MODELS_PATH)}")
-
 # -------------------------
 # Credit Risk Endpoint
 # -------------------------
