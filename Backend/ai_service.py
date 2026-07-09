@@ -67,13 +67,13 @@ Format:
                 "Content-Type": "application/json"
             },
             json={
-                "model": "openai/gpt-4o-mini",  # The specific LLM to use
+                "model": "meta-llama/llama-4-maverick:free",
                 "messages": [
                     {"role": "user", "content": prompt}
                 ],
-                "max_tokens": 500  # Max words in the response
+                "max_tokens": 500
             },
-            timeout=15  # Abort if no response in 15 seconds
+            timeout=15
         )
 
         if response.status_code != 200:
@@ -135,9 +135,9 @@ def chatbot_response(system_prompt, messages):
                 "Content-Type": "application/json"
             },
             json={
-                "model": "openai/gpt-4o-mini",
+                "model": "meta-llama/llama-4-maverick:free",
                 "messages": openrouter_messages,
-                "max_tokens": 800  # Longer limit for conversational responses
+                "max_tokens": 800
             },
             timeout=30  # Longer timeout for multi-turn conversation
         )
