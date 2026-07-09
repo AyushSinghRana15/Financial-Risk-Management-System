@@ -33,7 +33,7 @@ graph TB
     subgraph Services ["🔌 External Services"]
         Neon[("Neon<br/>PostgreSQL")]
         OAuth["Google OAuth<br/>Authentication"]
-        OpenRouter["OpenRouter<br/>GPT-4o-mini"]
+        OpenRouter["OpenRouter<br/>tencent/hy3:free<br/>(switchable to paid models)"]
         Yahoo["Yahoo Finance<br/>Market Data"]
     end
 

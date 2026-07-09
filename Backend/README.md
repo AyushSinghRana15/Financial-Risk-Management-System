@@ -10,7 +10,7 @@ The backend serves as the core API layer for FinRisk, handling risk predictions,
 - **Database**: PostgreSQL (Neon serverless) via SQLAlchemy 2.0
 - **ML Libraries**: XGBoost, CatBoost, scikit-learn, pandas, numpy
 - **Authentication**: Google OAuth 2.0, bcrypt
-- **AI Integration**: OpenRouter API (Gemini models)
+- **AI Integration**: OpenRouter API — currently `tencent/hy3:free` (free tier). Easily switchable to any paid model (GPT-4o, Claude, Gemini, etc.) via the `ai_service.py` config without code changes.
 - **Market Data**: yfinance for real-time prices
 - **Server**: Uvicorn (dev), Gunicorn (production)
 
