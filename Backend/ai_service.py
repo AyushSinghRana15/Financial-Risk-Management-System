@@ -67,7 +67,7 @@ Format:
                 "Content-Type": "application/json"
             },
             json={
-                "model": "meta-llama/llama-4-maverick:free",
+                "model": "tencent/hy3:free",
                 "messages": [
                     {"role": "user", "content": prompt}
                 ],
@@ -135,7 +135,7 @@ def chatbot_response(system_prompt, messages):
                 "Content-Type": "application/json"
             },
             json={
-                "model": "meta-llama/llama-4-maverick:free",
+                "model": "tencent/hy3:free",
                 "messages": openrouter_messages,
                 "max_tokens": 800
             },
